@@ -1,6 +1,9 @@
-# GOAT Token Contract
+# GOAT and MEAT Token Contracts
 
-GOAT (Guardian of Agricultural Trade) is an ERC20 token that supports staking and compounding rewards. The contract allows the designated MEAT contract to mint new tokens while holders can stake their balance to earn a high annualised reward.
+This repository contains two ERC20 tokens:
+
+- **GOAT** (Guardian of Agricultural Trade) supports staking and compounding rewards. The designated MEAT contract may mint new GOAT tokens while holders can stake their balance to earn a high annualised reward.
+- **MEAT** (Market-Enabled Agricultural Token) lets users mint tokens with native currency and swap to and from GOAT, acting as the on‑ramp to the ecosystem.
 
 ## Deployment
 
@@ -17,7 +20,7 @@ GOAT (Guardian of Agricultural Trade) is an ERC20 token that supports staking an
    ```bash
    npx hardhat compile
    ```
-4. Deploy the contract with your preferred Hardhat network configuration. A simple script might look like:
+4. Deploy the contracts with your preferred Hardhat network configuration. A simple script might look like:
    ```javascript
    const GOAT = await ethers.getContractFactory('GOAT');
    const goat = await GOAT.deploy(meatAddress);
@@ -28,10 +31,8 @@ GOAT (Guardian of Agricultural Trade) is an ERC20 token that supports staking an
 
 ## Running Tests
 
-This repository does not include tests, but Hardhat is recommended for writing them. Once your test files are created under `test/`, run:
+Hardhat tests for both contracts live in the `test/` directory. Run them with:
 
 ```bash
 npx hardhat test
 ```
-
-or, if using another framework, run the equivalent command.
