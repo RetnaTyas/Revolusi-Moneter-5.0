@@ -100,7 +100,7 @@ contract MEAT is ERC20 {
         require(swapEnabled, "Swap disabled");
         require(meatAmount > 0, "Amount must be > 0");
         require(allowance(msg.sender, address(this)) >= meatAmount, "Not approved");
-        require(transferFrom(msg.sender, address(this), meatAmount), "MEAT transfer failed");
+        require(IERC20(address(this)).transferFrom(msg.sender, address(this), meatAmount), "MEAT transfer failed");
 
         uint256 goatAmount = meatAmount / SwapRate;
         uint256 goatBalance = GOAT.balanceOf(address(this));
