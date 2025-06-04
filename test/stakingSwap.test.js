@@ -25,9 +25,6 @@ describe("GOAT staking and MEAT swap", function () {
   it("should stake, attempt claim, unstake and swap", async function () {
     const meatAmount = ethers.parseEther("100");
     await meat.connect(user).approve(meat.target, meatAmount);
-    // swapMEATForGOAT calls transferFrom internally so msg.sender remains the user
-    // Require self-approval due to contract implementation
-    await meat.connect(user).approve(user.address, meatAmount);
 
     await meat.connect(user).swapMEATForGOAT(meatAmount);
     const goatAmount = await goat.balanceOf(user.address);
