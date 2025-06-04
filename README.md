@@ -87,3 +87,78 @@ Hardhat tests for both contracts live in the `test/` directory. Run them with:
 ```bash
 npx hardhat test
 ```
+
+## 🧱 Struktur Kontrak
+
+Struktur dan hubungan antar kontrak:
+- `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan
+  fungsi staking, klaim, kompaun, serta konfigurasi reward. Hanya kontrak `MEAT`
+  yang dapat mencetak GOAT melalui `mintTo`.
+- `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
+  untuk mint, memungkinkan penukaran MEAT ↔ GOAT, dan mengontrol fitur swap.
+- `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo`
+  untuk dipanggil MEAT saat membutuhkan GOAT baru.
+- `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test
+  guna mensimulasikan kegagalan `transfer`.
+
+Alur panggilan eksternal–internal secara ringkas:
+1. `swapMEATForGOAT` memanggil `transferFrom` MEAT dan `mintTo` GOAT jika saldo
+   tidak mencukupi.
+2. `stake` mentransfer GOAT ke kontrak lalu mencatat waktu. Perhitungan reward
+   dilakukan fungsi internal `calculateReward`.
+3. `claimReward`, `compoundReward`, dan `unstake` sama-sama membaca reward dari
+   `calculateReward` sebelum mentransfer atau mencetak token ke pengguna.
+
+## 🔁 Flow Logic
+
+Simulasi tahapan staking hingga unstake:
+
+1. Pengguna memperoleh GOAT lalu memanggil `stake(amount)`.
+2. Setelah `minClaimInterval` terlewati, pengguna dapat:
+   - `claimReward` untuk mengambil hasil tanpa menarik pokok;
+   - `compoundReward` agar hasil otomatis ditambahkan ke saldo staking.
+3. Ketika keluar, panggil `unstake` sehingga pokok dan reward terkirim dan data
+   staking dihapus.
+
+Reward dihitung berbasis waktu (detik) sehingga tidak bergantung pada jumlah
+blok. Perubahan state utama terjadi pada `stakingBalance`, `lastStakedTime`, dan
+saldo token pengguna.
+
+## 🧠 Perubahan Terakhir
+
+Commit *Simplify MEAT swap allowance logic (#12)* merombak mekanisme swap:
+
+- Penghapusan pemeriksaan allowance manual di fungsi-fungsi swap MEAT.
+- Mengandalkan revert bawaan `transferFrom`/`transfer` bila allowance kurang.
+- Mock `FailingGOAT` diperbarui agar dapat mensimulasikan kegagalan transfer.
+- Test `meat.test.js` menyesuaikan dengan perilaku revert baru.
+
+Perubahan ini menyederhanakan kode dan memastikan kegagalan transfer terdeteksi
+otomatis.
+
+## 🧪 Testing
+
+Cakupan unit test meliputi:
+
+- Deployment GOAT dan MEAT beserta kepemilikan serta suplai awal.
+- Proses staking, klaim, unstake, dan swap (`stakingSwap.test.js`).
+- Pengujian interval klaim (`claim.test.js`).
+- Simulasi kegagalan transfer pada swap (`meat.test.js`).
+
+Assertion penting mengecek perubahan saldo, event tidak ter-revert, dan update
+waktu klaim. Belum tersedia tes batas untuk jumlah ekstrem atau konsumsi gas.
+
+## 💬 Filosofi & Manifestasi
+
+Kontrak dirancang menjaga nilai GOAT dan MEAT dengan imbal hasil tinggi namun
+terkontrol. Reward dihitung per detik (setara harian) sehingga tidak terikat
+kecepatan blok dan cocok lintas jaringan.
+
+Pemanggilan `claimReward` tidak otomatis menambah stake agar pengguna bebas
+menarik hasil tanpa memperpanjang penguncian. Fleksibilitas ini diharapkan
+mencegah inflasi berlebih sekaligus memberi kontrol penuh pada komunitas.
+
+---
+
+Bukan sekadar dokumen, README ini menjadi "suara sistem" yang terus diperbarui
+dan dipertanggungjawabkan.
