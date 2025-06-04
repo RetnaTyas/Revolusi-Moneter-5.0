@@ -38,6 +38,6 @@ describe("MEAT", function () {
 
     await expect(
       meat.connect(user).swapMEATForGOAT(meatAmount)
-    ).to.be.revertedWith("GOAT transfer failed");
+    ).to.be.revertedWith("Transfer failed");
   });
 });
