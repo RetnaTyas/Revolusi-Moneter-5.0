@@ -16,7 +16,7 @@ This repository contains two ERC20 tokens:
    ```bash
    npm install @openzeppelin/contracts
    ```
-3. Compile the included contracts:
+3. Copy `contracts/GOAT.sol` into your project's `contracts` folder and compile:
    ```bash
    npx hardhat compile
    ```
