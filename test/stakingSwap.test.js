@@ -22,7 +22,7 @@ describe("GOAT staking and MEAT swap", function () {
     await meat.transfer(user.address, initialMeat);
   });
 
-  it("should stake, attempt claim, unstake and swap", async function () {
+  it("should stake, claim, unstake and swap", async function () {
     const meatAmount = ethers.parseEther("100");
     await meat.connect(user).approve(meat.target, meatAmount);
 
@@ -39,7 +39,10 @@ describe("GOAT staking and MEAT swap", function () {
     const pending = await goat.pendingReward(user.address);
     expect(pending).to.be.gt(0n);
 
-    await expect(goat.connect(user).claimReward()).to.be.revertedWith("Claim not allowed yet");
+    await goat.connect(user).claimReward();
+
+    await ethers.provider.send("evm_increaseTime", [8 * 24 * 60 * 60]);
+    await ethers.provider.send("evm_mine", []);
 
     await goat.connect(user).unstake();
     expect(await goat.stakingBalance(user.address)).to.equal(0n);
