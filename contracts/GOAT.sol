@@ -106,9 +106,13 @@ function claimReward() external {
     emit RewardClaimed(msg.sender, reward);
 }
 /// @notice Compound current reward into staked balance
-function compoundReward() external {    
+function compoundReward() external {
     uint256 reward = calculateReward(msg.sender);
     require(reward > 0, "No reward to compound");
+    require(
+        block.timestamp - lastStakedTime[msg.sender] >= minClaimInterval,
+        "Claim not allowed yet"
+    );
     uint256 available = balanceOf(address(this));
     if (available < reward) {
         _mint(address(this), reward - available);
