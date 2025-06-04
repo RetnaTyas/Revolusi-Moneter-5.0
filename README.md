@@ -5,6 +5,15 @@ This repository contains two ERC20 tokens:
 - **GOAT** (Guardian of Agricultural Trade) supports staking and compounding rewards. The designated MEAT contract may mint new GOAT tokens while holders can stake their balance to earn a high annualised reward.
 - **MEAT** (Market-Enabled Agricultural Token) lets users mint tokens with native currency and swap to and from GOAT, acting as the on‑ramp to the ecosystem.
 
+## Cara Kerja Token
+
+Berikut gambaran umum alur penggunaan kedua token:
+
+1. **Mint MEAT** – Kirim native token (misalnya ETH/BNB) langsung ke kontrak `MEAT`. Kontrak akan mencetak MEAT sesuai `DepositRate` dan mengirimkannya ke pengirim.
+2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi ditentukan oleh konstanta `SwapRate` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
+3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
+4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
+
 ## Deployment
 
 1. Install [Hardhat](https://hardhat.org/) and initialise a project:
@@ -28,6 +37,40 @@ This repository contains two ERC20 tokens:
    console.log('GOAT deployed to:', goat.address);
    ```
    Run using `npx hardhat run scripts/deploy.js --network <network>`.
+
+## Contoh Konfigurasi Hardhat
+
+Tambahkan pengaturan jaringan pada `hardhat.config.js` agar skrip `deploy.js` dapat dijalankan ke testnet. Misalnya untuk jaringan Sepolia:
+
+```javascript
+require("@nomicfoundation/hardhat-toolbox");
+
+module.exports = {
+  solidity: "0.8.29",
+  networks: {
+    sepolia: {
+      url: "https://rpc.sepolia.org",
+      accounts: ["0xYOUR_PRIVATE_KEY"]
+    }
+  }
+};
+```
+
+Jalankan perintah berikut untuk melakukan deploy:
+
+```bash
+npx hardhat run scripts/deploy.js --network sepolia
+```
+
+## Parameter Penting
+
+- **SwapRate** – konstanta di kontrak MEAT yang menentukan rasio penukaran antar
+  kedua token. Nilai default `85` berarti 1 GOAT setara dengan 85 MEAT.
+- **rewardRate** – tingkat imbal hasil tahunan di kontrak GOAT (dalam skala
+  `1e18`). Nilai ini dikombinasikan dengan `rewardInterval` untuk menghitung
+  reward harian pengguna.
+- **minClaimInterval** – interval minimum pengguna dapat mengklaim atau
+  meng-unstake dengan reward. Default-nya `7 days`.
 
 ## Running Tests
 
