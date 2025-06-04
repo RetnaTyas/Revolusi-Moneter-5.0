@@ -13,7 +13,7 @@ GOAT (Guardian of Agricultural Trade) is an ERC20 token that supports staking an
    ```bash
    npm install @openzeppelin/contracts
    ```
-3. Copy `GOAT.sol` into your project's `contracts` folder and compile:
+3. Copy `contracts/GOAT.sol` into your project's `contracts` folder and compile:
    ```bash
    npx hardhat compile
    ```
