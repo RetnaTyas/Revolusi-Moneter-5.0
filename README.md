@@ -23,11 +23,19 @@ This repository contains two ERC20 tokens:
 4. Deploy the contracts with your preferred Hardhat network configuration. A simple script might look like:
    ```javascript
    const GOAT = await ethers.getContractFactory('GOAT');
-   const goat = await GOAT.deploy(meatAddress);
+   const goat = await GOAT.deploy(ethers.ZeroAddress);
    await goat.deployed();
+
+   const MEAT = await ethers.getContractFactory('MEAT');
+   const meat = await MEAT.deploy(goat.address);
+   await meat.deployed();
+
+   await goat.setMEATAddress(meat.address);
+
    console.log('GOAT deployed to:', goat.address);
+   console.log('MEAT deployed to:', meat.address);
    ```
-   Run using `npx hardhat run scripts/deploy.js --network <network>`.
+   Run using `npx hardhat run scripts/deploy.js --network <network>` and specify your desired Hardhat network with the `--network` option.
 
 ## Running Tests
 
