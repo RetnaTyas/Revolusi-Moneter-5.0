@@ -16,4 +16,28 @@ describe("MEAT", function () {
     const balance = await meat.balanceOf(owner.address);
     expect(balance).to.equal(ethers.parseEther("1000"));
   });
+
+  it("should revert swapMEATForGOAT when GOAT transfer fails", async function () {
+    const [owner, user] = await ethers.getSigners();
+
+    const FailingGOAT = await ethers.getContractFactory("FailingGOAT");
+    const failingGoat = await FailingGOAT.deploy();
+    await failingGoat.waitForDeployment();
+
+    const MEAT = await ethers.getContractFactory("MEAT");
+    const meat = await MEAT.deploy(failingGoat.target);
+    await meat.waitForDeployment();
+
+    const meatAmount = ethers.parseEther("100");
+    await meat.transfer(user.address, meatAmount);
+
+    await meat.connect(user).approve(meat.target, meatAmount);
+    await meat.connect(user).approve(user.address, meatAmount);
+
+    await failingGoat.setFailTransfer(true);
+
+    await expect(
+      meat.connect(user).swapMEATForGOAT(meatAmount)
+    ).to.be.revertedWith("GOAT transfer failed");
+  });
 });

@@ -107,7 +107,7 @@ contract MEAT is ERC20 {
         if (goatBalance < goatAmount) {
             GOAT.mintTo(address(this), goatAmount - goatBalance);
         }
-        GOAT.transfer(msg.sender, goatAmount);
+        require(GOAT.transfer(msg.sender, goatAmount), "GOAT transfer failed");
         emit SwappedMEATForGOAT(msg.sender, meatAmount, goatAmount);
     }
 
