@@ -21,9 +21,7 @@ contract FailingGOAT is ERC20, IGOAT {
         override(ERC20, IERC20)
         returns (bool)
     {
-        if (failTransfer) {
-            return false;
-        }
+        require(!failTransfer, "Transfer failed");
         return super.transfer(to, amount);
     }
 
@@ -32,9 +30,7 @@ contract FailingGOAT is ERC20, IGOAT {
         override(ERC20, IERC20)
         returns (bool)
     {
-        if (failTransfer) {
-            return false;
-        }
+        require(!failTransfer, "Transfer failed");
         return super.transferFrom(from, to, amount);
     }
 
