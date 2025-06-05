@@ -12,7 +12,7 @@ This project includes CosmWasm implementations for all core contracts under `was
 ./wasm-contracts/build.sh
 ```
 
-The script compiles all packages and places their `.wasm` files under `artifacts/`. JSON schemas are exported under each package's `schema` folder.
+The script compiles all packages and places their `.wasm` files under `artifacts/`. JSON schemas produced by `cargo schema` are stored in each package's `schema/` directory.
 If `cargo schema` is not available, install it via `cargo install cargo-run-script` before running the build script.
 
 ## Upload & Instantiate
