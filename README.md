@@ -34,16 +34,16 @@ Berikut gambaran umum alur penggunaan kedua token:
    ```javascript
    const GOAT = await ethers.getContractFactory('GOAT');
    const goat = await GOAT.deploy(ethers.ZeroAddress);
-   await goat.deployed();
+   await goat.waitForDeployment();
 
    const MEAT = await ethers.getContractFactory('MEAT');
-   const meat = await MEAT.deploy(goat.address);
-   await meat.deployed();
+   const meat = await MEAT.deploy(goat.target);
+   await meat.waitForDeployment();
 
-   await goat.setMEATAddress(meat.address);
+   await goat.setMEATAddress(meat.target);
 
-   console.log('GOAT deployed to:', goat.address);
-   console.log('MEAT deployed to:', meat.address);
+   console.log('GOAT deployed to:', goat.target);
+   console.log('MEAT deployed to:', meat.target);
    ```
    Run using `npx hardhat run scripts/deploy.js --network <network>` and specify your desired Hardhat network with the `--network` option.
 
