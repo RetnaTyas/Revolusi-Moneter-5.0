@@ -174,6 +174,17 @@ Pemanggilan `claimReward` tidak otomatis menambah stake agar pengguna bebas
 menarik hasil tanpa memperpanjang penguncian. Fleksibilitas ini diharapkan
 mencegah inflasi berlebih sekaligus memberi kontrol penuh pada komunitas.
 
+## 📚 Dokumentasi Tambahan
+
+Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
+
+- [System Architecture](architecture.md)
+- [Frontend Flow](frontend-flow.md)
+- [User Journey](user-journey.md)
+- [GOAT & MEAT Lifecycle](goat-meat-lifecycle.md)
+- [Contract Map](contract-map.md)
+- [Integration Bridge](integration-bridge.md)
+
 ---
 
 Bukan sekadar dokumen, README ini menjadi "suara sistem" yang terus diperbarui
