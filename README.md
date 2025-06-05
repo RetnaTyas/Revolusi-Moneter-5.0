@@ -165,6 +165,17 @@ Struktur dan hubungan antar kontrak:
   untuk dipanggil MEAT saat membutuhkan GOAT baru.
 - `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test
   guna mensimulasikan kegagalan `transfer`.
+- `burnAndMint` pada GOAT memungkinkan pemilik `GoatNFT` menukar NFT mereka
+  menjadi token GOAT setara nilai `goatValue`. Fungsi ini memanggil `burn`
+  di `GoatNFT` lalu mencetak jumlah GOAT yang sama ke alamat pemilik.
+
+### Contoh Penggunaan
+
+```solidity
+// asumsikan "nft" dan "goat" sudah terdeploy
+nft.approve(goatAddress, tokenId);
+goat.burnAndMint(tokenId);
+```
 
 Alur panggilan eksternal–internal secara ringkas:
 1. `swapMEATForGOAT` memanggil `transferFrom` MEAT dan `mintTo` GOAT jika saldo
