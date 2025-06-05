@@ -107,23 +107,14 @@ The frontend queries these endpoints instead of hitting the blockchain directly.
 
 ## Frontend Setup
 
+The web interface has been moved to its own repository so this project can
+focus on the smart contracts and backend utilities. The `frontend/` folder now
+only stores configuration templates such as `.env.example`.
 
-A minimal Next.js app lives in `frontend/` and uses Tailwind CSS for styling.
-Install dependencies and start the dev server with:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-=======
-The `frontend/` directory currently contains only configuration files and
-documentation. The actual Next.js application has been moved to a separate
-repository. Clone that repo and follow its README for instructions on running
-the UI.
-
-Before running, copy `.env.example` to `.env.local` and provide your deployed
-`NEXT_PUBLIC_GOAT_ADDRESS` and `NEXT_PUBLIC_MEAT_ADDRESS` values.
+To run the UI, clone the dedicated frontend repository and follow its README for
+installation and `npm run dev` instructions. Remember to copy `.env.example` to
+`.env.local` and set your deployed `NEXT_PUBLIC_GOAT_ADDRESS` and
+`NEXT_PUBLIC_MEAT_ADDRESS` values there.
 
 ## 🧱 Struktur Kontrak
 
