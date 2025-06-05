@@ -151,6 +151,10 @@ Struktur dan hubungan antar kontrak:
   yang dapat mencetak GOAT melalui `mintTo`.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
   untuk mint, memungkinkan penukaran MEAT ↔ GOAT, dan mengontrol fitur swap.
+- `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
+  Fungsi `mint` menerima metadata seperti `nfcId`, `breed`, `birthYear`, dan
+  `weight` lalu mencatat waktu pencetakan pada `goatMetadata`. Data dihapus saat
+  `burn`.
 - `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo`
   untuk dipanggil MEAT saat membutuhkan GOAT baru.
 - `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test
