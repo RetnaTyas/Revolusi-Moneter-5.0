@@ -8,6 +8,7 @@ The two tokens form a closed loop that allows value to enter the system via MEAT
    * MEAT can be swapped to GOAT and vice versa through the MEAT contract when `swapEnabled` is true. The fixed conversion constant `SwapRate` maintains proportional supply.
 3. **Staking GOAT**
    * GOAT holders stake tokens in `GOAT.sol` which records staking balances and timestamps. Rewards accrue linearly according to `rewardRate` and `rewardInterval`.
+   *Calling `stake()` again resets `lastStakedTime` and discards any pending reward. Claim your reward first if you plan to restake.*
 4. **Claiming Rewards**
    * After `minClaimInterval` stakers may claim rewards or compound them back into the stake. If they choose to exit entirely they call `unstake` to receive the principal plus reward.
 5. **Returning to MEAT**
