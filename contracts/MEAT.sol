@@ -60,7 +60,8 @@ contract MEAT is ERC20 {
     function withdrawNative() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "No Native Token to withdraw");
-        payable(_owner).transfer(balance);
+        (bool sent, ) = payable(_owner).call{value: balance}("");
+        require(sent, "Native transfer failed");
         emit NativeWithdrawn(_owner, balance);
     }
 
