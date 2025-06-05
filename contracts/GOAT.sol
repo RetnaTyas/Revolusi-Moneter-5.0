@@ -3,6 +3,7 @@ pragma solidity ^0.8.29;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IGoatNFT } from "./interfaces/IGoatNFT.sol";
 
 /// @title GOAT Token - Guardian of Organic Agriculture Trust
 /// @notice A smart contract enabling staking, compounding, and minting by MEAT contract
@@ -27,6 +28,7 @@ uint256 public rewardInterval = 365 days;
 uint256 public minClaimInterval = 7 days;
 uint256 private constant REWARD_PRECISION = 1e18;
 address public meatContract;
+address public nftContract;
 
 constructor(address meatAddress) ERC20("Guardian of Agricultural Trade", "GOAT") {
     _owner = msg.sender;
@@ -42,12 +44,27 @@ modifier onlyOwner() {
 function setMEATAddress(address meatAddress) external onlyOwner {
     meatContract = meatAddress;
 }
+/// @notice Sets the Goat NFT contract address
+/// @param nftAddress Address of the GoatNFT contract
+function setNFTAddress(address nftAddress) external onlyOwner {
+    nftContract = nftAddress;
+}
 /// @notice Allows the MEAT contract to mint GOAT tokens to any address
 /// @param to The recipient address
 /// @param amount The amount of GOAT to mint
 function mintTo(address to, uint256 amount) external {
     require(msg.sender == meatContract, "Unauthorized mint");
     _mint(to, amount);
+}
+/// @notice Burn a Goat NFT to receive GOAT tokens
+/// @param tokenId ID of the NFT to burn
+function burnAndMint(uint256 tokenId) external {
+    require(nftContract != address(0), "NFT not set");
+    IGoatNFT nft = IGoatNFT(nftContract);
+    require(nft.ownerOf(tokenId) == msg.sender, "Not token owner");
+    uint256 amount = nft.goatValue(tokenId);
+    nft.burn(tokenId);
+    _mint(msg.sender, amount);
 }
 /// @notice Stake GOAT tokens to earn rewards
 /// @param amount The amount of GOAT tokens to stake

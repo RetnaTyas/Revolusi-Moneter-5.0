@@ -16,3 +16,10 @@
 * **IGOAT** defines the `mintTo` function which enables MEAT to mint GOAT when necessary.
 
 The MEAT contract relies on GOAT for minting new tokens when swapping MEAT for GOAT. Both share the same owner who can manage rates and enable or disable swapping.
+=======
+| Contract | Description | Key Functions |
+|---------|-------------|---------------|
+| GOAT | ERC20 staking token minted by MEAT and GoatNFT burns. | `stake`, `unstake`, `claimReward`, `compoundReward`, `mintTo`, `burnAndMint`, `setMEATAddress`, `setNFTAddress` |
+| MEAT | ERC20 token minted with native deposits and swapped with GOAT. | `swapMEATForGOAT`, `swapGOATForMEAT`, `changeDepositRate`, `withdrawNative`, `setSwapEnabled`, `setGOATAddress` |
+| GoatNFT | ERC721 goat identifier redeemable for GOAT. | `mint`, `burn`, `goatValue` |
+| IGOAT | Interface for GOAT minting used by MEAT. | `mintTo` |
