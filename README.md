@@ -12,6 +12,7 @@ Berikut gambaran umum alur penggunaan kedua token:
 1. **Mint MEAT** – Kirim native token (misalnya ETH/BNB) langsung ke kontrak `MEAT`. Kontrak akan otomatis mencetak MEAT melalui fungsi `receive()` menggunakan rasio `DepositRate` dan mengirimkannya ke pengirim.
 2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi ditentukan oleh konstanta `SwapRate` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
 3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
+   *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
 4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
 
 ## Deployment
