@@ -2,11 +2,17 @@ use cosmwasm_std::{Addr, Empty, Uint128};
 use cw_multi_test::{App, ContractWrapper, Executor};
 
 use starter::{execute, instantiate, query};
-use starter::msg::{InstantiateMsg, ExecuteMsg, QueryMsg, BalanceResponse, StakingInfoResponse, TokenInfoResponse};
+use starter::msg::{InstantiateMsg, ExecuteMsg, QueryMsg, BalanceResponse, StakingInfoResponse, TokenInfoResponse, PendingRewardResponse};
+use goatnft::{execute as nft_execute, instantiate as nft_instantiate, query as nft_query};
+use goatnft::msg as nft_msg;
 
 fn contract_goat() -> Box<dyn cw_multi_test::Contract<Empty>> {
     let contract = ContractWrapper::new(execute, instantiate, query);
     Box::new(contract)
+}
+
+fn contract_nft() -> Box<dyn cw_multi_test::Contract<Empty>> {
+    Box::new(ContractWrapper::new(nft_execute, nft_instantiate, nft_query))
 }
 
 fn init_app() -> (App, Addr) {
@@ -96,4 +102,103 @@ fn owner_only() {
         &ExecuteMsg::SetRewardConfig { new_rate: Uint128::one(), new_interval: 1, new_min_claim: 1 },
         &[]
     ).unwrap_err();
+}
+
+#[test]
+fn burn_and_mint_emits_burn() {
+    let mut app = App::default();
+    let goat_id = app.store_code(contract_goat());
+    let nft_id = app.store_code(contract_nft());
+
+    let goat_addr = app
+        .instantiate_contract(goat_id, Addr::unchecked("owner"), &InstantiateMsg { meat_contract: "meat".into() }, &[], "goat", None)
+        .unwrap();
+    let nft_addr = app
+        .instantiate_contract(nft_id, Addr::unchecked("owner"), &nft_msg::InstantiateMsg {}, &[], "nft", None)
+        .unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        goat_addr.clone(),
+        &ExecuteMsg::SetNftAddress { nft_address: nft_addr.to_string() },
+        &[]
+    ).unwrap();
+
+    let resp = app.execute_contract(
+        Addr::unchecked("owner"),
+        nft_addr.clone(),
+        &nft_msg::ExecuteMsg::Mint { to: "user".into(), value: Uint128::new(50) },
+        &[]
+    ).unwrap();
+    let token_id: u64 = resp.events.iter().find(|e| e.ty == "wasm").unwrap()
+        .attributes.iter().find(|a| a.key == "token_id").unwrap().value.parse().unwrap();
+
+    let res = app.execute_contract(
+        Addr::unchecked("user"),
+        goat_addr.clone(),
+        &ExecuteMsg::BurnAndMint { token_id },
+        &[]
+    ).unwrap();
+
+    let has_event = res.events.iter().any(|e| {
+        e.ty == "execute" && e.attributes.iter().any(|a| a.key == "_contract_addr" && a.value == nft_addr)
+    });
+    assert!(has_event, "burn message not sent");
+
+    let owner_res: Result<String, _> = app.wrap().query_wasm_smart(nft_addr, &nft_msg::QueryMsg::Owner { token_id });
+    assert!(owner_res.is_err());
+}
+
+#[test]
+fn claim_reward_multiple_times() {
+    let (mut app, addr) = init_app();
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        addr.clone(),
+        &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 },
+        &[]
+    ).unwrap();
+    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
+
+    app.update_block(|b| b.time = b.time.plus_seconds(1));
+    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::ClaimReward {}, &[]).unwrap();
+    let bal1: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "staker".into() }).unwrap();
+    assert_eq!(bal1.balance, Uint128::new(100));
+
+    app.update_block(|b| b.time = b.time.plus_seconds(1));
+    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::ClaimReward {}, &[]).unwrap();
+    let bal2: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "staker".into() }).unwrap();
+    assert_eq!(bal2.balance, Uint128::new(200));
+}
+
+#[test]
+fn emergency_unstake_returns_only_stake() {
+    let (mut app, addr) = init_app();
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        addr.clone(),
+        &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 10 },
+        &[]
+    ).unwrap();
+    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "user".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
+    app.update_block(|b| b.time = b.time.plus_seconds(5));
+    app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::EmergencyUnstake {}, &[]).unwrap();
+    let bal: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "user".into() }).unwrap();
+    assert_eq!(bal.balance, Uint128::new(50));
+    let pending: PendingRewardResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::PendingReward { address: "user".into() }).unwrap();
+    assert_eq!(pending.reward, Uint128::zero());
+}
+
+#[test]
+fn claim_without_stake_fails() {
+    let (mut app, addr) = init_app();
+    let err = app.execute_contract(
+        Addr::unchecked("user"),
+        addr,
+        &ExecuteMsg::ClaimReward {},
+        &[]
+    ).unwrap_err();
+    assert!(!err.to_string().is_empty());
 }
