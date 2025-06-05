@@ -113,9 +113,9 @@ function unstake() external {
 /// @notice Claim only the reward without unstaking
 function claimReward() external {
     uint256 lastTime = lastStakedTime[msg.sender];
+    require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
     uint256 reward = calculateReward(msg.sender);
     require(reward > 0, "No reward to claim");
-    require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
     uint256 available = balanceOf(address(this));
     if (available >= reward) {
         _transfer(address(this), msg.sender, reward);
@@ -128,12 +128,10 @@ function claimReward() external {
 }
 /// @notice Compound current reward into staked balance
 function compoundReward() external {
+    uint256 lastTime = lastStakedTime[msg.sender];
+    require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
     uint256 reward = calculateReward(msg.sender);
     require(reward > 0, "No reward to compound");
-    require(
-        block.timestamp - lastStakedTime[msg.sender] >= minClaimInterval,
-        "Claim not allowed yet"
-    );
     uint256 available = balanceOf(address(this));
     if (available < reward) {
         _mint(address(this), reward - available);
