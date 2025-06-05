@@ -202,3 +202,62 @@ fn claim_without_stake_fails() {
     ).unwrap_err();
     assert!(!err.to_string().is_empty());
 }
+
+#[test]
+fn emergency_unstake_mints_shortfall() {
+    let (mut app, addr) = init_app();
+    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "user".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
+    // drain contract balance
+    app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(30) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::EmergencyUnstake {}, &[]).unwrap();
+    let bal: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "user".into() }).unwrap();
+    assert_eq!(bal.balance, Uint128::new(50));
+    let info: TokenInfoResponse = app.wrap().query_wasm_smart(addr, &QueryMsg::TokenInfo {}).unwrap();
+    assert_eq!(info.total_supply, Uint128::new(80));
+}
+
+#[test]
+fn unstake_mints_shortfall() {
+    let (mut app, addr) = init_app();
+    app.execute_contract(Addr::unchecked("owner"), addr.clone(), &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "user".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(30) }, &[]).unwrap();
+    app.update_block(|b| b.time = b.time.plus_seconds(1));
+    app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::Unstake {}, &[]).unwrap();
+    let bal: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "user".into() }).unwrap();
+    assert_eq!(bal.balance, Uint128::new(100));
+    let info: TokenInfoResponse = app.wrap().query_wasm_smart(addr, &QueryMsg::TokenInfo {}).unwrap();
+    assert_eq!(info.total_supply, Uint128::new(130));
+}
+
+#[test]
+fn claim_reward_mints_shortfall() {
+    let (mut app, addr) = init_app();
+    app.execute_contract(Addr::unchecked("owner"), addr.clone(), &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(40) }, &[]).unwrap();
+    app.update_block(|b| b.time = b.time.plus_seconds(1));
+    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::ClaimReward {}, &[]).unwrap();
+    let bal: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "staker".into() }).unwrap();
+    assert_eq!(bal.balance, Uint128::new(50));
+    let info: TokenInfoResponse = app.wrap().query_wasm_smart(addr, &QueryMsg::TokenInfo {}).unwrap();
+    assert_eq!(info.total_supply, Uint128::new(90));
+}
+
+#[test]
+fn compound_reward_mints_shortfall() {
+    let (mut app, addr) = init_app();
+    app.execute_contract(Addr::unchecked("owner"), addr.clone(), &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
+    app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(30) }, &[]).unwrap();
+    app.update_block(|b| b.time = b.time.plus_seconds(1));
+    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::CompoundReward {}, &[]).unwrap();
+    let stake: StakingInfoResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::StakingBalance { address: "staker".into() }).unwrap();
+    assert_eq!(stake.balance, Uint128::new(100));
+    let info: TokenInfoResponse = app.wrap().query_wasm_smart(addr, &QueryMsg::TokenInfo {}).unwrap();
+    assert_eq!(info.total_supply, Uint128::new(80));
+}

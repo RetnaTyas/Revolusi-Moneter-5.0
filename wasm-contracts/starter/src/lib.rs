@@ -184,8 +184,22 @@ fn execute_emergency_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdR
     }
     STAKING_BALANCE.remove(deps.storage, &info.sender);
     LAST_STAKED_TIME.remove(deps.storage, &info.sender);
-    sub_balance(deps.storage, &env.contract.address, staked)?;
-    add_balance(deps.storage, &info.sender, staked)?;
+
+    let contract = env.contract.address;
+    let available = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
+    if available >= staked {
+        sub_balance(deps.storage, &contract, staked)?;
+        add_balance(deps.storage, &info.sender, staked)?;
+    } else {
+        if !available.is_zero() {
+            sub_balance(deps.storage, &contract, available)?;
+            add_balance(deps.storage, &info.sender, available)?;
+        }
+        let diff = staked.checked_sub(available)?;
+        add_balance(deps.storage, &info.sender, diff)?;
+        let supply = TOTAL_SUPPLY.load(deps.storage)? + diff;
+        TOTAL_SUPPLY.save(deps.storage, &supply)?;
+    }
     Ok(Response::new())
 }
 
@@ -203,10 +217,21 @@ fn execute_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Resp
     STAKING_BALANCE.remove(deps.storage, &info.sender);
     LAST_STAKED_TIME.remove(deps.storage, &info.sender);
     let total = staked + reward;
-    sub_balance(deps.storage, &env.contract.address, staked)?;
-    add_balance(deps.storage, &info.sender, total)?;
-    let supply = TOTAL_SUPPLY.load(deps.storage)? + reward;
-    TOTAL_SUPPLY.save(deps.storage, &supply)?;
+    let contract = env.contract.address;
+    let available = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
+    if available >= total {
+        sub_balance(deps.storage, &contract, total)?;
+        add_balance(deps.storage, &info.sender, total)?;
+    } else {
+        if !available.is_zero() {
+            sub_balance(deps.storage, &contract, available)?;
+            add_balance(deps.storage, &info.sender, available)?;
+        }
+        let diff = total.checked_sub(available)?;
+        add_balance(deps.storage, &info.sender, diff)?;
+        let supply = TOTAL_SUPPLY.load(deps.storage)? + diff;
+        TOTAL_SUPPLY.save(deps.storage, &supply)?;
+    }
     Ok(Response::new())
 }
 
@@ -220,10 +245,22 @@ fn execute_claim_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult
     if env.block.time.seconds().saturating_sub(last) < min {
         return Err(StdError::generic_err("Claim not allowed yet"));
     }
+    let contract = env.contract.address;
+    let available = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
+    if available >= reward {
+        sub_balance(deps.storage, &contract, reward)?;
+        add_balance(deps.storage, &info.sender, reward)?;
+    } else {
+        if !available.is_zero() {
+            sub_balance(deps.storage, &contract, available)?;
+            add_balance(deps.storage, &info.sender, available)?;
+        }
+        let diff = reward.checked_sub(available)?;
+        add_balance(deps.storage, &info.sender, diff)?;
+        let supply = TOTAL_SUPPLY.load(deps.storage)? + diff;
+        TOTAL_SUPPLY.save(deps.storage, &supply)?;
+    }
     LAST_STAKED_TIME.save(deps.storage, &info.sender, &env.block.time.seconds())?;
-    add_balance(deps.storage, &info.sender, reward)?;
-    let supply = TOTAL_SUPPLY.load(deps.storage)? + reward;
-    TOTAL_SUPPLY.save(deps.storage, &supply)?;
     Ok(Response::new())
 }
 
@@ -237,10 +274,16 @@ fn execute_compound_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdRes
     if env.block.time.seconds().saturating_sub(last) < min {
         return Err(StdError::generic_err("Claim not allowed yet"));
     }
+    let contract = env.contract.address;
+    let available = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
+    if available < reward {
+        let diff = reward.checked_sub(available)?;
+        add_balance(deps.storage, &contract, diff)?;
+        let supply = TOTAL_SUPPLY.load(deps.storage)? + diff;
+        TOTAL_SUPPLY.save(deps.storage, &supply)?;
+    }
     STAKING_BALANCE.update(deps.storage, &info.sender, |b| -> StdResult<_> { Ok(b.unwrap_or_default() + reward) })?;
     LAST_STAKED_TIME.save(deps.storage, &info.sender, &env.block.time.seconds())?;
-    let supply = TOTAL_SUPPLY.load(deps.storage)? + reward;
-    TOTAL_SUPPLY.save(deps.storage, &supply)?;
     Ok(Response::new())
 }
 
