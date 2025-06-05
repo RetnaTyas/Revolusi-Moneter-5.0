@@ -107,10 +107,23 @@ The frontend queries these endpoints instead of hitting the blockchain directly.
 
 ## Frontend Setup
 
+
+A minimal Next.js app lives in `frontend/` and uses Tailwind CSS for styling.
+Install dependencies and start the dev server with:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+=======
 The `frontend/` directory currently contains only configuration files and
 documentation. The actual Next.js application has been moved to a separate
 repository. Clone that repo and follow its README for instructions on running
 the UI.
+
+Before running, copy `.env.example` to `.env.local` and provide your deployed
+`NEXT_PUBLIC_GOAT_ADDRESS` and `NEXT_PUBLIC_MEAT_ADDRESS` values.
 
 ## 🧱 Struktur Kontrak
 
