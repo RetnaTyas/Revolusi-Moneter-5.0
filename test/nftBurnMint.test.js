@@ -20,13 +20,27 @@ describe("GoatNFT burn and GOAT mint", function () {
 
   it("burns NFT and mints GOAT", async function () {
     const value = ethers.parseEther("5");
-    const tx = await nft.mint(user.address, value);
+    const nfcId = 1234;
+    const breed = "Boer";
+    const birthYear = 2021;
+    const weight = 70;
+    const tx = await nft.mint(user.address, value, nfcId, breed, birthYear, weight);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2]; // Transfer event
+
+    const stored = await nft.getGoatData(tokenId);
+    expect(stored.nfcId).to.equal(nfcId);
+    expect(stored.breed).to.equal(breed);
+    expect(stored.birthYear).to.equal(birthYear);
+    expect(stored.weight).to.equal(weight);
+    expect(stored.mintedAt).to.be.gt(0);
 
     await nft.connect(user).approve(goat.target, tokenId);
     await expect(goat.connect(user).burnAndMint(tokenId)).to.not.be.reverted;
 
+    const afterBurn = await nft.getGoatData(tokenId);
+    expect(afterBurn.nfcId).to.equal(0);
+  
     expect(await goat.balanceOf(user.address)).to.equal(value);
     await expect(nft.ownerOf(tokenId)).to.be.reverted;
   });

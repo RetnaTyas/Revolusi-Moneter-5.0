@@ -9,6 +9,14 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract GoatNFT is ERC721Burnable {
     uint256 public nextId;
     mapping(uint256 => uint256) public goatValue;
+    struct GoatData {
+        uint256 nfcId;
+        string breed;
+        uint16 birthYear;
+        uint16 weight;
+        uint256 mintedAt;
+    }
+    mapping(uint256 => GoatData) public goatMetadata;
     address private immutable _owner;
 
     constructor() ERC721("Goat Identifier", "GOATNFT") {
@@ -20,10 +28,18 @@ contract GoatNFT is ERC721Burnable {
         _;
     }
 
-    function mint(address to, uint256 value) external onlyOwner returns (uint256) {
+    function mint(
+        address to,
+        uint256 value,
+        uint256 nfcId,
+        string calldata breed,
+        uint16 birthYear,
+        uint16 weight
+    ) external onlyOwner returns (uint256) {
         require(value > 0, "Value must be > 0");
         uint256 tokenId = ++nextId;
         goatValue[tokenId] = value;
+        goatMetadata[tokenId] = GoatData(nfcId, breed, birthYear, weight, block.timestamp);
         _mint(to, tokenId);
         return tokenId;
     }
@@ -33,6 +49,11 @@ contract GoatNFT is ERC721Burnable {
         require(_isAuthorized(tokenOwner, msg.sender, tokenId), "Not owner");
         super.burn(tokenId);
         delete goatValue[tokenId];
+        delete goatMetadata[tokenId];
+    }
+
+    function getGoatData(uint256 tokenId) external view returns (GoatData memory) {
+        return goatMetadata[tokenId];
     }
 
     function owner() external view returns (address) {
