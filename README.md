@@ -182,8 +182,9 @@ Alur panggilan eksternal–internal secara ringkas:
    tidak mencukupi.
 2. `stake` mentransfer GOAT ke kontrak lalu mencatat waktu. Perhitungan reward
    dilakukan fungsi internal `calculateReward`.
-3. `claimReward`, `compoundReward`, dan `unstake` sama-sama membaca reward dari
-   `calculateReward` sebelum mentransfer atau mencetak token ke pengguna.
+3. `claimReward`, `compoundReward`, dan `unstake` kini memuat `lastStakedTime`
+   ke variabel lokal lalu meneruskannya ke `calculateReward` sebelum mentransfer
+   atau mencetak token ke pengguna.
 
 ## 🔁 Flow Logic
 

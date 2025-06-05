@@ -98,8 +98,9 @@ function emergencyUnstake() external {
 function unstake() external {
     uint256 staked = stakingBalance[msg.sender];
     require(staked > 0, "Nothing to unstake");
-    require(block.timestamp - lastStakedTime[msg.sender] >= minClaimInterval, "Claim not allowed yet");
-    uint256 reward = calculateReward(msg.sender);
+    uint256 lastTime = lastStakedTime[msg.sender];
+    require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
+    uint256 reward = calculateReward(msg.sender, lastTime);
     uint256 total = staked + reward;
     stakingBalance[msg.sender] = 0;    
     uint256 available = balanceOf(address(this));
@@ -115,7 +116,7 @@ function unstake() external {
 function claimReward() external {
     uint256 lastTime = lastStakedTime[msg.sender];
     require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
-    uint256 reward = calculateReward(msg.sender);
+    uint256 reward = calculateReward(msg.sender, lastTime);
     require(reward > 0, "No reward to claim");
     uint256 available = balanceOf(address(this));
     if (available >= reward) {
@@ -131,7 +132,7 @@ function claimReward() external {
 function compoundReward() external {
     uint256 lastTime = lastStakedTime[msg.sender];
     require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
-    uint256 reward = calculateReward(msg.sender);
+    uint256 reward = calculateReward(msg.sender, lastTime);
     require(reward > 0, "No reward to compound");
     uint256 available = balanceOf(address(this));
     if (available < reward) {
@@ -143,18 +144,19 @@ function compoundReward() external {
 }
 /// @notice Internal reward calculation based on duration and amount
 /// @param user The address of the staker
+/// @param lastTime Timestamp of the last stake/claim
 /// @return reward amount in GOAT token wei
-function calculateReward(address user) internal view returns (uint256) {
+function calculateReward(address user, uint256 lastTime) internal view returns (uint256) {
     uint256 staked = stakingBalance[user];
     if (staked == 0) return 0;
-    uint256 duration = block.timestamp - lastStakedTime[user];
+    uint256 duration = block.timestamp - lastTime;
     return (staked * duration * rewardRate) / (rewardInterval * REWARD_PRECISION);
 }
 /// @notice Shows pending reward amount
 /// @param user The address of the staker
 /// @return amount pending to be claimed
 function pendingReward(address user) external view returns (uint256) {
-    return calculateReward(user);
+    return calculateReward(user, lastStakedTime[user]);
 }
 /// @notice Returns the next eligible claim timestamp
 /// @param user The address of the staker
