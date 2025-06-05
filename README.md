@@ -111,11 +111,12 @@ The frontend queries these endpoints instead of hitting the blockchain directly.
 
 ## Frontend Setup
 
-The web interface has been moved to its own repository so this project can
-focus on the smart contracts and backend utilities. The `frontend/` folder now
-only stores configuration templates such as `.env.example`.
+The complete user interface lives in a separate repository so this project can
+focus on the smart contracts and backend utilities. A minimal Next.js template
+still resides in `frontend/` purely as a placeholder and to illustrate
+environment variable usage.
 
-To run the UI, clone the dedicated frontend repository and follow its README for
+Clone the dedicated UI repository (when available) and follow its README for
 installation and `npm run dev` instructions. Remember to copy `.env.example` to
 `.env.local` and set your deployed `NEXT_PUBLIC_GOAT_ADDRESS` and
 `NEXT_PUBLIC_MEAT_ADDRESS` values there.
