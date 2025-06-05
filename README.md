@@ -203,6 +203,7 @@ Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
 - [GOAT & MEAT Lifecycle](goat-meat-lifecycle.md)
 - [Contract Map](contract-map.md)
 - [Integration Bridge](integration-bridge.md)
+- [CosmWasm Deployment](docs/wasm-deploy.md)
 
 ---
 
