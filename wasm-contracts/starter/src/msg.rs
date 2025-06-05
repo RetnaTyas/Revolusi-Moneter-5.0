@@ -65,6 +65,11 @@ pub struct PendingRewardResponse {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct GoatValueResponse {
+    pub value: Uint128,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct NextClaimResponse {
     pub timestamp: u64,
 }
