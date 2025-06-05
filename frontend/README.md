@@ -1,29 +1,8 @@
 # GOAT/MEAT Frontend
 
-This directory contains the web interface used to interact with the GOAT and MEAT token contracts. The UI guides users through the typical lifecycle:
+This folder now holds only environment templates and other configuration files
+for the web interface. The actual Next.js source code was moved to a separate
+repository and is no longer included here.
 
-1. **Mint MEAT** by sending native currency to the MEAT contract.
-2. **Swap MEAT ↔ GOAT** once `swapEnabled` is active.
-3. **Stake GOAT** to begin earning rewards.
-4. **Claim or Compound** rewards after the minimum interval.
-5. **Unstake** to withdraw principal plus accrued GOAT.
-
-## Development
-
-Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_GOAT_ADDRESS` and `NEXT_PUBLIC_MEAT_ADDRESS` to the deployed contract addresses. Then install dependencies and start a local dev server:
-
-```bash
-cp .env.example .env.local
-npm install
-npm run dev
-```
-
-## Build
-
-Create a production build with:
-
-```bash
-npm run build
-```
-
-For full contract information and backend instructions see the [root README](../README.md).
+See the UI repository for development and build instructions. For full contract
+information and backend setup steps refer to the [root README](../README.md).
