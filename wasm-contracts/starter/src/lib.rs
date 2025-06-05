@@ -1,4 +1,4 @@
-use cosmwasm_std::{entry_point, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg};
+use cosmwasm_std::{entry_point, to_json_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg};
 use cw2::set_contract_version;
 use cw721::Cw721ExecuteMsg;
 use crate::msg::{
@@ -122,9 +122,9 @@ fn execute_mint_to(mut deps: DepsMut, info: MessageInfo, to: String, amount: Uin
 
 fn execute_burn_and_mint(mut deps: DepsMut, info: MessageInfo, token_id: u64) -> StdResult<Response> {
     let nft = NFT_CONTRACT.load(deps.storage)?.ok_or_else(|| StdError::generic_err("NFT not set"))?;
-    let query = to_binary(&serde_json::json!({"goat_value": {"token_id": token_id}}))?;
+    let query = to_json_binary(&serde_json::json!({"goat_value": {"token_id": token_id}}))?;
     let resp: GoatValueResponse = deps.querier.query_wasm_smart(nft.clone(), &query)?;
-    let burn = WasmMsg::Execute { contract_addr: nft.to_string(), msg: to_binary(&Cw721ExecuteMsg::Burn { token_id: token_id.to_string() })?, funds: vec![] };
+    let burn = WasmMsg::Execute { contract_addr: nft.to_string(), msg: to_json_binary(&Cw721ExecuteMsg::Burn { token_id: token_id.to_string() })?, funds: vec![] };
     add_balance(deps.storage, &info.sender, resp.value)?;
     let supply = TOTAL_SUPPLY.load(deps.storage)? + resp.value;
     TOTAL_SUPPLY.save(deps.storage, &supply)?;
@@ -250,41 +250,41 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::Balance { address } => {
             let addr = deps.api.addr_validate(&address)?;
             let balance = BALANCES.may_load(deps.storage, &addr)?.unwrap_or_default();
-            to_binary(&BalanceResponse { balance })
+            to_json_binary(&BalanceResponse { balance })
         }
         QueryMsg::Allowance { owner, spender } => {
             let owner = deps.api.addr_validate(&owner)?;
             let spender = deps.api.addr_validate(&spender)?;
             let allowance = ALLOWANCES.may_load(deps.storage, (&owner, &spender))?.unwrap_or_default();
-            to_binary(&AllowanceResponse { allowance })
+            to_json_binary(&AllowanceResponse { allowance })
         }
         QueryMsg::TokenInfo {} => {
             let total_supply = TOTAL_SUPPLY.load(deps.storage)?;
-            to_binary(&TokenInfoResponse { name: NAME.to_string(), symbol: SYMBOL.to_string(), decimals: DECIMALS, total_supply })
+            to_json_binary(&TokenInfoResponse { name: NAME.to_string(), symbol: SYMBOL.to_string(), decimals: DECIMALS, total_supply })
         }
         QueryMsg::StakingBalance { address } => {
             let addr = deps.api.addr_validate(&address)?;
             let balance = STAKING_BALANCE.may_load(deps.storage, &addr)?.unwrap_or_default();
             let last = LAST_STAKED_TIME.may_load(deps.storage, &addr)?.unwrap_or_default();
-            to_binary(&StakingInfoResponse { balance, last_staked: last })
+            to_json_binary(&StakingInfoResponse { balance, last_staked: last })
         }
         QueryMsg::PendingReward { address } => {
             let addr = deps.api.addr_validate(&address)?;
             let reward = calculate_reward(deps, &env, &addr)?;
-            to_binary(&PendingRewardResponse { reward })
+            to_json_binary(&PendingRewardResponse { reward })
         }
         QueryMsg::NextClaimTime { address } => {
             let addr = deps.api.addr_validate(&address)?;
             let last = LAST_STAKED_TIME.may_load(deps.storage, &addr)?.unwrap_or_default();
             if last == 0 {
-                return to_binary(&NextClaimResponse { timestamp: 0 });
+                return to_json_binary(&NextClaimResponse { timestamp: 0 });
             }
             let min = MIN_CLAIM_INTERVAL.load(deps.storage)?;
-            to_binary(&NextClaimResponse { timestamp: last + min })
+            to_json_binary(&NextClaimResponse { timestamp: last + min })
         }
         QueryMsg::Owner {} => {
             let owner = OWNER.load(deps.storage)?;
-            to_binary(&owner.into_string())
+            to_json_binary(&owner.into_string())
         }
     }
 }
