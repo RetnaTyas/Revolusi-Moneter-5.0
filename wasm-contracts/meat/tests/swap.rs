@@ -28,6 +28,7 @@ fn swap_meat_and_goat() {
     // send meat to user
     app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExecute::Transfer { recipient: "user".into(), amount: Uint128::new(1000) }, &[]).unwrap();
 
+    app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::Approve { spender: meat_addr.to_string(), amount: Uint128::new(1000) }, &[]).unwrap();
     app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::SwapMeatForGoat { meat_amount: Uint128::new(1000) }, &[]).unwrap();
     let goat_bal: goat_msg::BalanceResponse = app.wrap().query_wasm_smart(goat_addr.clone(), &goat_msg::QueryMsg::Balance { address: "user".into() }).unwrap();
     assert_eq!(goat_bal.balance, Uint128::new(1000 / 85));
@@ -36,4 +37,21 @@ fn swap_meat_and_goat() {
     app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::SwapGoatForMeat { goat_amount: goat_bal.balance }, &[]).unwrap();
     let meat_bal: BalanceResponse = app.wrap().query_wasm_smart(meat_addr, &MeatQuery::Balance { address: "user".into() }).unwrap();
     assert!(meat_bal.balance > Uint128::zero());
+}
+
+#[test]
+fn swap_meat_requires_approval() {
+    let mut app = App::default();
+    let goat_id = app.store_code(contract_goat());
+    let meat_id = app.store_code(contract_meat());
+
+    let goat_addr = app.instantiate_contract(goat_id, Addr::unchecked("owner"), &starter::msg::InstantiateMsg { meat_contract: "meat".into() }, &[], "goat", None).unwrap();
+    let meat_addr = app.instantiate_contract(meat_id, Addr::unchecked("owner"), &MeatInstantiate { goat_contract: goat_addr.to_string() }, &[], "meat", None).unwrap();
+
+    app.execute_contract(Addr::unchecked("owner"), goat_addr.clone(), &goat_msg::ExecuteMsg::SetMeatAddress { meat_address: meat_addr.to_string() }, &[]).unwrap();
+
+    app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExecute::Transfer { recipient: "user".into(), amount: Uint128::new(1) }, &[]).unwrap();
+
+    let res = app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::SwapMeatForGoat { meat_amount: Uint128::new(1) }, &[]);
+    assert!(res.is_err());
 }

@@ -154,6 +154,10 @@ fn execute_swap_meat_for_goat(deps: DepsMut, env: Env, info: MessageInfo, meat_a
     if !SWAP_ENABLED.load(deps.storage)? { return Err(StdError::generic_err("Swap disabled")); }
     if meat_amount.is_zero() { return Err(StdError::generic_err("Amount must be > 0")); }
     let goat = GOAT_CONTRACT.load(deps.storage)?;
+    let mut allowance = ALLOWANCES.may_load(deps.storage, (&info.sender, &env.contract.address))?.unwrap_or_default();
+    if allowance < meat_amount { return Err(StdError::generic_err("Allowance exceeded")); }
+    allowance -= meat_amount;
+    ALLOWANCES.save(deps.storage, (&info.sender, &env.contract.address), &allowance)?;
     sub_balance(deps.storage, &info.sender, meat_amount)?;
     add_balance(deps.storage, &env.contract.address, meat_amount)?;
     let goat_amount = Uint128::new(meat_amount.u128() / SWAP_RATE);
