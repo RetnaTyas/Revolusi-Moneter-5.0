@@ -1,6 +1,5 @@
-use cosmwasm_std::{entry_point, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128};
+use cosmwasm_std::{entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128};
 use base64;
-use cw721;
 use serde_json_wasm;
 use cw2::set_contract_version;
 
@@ -65,15 +64,15 @@ fn handle_query(deps: Deps, q: QueryMsg) -> StdResult<Binary> {
     match q {
         QueryMsg::GoatValue { token_id } => {
             let value = GOAT_VALUE.load(deps.storage, token_id)?;
-            to_binary(&GoatValueResponse { value })
+            to_json_binary(&GoatValueResponse { value })
         }
         QueryMsg::Owner { token_id } => {
             let owner = OWNER_OF.load(deps.storage, token_id)?;
-            to_binary(&owner.into_string())
+            to_json_binary(&owner.into_string())
         }
         QueryMsg::OwnerAddress {} => {
             let owner = OWNER.load(deps.storage)?;
-            to_binary(&owner.into_string())
+            to_json_binary(&owner.into_string())
         }
     }
 }

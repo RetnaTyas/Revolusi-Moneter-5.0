@@ -1,4 +1,4 @@
-use cosmwasm_std::{entry_point, to_binary, Addr, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg, BankMsg};
+use cosmwasm_std::{entry_point, to_json_binary, Addr, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg, BankMsg};
 use cw2::set_contract_version;
 
 use starter::msg as goat_msg;
@@ -129,7 +129,7 @@ fn execute_swap_goat_for_meat(mut deps: DepsMut, env: Env, info: MessageInfo, go
     if !SWAP_ENABLED.load(deps.storage)? { return Err(StdError::generic_err("Swap disabled")); }
     if goat_amount.is_zero() { return Err(StdError::generic_err("Amount must be > 0")); }
     let goat = GOAT_CONTRACT.load(deps.storage)?;
-    let transfer = WasmMsg::Execute { contract_addr: goat.to_string(), msg: to_binary(&goat_msg::ExecuteMsg::TransferFrom { owner: info.sender.to_string(), recipient: env.contract.address.to_string(), amount: goat_amount })?, funds: vec![] };
+    let transfer = WasmMsg::Execute { contract_addr: goat.to_string(), msg: to_json_binary(&goat_msg::ExecuteMsg::TransferFrom { owner: info.sender.to_string(), recipient: env.contract.address.to_string(), amount: goat_amount })?, funds: vec![] };
     let meat_needed = Uint128::new(goat_amount.u128() * SWAP_RATE);
     let contract = env.contract.address;
     let bal = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
@@ -164,13 +164,13 @@ fn execute_swap_meat_for_goat(mut deps: DepsMut, env: Env, info: MessageInfo, me
         let diff = goat_amount.checked_sub(goat_bal.balance)?;
         resp = resp.add_message(WasmMsg::Execute {
             contract_addr: goat.to_string(),
-            msg: to_binary(&goat_msg::ExecuteMsg::MintTo { to: env.contract.address.to_string(), amount: diff })?,
+            msg: to_json_binary(&goat_msg::ExecuteMsg::MintTo { to: env.contract.address.to_string(), amount: diff })?,
             funds: vec![],
         });
     }
     resp = resp.add_message(WasmMsg::Execute {
         contract_addr: goat.to_string(),
-        msg: to_binary(&goat_msg::ExecuteMsg::Transfer { recipient: info.sender.to_string(), amount: goat_amount })?,
+        msg: to_json_binary(&goat_msg::ExecuteMsg::Transfer { recipient: info.sender.to_string(), amount: goat_amount })?,
         funds: vec![],
     });
     Ok(resp)
@@ -195,37 +195,37 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::Balance { address } => {
             let addr = deps.api.addr_validate(&address)?;
             let balance = BALANCES.may_load(deps.storage, &addr)?.unwrap_or_default();
-            to_binary(&BalanceResponse { balance })
+            to_json_binary(&BalanceResponse { balance })
         }
         QueryMsg::Allowance { owner, spender } => {
             let owner = deps.api.addr_validate(&owner)?;
             let spender = deps.api.addr_validate(&spender)?;
             let allowance = ALLOWANCES.may_load(deps.storage, (&owner, &spender))?.unwrap_or_default();
-            to_binary(&AllowanceResponse { allowance })
+            to_json_binary(&AllowanceResponse { allowance })
         }
         QueryMsg::TokenInfo {} => {
             let total_supply = TOTAL_SUPPLY.load(deps.storage)?;
-            to_binary(&TokenInfoResponse { name: NAME.to_string(), symbol: SYMBOL.to_string(), decimals: DECIMALS, total_supply })
+            to_json_binary(&TokenInfoResponse { name: NAME.to_string(), symbol: SYMBOL.to_string(), decimals: DECIMALS, total_supply })
         }
         QueryMsg::DepositRate {} => {
             let rate = RATE.load(deps.storage)?;
-            to_binary(&RateResponse { rate })
+            to_json_binary(&RateResponse { rate })
         }
         QueryMsg::SwapEnabled {} => {
             let enabled = SWAP_ENABLED.load(deps.storage)?;
-            to_binary(&EnabledResponse { enabled })
+            to_json_binary(&EnabledResponse { enabled })
         }
         QueryMsg::Owner {} => {
             let owner = OWNER.load(deps.storage)?;
-            to_binary(&owner.into_string())
+            to_json_binary(&owner.into_string())
         }
         QueryMsg::EquivalentMeat { goat_amount } => {
             let amount = Uint128::new(goat_amount.u128() * SWAP_RATE);
-            to_binary(&EquivalentResponse { amount })
+            to_json_binary(&EquivalentResponse { amount })
         }
         QueryMsg::EquivalentGoat { meat_amount } => {
             let amount = Uint128::new(meat_amount.u128() / SWAP_RATE);
-            to_binary(&EquivalentResponse { amount })
+            to_json_binary(&EquivalentResponse { amount })
         }
     }
 }
