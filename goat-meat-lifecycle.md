@@ -3,7 +3,7 @@
 The two tokens form a closed loop that allows value to enter the system via MEAT and be rewarded through GOAT staking.
 
 1. **Minting MEAT**
-   * Users send native currency to the MEAT contract. It mints MEAT tokens to the sender at a ratio determined by `DepositRate`.
+   * Users send native currency to the MEAT contract. Its `receive()` function mints MEAT to the sender using the `DepositRate`, scaled per 1000 units (default `100`, i.e. 100 MEAT per 1000 native).
 2. **Swapping**
    * MEAT can be swapped to GOAT and vice versa through the MEAT contract when `swapEnabled` is true. The fixed conversion constant `SwapRate` maintains proportional supply.
 3. **Staking GOAT**

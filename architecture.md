@@ -5,7 +5,7 @@ This project revolves around two ERC20 contracts – **GOAT** and **MEAT** – d
 ## On‑Chain Layer
 
 * **GOAT (`contracts/GOAT.sol`)** – provides staking with time‑based rewards, the ability for the MEAT contract to mint new supply and various owner controls (reward settings, MEAT address).
-* **MEAT (`contracts/MEAT.sol`)** – mints tokens when receiving native currency, swaps MEAT to and from GOAT, controls swap availability and deposit rate and can withdraw collected native tokens.
+* **MEAT (`contracts/MEAT.sol`)** – mints tokens when receiving native currency (using a `DepositRate` measured per 1000 units), swaps MEAT to and from GOAT, controls swap availability and deposit rate and can withdraw collected native tokens.
 * **Interfaces and mocks** – `IGOAT` defines the minting hook used by MEAT and `FailingGOAT` is a test helper for simulating failed transfers.
 
 ## Backend
