@@ -2,10 +2,6 @@ const { expect } = require("chai");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { ethers } = require("hardhat");
 
-function calcReward(staked, duration, rate, interval) {
-  return (staked * BigInt(duration) * BigInt(rate)) / (BigInt(interval) * 10n ** 18n);
-}
-
 describe("Full flow integration", function () {
   let owner, user1, user2, user3;
   let goat, meat;
