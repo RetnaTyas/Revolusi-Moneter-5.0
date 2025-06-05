@@ -71,6 +71,21 @@ Jalankan perintah berikut untuk melakukan deploy:
 npx hardhat run scripts/deploy.js --network sepolia
 ```
 
+## Build Artifacts
+
+This repository maintains both EVM and CosmWasm contract builds under the `artifacts/` folder.
+
+1. **EVM** – compile the Solidity contracts and generate ABI files:
+   ```bash
+   npx hardhat compile
+   ```
+   Copy the ABI JSONs from `artifacts/contracts/` into `backend/abi/` if you change the contracts.
+2. **CosmWasm** – build the Rust packages:
+   ```bash
+   ./wasm-contracts/build.sh
+   ```
+   The script outputs `.wasm` files to `artifacts/` and writes schema files under each package.
+
 ## Parameter Penting
 
 - **SwapRate** – konstanta di kontrak MEAT yang menentukan rasio penukaran antar
@@ -101,7 +116,11 @@ A small Express backend in `backend/` exposes cached contract analytics. Start i
 npm run start:server
 ```
 
-Copy `backend/.env.example` to `.env` and fill in `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` and `PORT` so the server can read on-chain data after Hardhat compilation.
+Prepare the environment variables before starting the server:
+```bash
+cp backend/.env.example backend/.env
+```
+Edit `backend/.env` and set `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` and `PORT` so the server can read on-chain data after Hardhat compilation.
 
 ### API Endpoints
 - `GET /health` – health check.
@@ -117,9 +136,12 @@ still resides in `frontend/` purely as a placeholder and to illustrate
 environment variable usage.
 
 Clone the dedicated UI repository (when available) and follow its README for
-installation and `npm run dev` instructions. Remember to copy `.env.example` to
-`.env.local` and set your deployed `NEXT_PUBLIC_GOAT_ADDRESS` and
-`NEXT_PUBLIC_MEAT_ADDRESS` values there.
+installation and `npm run dev` instructions. Prepare the environment variables:
+```bash
+cp frontend/.env.example frontend/.env.local
+```
+Then edit `frontend/.env.local` to set your deployed `NEXT_PUBLIC_GOAT_ADDRESS`
+and `NEXT_PUBLIC_MEAT_ADDRESS` values.
 
 ## 🧱 Struktur Kontrak
 
