@@ -97,7 +97,7 @@ A small Express backend in `backend/` exposes cached contract analytics. Start i
 npm run start:server
 ```
 
-Create a `.env` file defining `RPC_URL`, `GOAT_ADDRESS` and `MEAT_ADDRESS` so the server can read on-chain data after Hardhat compilation.
+Copy `backend/.env.example` to `.env` and fill in `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` and `PORT` so the server can read on-chain data after Hardhat compilation.
 
 ### API Endpoints
 - `GET /health` – health check.
