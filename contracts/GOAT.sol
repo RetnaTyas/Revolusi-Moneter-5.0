@@ -84,6 +84,7 @@ function emergencyUnstake() external {
     uint256 staked = stakingBalance[msg.sender];
     require(staked > 0, "Nothing to unstake");
     stakingBalance[msg.sender] = 0;
+    lastStakedTime[msg.sender] = 0;
     uint256 available = balanceOf(address(this));
     if (available >= staked) {
         _transfer(address(this), msg.sender, staked);

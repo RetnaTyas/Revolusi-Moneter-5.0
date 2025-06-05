@@ -156,6 +156,7 @@ describe("Full flow integration", function () {
       .withArgs(user3.address, goatOut3, 0);
 
     expect(await goat.balanceOf(user3.address)).to.equal(goatOut3);
+    expect(await goat.lastStakedTime(user3.address)).to.equal(0n);
     const finalMeat3 = ethers.parseEther("100") - amountSwap3;
     expect(await meat.balanceOf(user3.address)).to.equal(finalMeat3);
   });
