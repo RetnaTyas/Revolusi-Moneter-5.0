@@ -9,7 +9,7 @@ This repository contains two ERC20 tokens:
 
 Berikut gambaran umum alur penggunaan kedua token:
 
-1. **Mint MEAT** – Kirim native token (misalnya ETH/BNB) langsung ke kontrak `MEAT`. Kontrak akan mencetak MEAT sesuai `DepositRate` dan mengirimkannya ke pengirim.
+1. **Mint MEAT** – Kirim native token (misalnya ETH/BNB) langsung ke kontrak `MEAT`. Kontrak akan otomatis mencetak MEAT melalui fungsi `receive()` menggunakan rasio `DepositRate` dan mengirimkannya ke pengirim.
 2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi ditentukan oleh konstanta `SwapRate` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
 3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
 4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
@@ -74,6 +74,9 @@ npx hardhat run scripts/deploy.js --network sepolia
 
 - **SwapRate** – konstanta di kontrak MEAT yang menentukan rasio penukaran antar
   kedua token. Nilai default `85` berarti 1 GOAT setara dengan 85 MEAT.
+- **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
+  dihitung per 1000 unit native token sehingga `100` berarti 100 MEAT untuk 1000
+  unit native (0.1 MEAT per 1 unit).
 - **rewardRate** – tingkat imbal hasil tahunan di kontrak GOAT (dalam skala
   `1e18`). Nilai ini dikombinasikan dengan `rewardInterval` untuk menghitung
   reward harian pengguna.
