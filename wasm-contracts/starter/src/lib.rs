@@ -84,20 +84,20 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
     }
 }
 
-fn execute_transfer(mut deps: DepsMut, info: MessageInfo, recipient: String, amount: Uint128) -> StdResult<Response> {
+fn execute_transfer(deps: DepsMut, info: MessageInfo, recipient: String, amount: Uint128) -> StdResult<Response> {
     let recipient = deps.api.addr_validate(&recipient)?;
     sub_balance(deps.storage, &info.sender, amount)?;
     add_balance(deps.storage, &recipient, amount)?;
     Ok(Response::new())
 }
 
-fn execute_approve(mut deps: DepsMut, info: MessageInfo, spender: String, amount: Uint128) -> StdResult<Response> {
+fn execute_approve(deps: DepsMut, info: MessageInfo, spender: String, amount: Uint128) -> StdResult<Response> {
     let spender = deps.api.addr_validate(&spender)?;
     ALLOWANCES.save(deps.storage, (&info.sender, &spender), &amount)?;
     Ok(Response::new())
 }
 
-fn execute_transfer_from(mut deps: DepsMut, info: MessageInfo, owner: String, recipient: String, amount: Uint128) -> StdResult<Response> {
+fn execute_transfer_from(deps: DepsMut, info: MessageInfo, owner: String, recipient: String, amount: Uint128) -> StdResult<Response> {
     let owner_addr = deps.api.addr_validate(&owner)?;
     let recipient = deps.api.addr_validate(&recipient)?;
     let mut allowance = ALLOWANCES.may_load(deps.storage, (&owner_addr, &info.sender))?.unwrap_or_default();
@@ -120,7 +120,7 @@ fn execute_mint_to(mut deps: DepsMut, info: MessageInfo, to: String, amount: Uin
     Ok(Response::new())
 }
 
-fn execute_burn_and_mint(mut deps: DepsMut, info: MessageInfo, token_id: u64) -> StdResult<Response> {
+fn execute_burn_and_mint(deps: DepsMut, info: MessageInfo, token_id: u64) -> StdResult<Response> {
     let nft = NFT_CONTRACT.load(deps.storage)?.ok_or_else(|| StdError::generic_err("NFT not set"))?;
     let query = to_json_binary(&serde_json::json!({"goat_value": {"token_id": token_id}}))?;
     let resp: GoatValueResponse = deps.querier.query_wasm_smart(nft.clone(), &query)?;
@@ -166,7 +166,7 @@ fn calculate_reward(deps: Deps, env: &Env, addr: &Addr) -> StdResult<Uint128> {
     Ok(Uint128::new(reward))
 }
 
-fn execute_stake(mut deps: DepsMut, env: Env, info: MessageInfo, amount: Uint128) -> StdResult<Response> {
+fn execute_stake(deps: DepsMut, env: Env, info: MessageInfo, amount: Uint128) -> StdResult<Response> {
     if amount.is_zero() {
         return Err(StdError::generic_err("Amount must be > 0"));
     }
@@ -177,7 +177,7 @@ fn execute_stake(mut deps: DepsMut, env: Env, info: MessageInfo, amount: Uint128
     Ok(Response::new())
 }
 
-fn execute_emergency_unstake(mut deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
+fn execute_emergency_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
     let staked = STAKING_BALANCE.may_load(deps.storage, &info.sender)?.unwrap_or_default();
     if staked.is_zero() {
         return Err(StdError::generic_err("Nothing to unstake"));
@@ -189,7 +189,7 @@ fn execute_emergency_unstake(mut deps: DepsMut, env: Env, info: MessageInfo) -> 
     Ok(Response::new())
 }
 
-fn execute_unstake(mut deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
+fn execute_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
     let staked = STAKING_BALANCE.may_load(deps.storage, &info.sender)?.unwrap_or_default();
     if staked.is_zero() {
         return Err(StdError::generic_err("Nothing to unstake"));
@@ -210,7 +210,7 @@ fn execute_unstake(mut deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<
     Ok(Response::new())
 }
 
-fn execute_claim_reward(mut deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
+fn execute_claim_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
     let reward = calculate_reward(deps.as_ref(), &env, &info.sender)?;
     if reward.is_zero() {
         return Err(StdError::generic_err("No reward to claim"));
@@ -227,7 +227,7 @@ fn execute_claim_reward(mut deps: DepsMut, env: Env, info: MessageInfo) -> StdRe
     Ok(Response::new())
 }
 
-fn execute_compound_reward(mut deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
+fn execute_compound_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
     let reward = calculate_reward(deps.as_ref(), &env, &info.sender)?;
     if reward.is_zero() {
         return Err(StdError::generic_err("No reward to compound"));
