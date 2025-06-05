@@ -187,6 +187,7 @@ Untuk kontrak CosmWasm, jalankan skrip build berikut terlebih dahulu:
 ```
 
 Skrip ini akan membangun `starter`, `meat`, dan `goatnft`, menyalin semua file `.wasm` ke folder `artifacts` dan menulis schema di masing-masing paket.
+Jika perintah `cargo schema` belum tersedia, jalankan `cargo install cargo-run-script` terlebih dahulu.
 
 Unit test Rust di setiap paket dapat dijalankan dengan:
 
