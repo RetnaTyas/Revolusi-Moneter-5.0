@@ -81,6 +81,11 @@ This repository maintains both EVM and CosmWasm contract builds under the `artif
    ```
    Copy the ABI JSONs from `artifacts/contracts/` into `backend/abi/` if you change the contracts.
 2. **CosmWasm** – build the Rust packages:
+   Install the build target if needed:
+   ```bash
+   rustup target add wasm32-unknown-unknown
+   ```
+   Then run:
    ```bash
    ./wasm-contracts/build.sh
    ```
@@ -210,6 +215,7 @@ Cakupan unit test meliputi:
 Untuk kontrak CosmWasm, jalankan skrip build berikut terlebih dahulu:
 
 ```bash
+rustup target add wasm32-unknown-unknown
 ./wasm-contracts/build.sh
 ```
 
