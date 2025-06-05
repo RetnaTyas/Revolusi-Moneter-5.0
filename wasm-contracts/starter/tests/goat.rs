@@ -124,6 +124,13 @@ fn burn_and_mint_emits_burn() {
         &[]
     ).unwrap();
 
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        nft_addr.clone(),
+        &nft_msg::ExecuteMsg::SetAllowedContract { contract: goat_addr.to_string() },
+        &[]
+    ).unwrap();
+
     let resp = app.execute_contract(
         Addr::unchecked("owner"),
         nft_addr.clone(),

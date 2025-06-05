@@ -10,6 +10,7 @@ pub struct InstantiateMsg {}
 pub enum ExecuteMsg {
     Mint { to: String, value: Uint128 },
     Burn { token_id: String },
+    SetAllowedContract { contract: String },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
