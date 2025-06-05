@@ -1,0 +1,7 @@
+{
+  "rpc": "https://rpc.testnet.cosmos.network",
+  "chain_id": "testing-1",
+  "mnemonic_path": ".keys/deployer.txt",
+  "prefix": "cosmos",
+  "gas_price": "0.025uatom"
+}
