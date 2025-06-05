@@ -42,11 +42,13 @@ modifier onlyOwner() {
 /// @notice Sets the MEAT contract address
 /// @param meatAddress Address of the MEAT contract
 function setMEATAddress(address meatAddress) external onlyOwner {
+    require(meatAddress != address(0), "Invalid address");
     meatContract = meatAddress;
 }
 /// @notice Sets the Goat NFT contract address
 /// @param nftAddress Address of the GoatNFT contract
 function setNFTAddress(address nftAddress) external onlyOwner {
+    require(nftAddress != address(0), "Invalid address");
     nftContract = nftAddress;
 }
 /// @notice Allows the MEAT contract to mint GOAT tokens to any address
