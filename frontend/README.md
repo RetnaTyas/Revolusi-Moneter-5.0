@@ -1,42 +1,36 @@
-# GOAT/MEAT Frontend
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This directory contains the web interface used to interact with the GOAT and MEAT token contracts. The UI guides users through the typical lifecycle:
+## Getting Started
 
-1. **Mint MEAT** by sending native currency to the MEAT contract.
-2. **Swap MEAT ↔ GOAT** once `swapEnabled` is active.
-3. **Stake GOAT** to begin earning rewards.
-4. **Claim or Compound** rewards after the minimum interval.
-5. **Unstake** to withdraw principal plus accrued GOAT.
-
-## Development
-
-Install dependencies and start a local dev server:
+First, run the development server:
 
 ```bash
-npm install
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## Build
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Create a production build with:
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```bash
-npm run build
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-For full contract information and backend instructions see the [root README](../README.md).
-=======
-# Frontend
+## Learn More
 
-This folder holds the Next.js interface for interacting with the GOAT and MEAT contracts.
+To learn more about Next.js, take a look at the following resources:
 
-## Local Setup
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-1. Copy `.env.example` to `.env.local`:
-   ```bash
-   cp .env.example .env.local
-   ```
-2. Edit `.env.local` and set `NEXT_PUBLIC_GOAT_ADDRESS` and `NEXT_PUBLIC_MEAT_ADDRESS` to the deployed contract addresses.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-Run the development server with `npm run dev` after installing dependencies.
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
