@@ -252,6 +252,7 @@ Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
 - [Contract Map](contract-map.md)
 - [Integration Bridge](integration-bridge.md)
 - [CosmWasm Deployment](docs/wasm-deploy.md)
+- [Frontend Pages](docs/frontend-pages.md)
 
 ---
 
