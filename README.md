@@ -104,6 +104,17 @@ Create a `.env` file defining `RPC_URL`, `GOAT_ADDRESS` and `MEAT_ADDRESS` so th
 - `GET /stats` – cached stats like total supply and total staked.
 
 The frontend queries these endpoints instead of hitting the blockchain directly.
+
+## Frontend Setup
+
+A simple Next.js interface lives in `frontend/`. Before starting the dev server,
+copy `.env.example` to `.env.local` and fill in the deployed contract addresses:
+
+```bash
+cp frontend/.env.example frontend/.env.local
+# edit `.env.local` and set NEXT_PUBLIC_GOAT_ADDRESS and NEXT_PUBLIC_MEAT_ADDRESS
+```
+
 ## 🧱 Struktur Kontrak
 
 Struktur dan hubungan antar kontrak:
