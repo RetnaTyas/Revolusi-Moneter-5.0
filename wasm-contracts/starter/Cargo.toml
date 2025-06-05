@@ -19,3 +19,4 @@ serde_json = "1.0"
 
 [dev-dependencies]
 cw-multi-test = "0.16"
+goatnft = { path = "../goatnft" }
