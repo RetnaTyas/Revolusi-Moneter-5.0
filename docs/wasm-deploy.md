@@ -8,6 +8,14 @@ This project includes CosmWasm implementations for all core contracts under `was
 
 ## Building
 
+Install the WASM target if you have not already:
+
+```bash
+rustup target add wasm32-unknown-unknown
+```
+
+Then run the build script:
+
 ```bash
 ./wasm-contracts/build.sh
 ```
