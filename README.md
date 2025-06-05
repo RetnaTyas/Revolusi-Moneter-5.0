@@ -153,6 +153,8 @@ Simulasi tahapan staking hingga unstake:
 3. Ketika keluar, panggil `unstake` sehingga pokok dan reward terkirim dan data
    staking dihapus.
 
+4. Dalam keadaan darurat, `emergencyUnstake` dapat digunakan kapan saja untuk menarik pokok tanpa reward.
+
 Reward dihitung berbasis waktu (detik) sehingga tidak bergantung pada jumlah
 blok. Perubahan state utama terjadi pada `stakingBalance`, `lastStakedTime`, dan
 saldo token pengguna.
