@@ -4,7 +4,7 @@ use cw_multi_test::{App, ContractWrapper, Executor};
 use starter::{execute as goat_execute, instantiate as goat_instantiate, query as goat_query};
 use goatnft::{execute, instantiate, query};
 use starter::msg as goat_msg;
-use goatnft::msg::{InstantiateMsg as NftInstantiate, ExecuteMsg as NftExecute, QueryMsg as NftQuery, GoatValueResponse};
+use goatnft::msg::{InstantiateMsg as NftInstantiate, ExecuteMsg as NftExecute, QueryMsg as NftQuery};
 
 fn contract_goat() -> Box<dyn cw_multi_test::Contract<Empty>> {
     Box::new(ContractWrapper::new(goat_execute, goat_instantiate, goat_query))

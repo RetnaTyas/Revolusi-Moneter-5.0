@@ -1,5 +1,5 @@
 use cosmwasm_std::{entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128};
-use base64;
+use base64::{engine::general_purpose, Engine as _};
 use serde_json_wasm;
 use cw2::set_contract_version;
 
@@ -42,14 +42,14 @@ fn execute_mint(mut deps: DepsMut, info: MessageInfo, to: String, value: Uint128
     only_owner(deps.branch(), &info)?;
     if value.is_zero() { return Err(StdError::generic_err("Value must be > 0")); }
     let to_addr = deps.api.addr_validate(&to)?;
-    let mut id = NEXT_ID.load(deps.storage)? + 1;
+    let id = NEXT_ID.load(deps.storage)? + 1;
     NEXT_ID.save(deps.storage, &id)?;
     OWNER_OF.save(deps.storage, id, &to_addr)?;
     GOAT_VALUE.save(deps.storage, id, &value)?;
     Ok(Response::new().add_attribute("token_id", id.to_string()))
 }
 
-fn execute_burn(mut deps: DepsMut, info: MessageInfo, token_id: String) -> StdResult<Response> {
+fn execute_burn(deps: DepsMut, info: MessageInfo, token_id: String) -> StdResult<Response> {
     let id: u64 = token_id.parse().map_err(|_| StdError::generic_err("invalid id"))?;
     let owner = OWNER_OF.load(deps.storage, id)?;
     if owner != info.sender {
@@ -83,7 +83,7 @@ pub fn query(deps: Deps, _env: Env, msg: Binary) -> StdResult<Binary> {
         return handle_query(deps, q);
     }
     if let Ok(s) = std::str::from_utf8(&msg) {
-        if let Ok(decoded) = base64::decode(s) {
+        if let Ok(decoded) = general_purpose::STANDARD.decode(s) {
             if let Ok(q) = serde_json_wasm::from_slice::<QueryMsg>(&decoded) {
                 return handle_query(deps, q);
             }
