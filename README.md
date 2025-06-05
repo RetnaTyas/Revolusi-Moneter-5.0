@@ -152,8 +152,9 @@ Struktur dan hubungan antar kontrak:
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
   untuk mint, memungkinkan penukaran MEAT ↔ GOAT, dan mengontrol fitur swap.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
-  Fungsi `mint` menerima metadata seperti `nfcId`, `breed`, `birthYear`, dan
-  `weight` lalu mencatat waktu pencetakan pada `goatMetadata`. Data dihapus saat
+  Metadata tiap token dikemas dalam struct `GoatData` dan disimpan pada mapping
+  `goatMetadata`. Fungsi `mint` menerima `nfcId`, `breed`, `birthYear`, dan
+  `weight`; data dapat dibaca ulang melalui `getGoatData` dan dihapus saat
   `burn`.
 - `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo`
   untuk dipanggil MEAT saat membutuhkan GOAT baru.
