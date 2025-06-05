@@ -114,6 +114,7 @@ contract MEAT is ERC20 {
     }
 
     function setGOATAddress(address goatAddress) external onlyOwner {
+        require(goatAddress != address(0), "Invalid address");
         GOAT = IGOAT(goatAddress);
     }
 
