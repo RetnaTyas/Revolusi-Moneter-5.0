@@ -86,7 +86,14 @@ describe("Full flow integration", function () {
       goat.setRewardConfig(1000000000, 365 * 24 * 60 * 60, 24 * 60 * 60)
     )
       .to.emit(goat, "RewardConfigChanged")
-      .withArgs(500000000, 1000000000, 365 * 24 * 60 * 60, 365 * 24 * 60 * 60, 604800, 86400);
+      .withArgs(
+        5000000000000000000n,
+        1000000000,
+        365 * 24 * 60 * 60,
+        365 * 24 * 60 * 60,
+        604800,
+        86400
+      );
 
     await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]);
     await ethers.provider.send("evm_mine", []);
