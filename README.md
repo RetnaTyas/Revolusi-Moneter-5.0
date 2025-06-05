@@ -180,6 +180,20 @@ Cakupan unit test meliputi:
 - Pengujian interval klaim (`claim.test.js`).
 - Simulasi kegagalan transfer pada swap (`meat.test.js`).
 
+Untuk kontrak CosmWasm, jalankan skrip build berikut terlebih dahulu:
+
+```bash
+./wasm-contracts/build.sh
+```
+
+Skrip ini menyalin artefak `starter.wasm` ke folder `artifacts` dan menghasilkan schema.
+
+Unit test Rust di direktori `wasm-contracts/starter` dapat dieksekusi dengan:
+
+```bash
+cargo test
+```
+
 Assertion penting mengecek perubahan saldo, event tidak ter-revert, dan update
 waktu klaim. Belum tersedia tes batas untuk jumlah ekstrem atau konsumsi gas.
 
