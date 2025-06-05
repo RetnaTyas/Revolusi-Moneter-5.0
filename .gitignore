@@ -1,3 +1,6 @@
 node_modules/
 artifacts/
 cache/
+
+wasm-contracts/starter/target/
+wasm-contracts/starter/schema/
