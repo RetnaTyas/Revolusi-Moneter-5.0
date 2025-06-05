@@ -59,12 +59,14 @@ function mintTo(address to, uint256 amount) external {
     _mint(to, amount);
 }
 /// @notice Burn a Goat NFT to receive GOAT tokens
+/// @dev The GoatNFT contract must be trusted; a malicious contract could reenter
+///      or change the token's value during burn.
 /// @param tokenId ID of the NFT to burn
 function burnAndMint(uint256 tokenId) external {
     require(nftContract != address(0), "NFT not set");
     IGoatNFT nft = IGoatNFT(nftContract);
     require(nft.ownerOf(tokenId) == msg.sender, "Not token owner");
-    uint256 amount = nft.goatValue(tokenId);
+    uint256 amount = nft.goatValue(tokenId); // store before burn (Checks-Effects-Interactions)
     nft.burn(tokenId);
     _mint(msg.sender, amount);
 }
