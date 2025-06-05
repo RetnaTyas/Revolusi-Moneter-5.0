@@ -1,7 +1,18 @@
 use cosmwasm_std::{entry_point, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg};
 use cw2::set_contract_version;
 use cw721::Cw721ExecuteMsg;
-use crate::msg::{InstantiateMsg, ExecuteMsg, QueryMsg, BalanceResponse, AllowanceResponse, TokenInfoResponse, StakingInfoResponse, PendingRewardResponse, NextClaimResponse};
+use crate::msg::{
+    InstantiateMsg,
+    ExecuteMsg,
+    QueryMsg,
+    BalanceResponse,
+    AllowanceResponse,
+    TokenInfoResponse,
+    StakingInfoResponse,
+    PendingRewardResponse,
+    NextClaimResponse,
+    GoatValueResponse,
+};
 use crate::state::*;
 
 pub mod msg;
@@ -111,11 +122,11 @@ fn execute_mint_to(mut deps: DepsMut, info: MessageInfo, to: String, amount: Uin
 
 fn execute_burn_and_mint(mut deps: DepsMut, info: MessageInfo, token_id: u64) -> StdResult<Response> {
     let nft = NFT_CONTRACT.load(deps.storage)?.ok_or_else(|| StdError::generic_err("NFT not set"))?;
-    let query = to_binary(&serde_json::json!({"goat_value":{"token_id":token_id}}))?;
-    let resp: PendingRewardResponse = deps.querier.query_wasm_smart(nft.clone(), &query)?;
+    let query = to_binary(&serde_json::json!({"goat_value": {"token_id": token_id}}))?;
+    let resp: GoatValueResponse = deps.querier.query_wasm_smart(nft.clone(), &query)?;
     let burn = WasmMsg::Execute { contract_addr: nft.to_string(), msg: to_binary(&Cw721ExecuteMsg::Burn { token_id: token_id.to_string() })?, funds: vec![] };
-    add_balance(deps.storage, &info.sender, resp.reward)?;
-    let supply = TOTAL_SUPPLY.load(deps.storage)? + resp.reward;
+    add_balance(deps.storage, &info.sender, resp.value)?;
+    let supply = TOTAL_SUPPLY.load(deps.storage)? + resp.value;
     TOTAL_SUPPLY.save(deps.storage, &supply)?;
     Ok(Response::new().add_message(burn))
 }
