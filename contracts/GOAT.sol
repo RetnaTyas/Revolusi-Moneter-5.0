@@ -23,7 +23,7 @@ event RewardClaimed(address indexed user, uint256 reward);
 event Compounded(address indexed user, uint256 reward);
 mapping(address => uint256) public stakingBalance;
 mapping(address => uint256) public lastStakedTime;
-uint256 public rewardRate = 500_000_000; // 500% per year, scaled to 1e18
+uint256 public rewardRate = 5e18; // 500% per year, scaled to 1e18
 uint256 public rewardInterval = 365 days;
 uint256 public minClaimInterval = 7 days;
 uint256 private constant REWARD_PRECISION = 1e18;
