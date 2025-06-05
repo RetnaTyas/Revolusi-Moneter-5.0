@@ -1,6 +1,10 @@
 # Deploying the CosmWasm Contract
 
-This project includes a basic CosmWasm implementation of the GOAT logic under `wasm-contracts/starter`.
+This project includes CosmWasm implementations for all core contracts under `wasm-contracts/`:
+
+- `starter` – GOAT token with staking logic
+- `meat` – MEAT token supporting swaps and native minting
+- `goatnft` – simple NFT contract whose tokens hold a GOAT value
 
 ## Building
 
@@ -8,24 +12,28 @@ This project includes a basic CosmWasm implementation of the GOAT logic under `w
 ./wasm-contracts/build.sh
 ```
 
-The script compiles the contract and places the resulting `.wasm` file under `artifacts/` and exports the JSON schema under `wasm-contracts/starter/schema`.
+The script compiles all packages and places their `.wasm` files under `artifacts/`. JSON schemas are exported under each package's `schema` folder.
 
 ## Upload & Instantiate
 
 1. Upload the wasm bytecode:
-   ```bash
-   wasmd tx wasm store artifacts/starter.wasm --from wallet \
-     --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
-     --chain-id testing-1 --node https://rpc.testnet.cosmos.network
-   ```
-   Save the resulting `code_id`.
-2. Instantiate the contract:
-   ```bash
-   wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
-     --from wallet --label "goat" \
-     --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
-     --chain-id testing-1 --node https://rpc.testnet.cosmos.network
-   ```
+```bash
+# example upload of the GOAT contract
+wasmd tx wasm store artifacts/starter.wasm --from wallet \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+```
+Save the resulting `code_id`.
+2. Instantiate the contract (example for GOAT):
+```bash
+wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
+  --from wallet --label "goat" \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+```
+
+Instantiate `meat` and `goatnft` with similar commands by providing the desired
+`goat_contract` or no parameters for the NFT.
 
 ## Query Examples
 

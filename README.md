@@ -186,9 +186,9 @@ Untuk kontrak CosmWasm, jalankan skrip build berikut terlebih dahulu:
 ./wasm-contracts/build.sh
 ```
 
-Skrip ini menyalin artefak `starter.wasm` ke folder `artifacts` dan menghasilkan schema.
+Skrip ini akan membangun `starter`, `meat`, dan `goatnft`, menyalin semua file `.wasm` ke folder `artifacts` dan menulis schema di masing-masing paket.
 
-Unit test Rust di direktori `wasm-contracts/starter` dapat dieksekusi dengan:
+Unit test Rust di setiap paket dapat dijalankan dengan:
 
 ```bash
 cargo test
