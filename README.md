@@ -107,13 +107,10 @@ The frontend queries these endpoints instead of hitting the blockchain directly.
 
 ## Frontend Setup
 
-A simple Next.js interface lives in `frontend/`. Before starting the dev server,
-copy `.env.example` to `.env.local` and fill in the deployed contract addresses:
-
-```bash
-cp frontend/.env.example frontend/.env.local
-# edit `.env.local` and set NEXT_PUBLIC_GOAT_ADDRESS and NEXT_PUBLIC_MEAT_ADDRESS
-```
+The `frontend/` directory currently contains only configuration files and
+documentation. The actual Next.js application has been moved to a separate
+repository. Clone that repo and follow its README for instructions on running
+the UI.
 
 ## 🧱 Struktur Kontrak
 
