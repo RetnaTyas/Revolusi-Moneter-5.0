@@ -2,18 +2,26 @@
 
 This folder contains a small Express server that exposes cached stats for the GOAT and MEAT token contracts. The server reads on-chain data through an RPC provider and exposes JSON endpoints used by the frontend.
 
-## Environment Variables
+## Setup
 
-Copy `.env.example` to `.env` and fill the following values:
-
-- `RPC_URL` – RPC endpoint to access the blockchain
-- `GOAT_ADDRESS` – deployed GOAT contract address
-- `MEAT_ADDRESS` – deployed MEAT contract address
-- `PORT` – port the server should listen on
+1. Install dependencies at the repository root:
+   ```bash
+   npm install
+   ```
+2. Compile the contracts to generate ABI files used by the server:
+   ```bash
+   npx hardhat compile
+   ```
+   Copy updated ABI JSONs from `artifacts/contracts/` into `backend/abi/` when you modify the contracts.
+3. Copy the environment template and set the required variables:
+   ```bash
+   cp .env.example .env
+   ```
+   Configure `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` and `PORT` in `backend/.env`.
 
 ## Running
 
-Install dependencies at the repository root and start the server with:
+Start the server with:
 
 ```bash
 npm run start:server
