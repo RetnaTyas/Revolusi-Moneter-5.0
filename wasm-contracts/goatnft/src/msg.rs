@@ -18,6 +18,8 @@ pub enum ExecuteMsg {
     },
     Burn { token_id: String },
     Approve { spender: String, token_id: String },
+    Transfer { to: String, token_id: String },
+    TransferFrom { owner: String, to: String, token_id: String },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
