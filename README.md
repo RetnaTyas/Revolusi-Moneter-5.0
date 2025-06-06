@@ -112,6 +112,12 @@ Perubahan alamat penting pada kontrak GOAT dapat dipantau melalui dua event:
   alamat kontrak MEAT.
 - `NftAddressUpdated(oldAddress, newAddress)` dicatat saat alamat GoatNFT diubah.
 
+MEAT juga memunculkan event utama berikut:
+
+- `MintedWithNative(user, nativeReceived, meatMinted)` terjadi ketika kontrak
+  menerima native token melalui fungsi `receive()` dan mencetak MEAT kepada
+  pengirim.
+
 ## Running Tests
 
 Hardhat tests for both contracts live in the `test/` directory. Run them with:

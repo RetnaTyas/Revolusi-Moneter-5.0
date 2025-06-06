@@ -175,7 +175,7 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "bnbReceived",
+          "name": "nativeReceived",
           "type": "uint256"
         },
         {
