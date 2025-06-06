@@ -2,12 +2,16 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("GoatNFT owner restrictions", function () {
-  let owner, nonOwner, nft;
+  let owner, nonOwner, nft, goat;
 
   beforeEach(async function () {
     [owner, nonOwner] = await ethers.getSigners();
+    const GOAT = await ethers.getContractFactory("GOAT");
+    goat = await GOAT.deploy(owner.address);
+    await goat.waitForDeployment();
+
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
-    nft = await GoatNFT.deploy();
+    nft = await GoatNFT.deploy(goat.target);
     await nft.waitForDeployment();
   });
 

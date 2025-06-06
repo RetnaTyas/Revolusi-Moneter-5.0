@@ -29,7 +29,7 @@ This document summarises the main pages expected in the full UI and how they map
 
 ## `/burn`
 *Overview*: burn a `GoatNFT` to redeem its value in GOAT tokens.
-- **User Inputs**: NFT `tokenId` to burn (requires prior `approve` to the GOAT contract).
-- **Contract Calls**: `burnAndMint(tokenId)` on `GOAT.sol` which calls `burn` on `GoatNFT` and mints equivalent GOAT.
+- **User Inputs**: NFT `tokenId` to burn.
+- **Contract Calls**: `burn(tokenId)` on `GoatNFT` which internally mints equivalent GOAT.
 
 These pages align with the flows tested under `test/` such as `stakingSwap.test.js` and `nftBurnMint.test.js`, ensuring UI actions correspond to on-chain behaviour.

@@ -15,7 +15,7 @@ describe("Setter address validation", function () {
     await meat.waitForDeployment();
 
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
-    nft = await GoatNFT.deploy();
+    nft = await GoatNFT.deploy(goat.target);
     await nft.waitForDeployment();
   });
 
