@@ -16,6 +16,18 @@ Berikut gambaran umum alur penggunaan kedua token:
 4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
 5. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
 
+## Burn & Redeem Flow
+
+Diagram sederhana berikut menjelaskan jalur dari kambing hidup hingga daging siap tebus:
+
+```text
+GoatNFT burn --(weight / 85)--> GOAT --(SwapRate)--> MEAT --redeemForMeat--> Real Meat
+```
+
+- Membakar `GoatNFT` otomatis mencetak GOAT sejumlah `weight / 85`.
+- GOAT dapat ditukar dengan MEAT atau sebaliknya menggunakan `SwapRate` yang sama persis dengan fungsi swap pada kontrak.
+- Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
+
 ## Deployment
 
 1. Install [Hardhat](https://hardhat.org/) and initialise a project:
