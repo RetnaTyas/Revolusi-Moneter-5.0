@@ -47,10 +47,10 @@ wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
 Instantiate `meat` and `goatnft` with similar commands by providing the desired
 `goat_contract` or no parameters for the NFT.
 
-After deploying `goatnft`, authorize the GOAT contract to burn NFTs:
+After deploying `goatnft`, each NFT owner must approve the GOAT contract before it can burn tokens. Example approval:
 
 ```bash
-wasmd tx wasm execute <nft_address> '{"set_allowed_contract":{"contract":"<goat_addr>"}}' \
+wasmd tx wasm execute <nft_address> '{"approve":{"spender":"<goat_addr>","token_id":"1"}}' \
   --from wallet --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```

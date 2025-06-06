@@ -58,15 +58,6 @@ fn burn_nft_for_goat() {
         &[],
     )
     .unwrap();
-    app.execute_contract(
-        Addr::unchecked("owner"),
-        nft_addr.clone(),
-        &NftExecute::SetAllowedContract {
-            contract: goat_addr.to_string(),
-        },
-        &[],
-    )
-    .unwrap();
 
     let resp = app
         .execute_contract(
@@ -75,6 +66,10 @@ fn burn_nft_for_goat() {
             &NftExecute::Mint {
                 to: "user".into(),
                 value: Uint128::new(50),
+                nfc_id: "nfc".into(),
+                breed: "breed".into(),
+                birth_year: 2024,
+                weight: 10,
             },
             &[],
         )
@@ -91,6 +86,17 @@ fn burn_nft_for_goat() {
         .value
         .parse()
         .unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("user"),
+        nft_addr.clone(),
+        &NftExecute::Approve {
+            spender: goat_addr.to_string(),
+            token_id: token_id.to_string(),
+        },
+        &[],
+    )
+    .unwrap();
 
     app.execute_contract(
         Addr::unchecked("user"),
@@ -145,15 +151,6 @@ fn burn_nft_unauthorized() {
         )
         .unwrap();
 
-    app.execute_contract(
-        Addr::unchecked("owner"),
-        nft_addr.clone(),
-        &NftExecute::SetAllowedContract {
-            contract: goat_addr.to_string(),
-        },
-        &[],
-    )
-    .unwrap();
 
     let resp = app
         .execute_contract(
@@ -162,6 +159,10 @@ fn burn_nft_unauthorized() {
             &NftExecute::Mint {
                 to: "user".into(),
                 value: Uint128::new(50),
+                nfc_id: "nfc".into(),
+                breed: "breed".into(),
+                birth_year: 2024,
+                weight: 10,
             },
             &[],
         )
@@ -191,5 +192,5 @@ fn burn_nft_unauthorized() {
         .unwrap_err();
     assert!(!err.to_string().is_empty());
 
-    // ensure burn was rejected and state left unchanged
+    // ensure burn was rejected
 }
