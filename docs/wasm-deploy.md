@@ -70,6 +70,14 @@ wasmd tx wasm execute <nft_address> '{"approve":{"spender":"<goat_addr>","token_
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
 
+Once approved, redeem the NFT's value by calling `burn_and_mint` on the GOAT contract:
+
+```bash
+wasmd tx wasm execute <goat_address> '{"burn_and_mint":{"token_id":1}}' \
+  --from wallet --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+```
+
 ## Query Examples
 
 ```bash
