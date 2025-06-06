@@ -3,6 +3,7 @@ pragma solidity ^0.8.29;
 
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {IGoatToken} from "./interfaces/IGoatToken.sol";
 
 /// @title GoatNFT - tokenized goat identification
 /// @notice Each NFT holds a value redeemable for GOAT tokens
@@ -23,17 +24,23 @@ contract GoatNFT is ERC721Burnable {
     mapping(uint256 => uint256) public lastWeightUpdateAt;
 
     address private immutable _owner;
+    IGoatToken public goatTokenContract;
 
     /// @notice Weight update validity window in seconds (7 days)
     uint256 public constant WEIGHT_UPDATE_VALIDITY = 7 days;
 
-    constructor() ERC721("Goat Identifier", "GOATNFT") {
+    constructor(address goatTokenAddress) ERC721("Goat Identifier", "GOATNFT") {
         _owner = msg.sender;
+        goatTokenContract = IGoatToken(goatTokenAddress);
     }
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
         _;
+    }
+
+    function setGoatTokenContract(address goatTokenAddress) external onlyOwner {
+        goatTokenContract = IGoatToken(goatTokenAddress);
     }
 
     function mint(
@@ -78,6 +85,10 @@ contract GoatNFT is ERC721Burnable {
         require(currentWeight > 0, "Invalid weight");
 
         uint256 goatAmount = (currentWeight * 1e18) / 85;
+
+        // Mint GOAT tokens directly to the token owner
+        goatTokenContract.mint(tokenOwner, goatAmount);
+
         emit GoatBurned(tokenId, tokenOwner, currentWeight, goatAmount);
 
         super.burn(tokenId);
@@ -94,6 +105,6 @@ contract GoatNFT is ERC721Burnable {
         return _owner;
     }
 
-    /// @notice Emitted when NFT is burned and GOAT token should be minted externally
+    /// @notice Emitted when NFT is burned and GOAT token minted automatically
     event GoatBurned(uint256 indexed tokenId, address indexed user, uint256 weight, uint256 goatAmount);
 }

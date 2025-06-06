@@ -12,7 +12,7 @@ describe("GoatNFT burn and GOAT mint", function () {
     await goat.waitForDeployment();
 
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
-    nft = await GoatNFT.deploy();
+    nft = await GoatNFT.deploy(goat.target);
     await nft.waitForDeployment();
 
     await goat.setNFTAddress(nft.target);
@@ -42,14 +42,12 @@ describe("GoatNFT burn and GOAT mint", function () {
     const stored = await nft.getGoatData(tokenId);
     expect(stored.weight).to.equal(newWeight);
 
-    await nft.connect(user).approve(goat.target, tokenId);
-
     const goatAmount = (newWeight * 10n ** 18n) / 85n;
-    await expect(goat.connect(user).burnAndMint(tokenId))
+    await expect(nft.connect(user).burn(tokenId))
       .to.emit(nft, "GoatBurned")
       .withArgs(tokenId, user.address, newWeight, goatAmount);
 
-    expect(await goat.balanceOf(user.address)).to.equal(newWeight);
+    expect(await goat.balanceOf(user.address)).to.equal(goatAmount);
     await expect(nft.ownerOf(tokenId)).to.be.reverted;
   });
 
@@ -63,8 +61,7 @@ describe("GoatNFT burn and GOAT mint", function () {
     await ethers.provider.send("evm_increaseTime", [8 * 24 * 60 * 60]);
     await ethers.provider.send("evm_mine", []);
 
-    await nft.connect(user).approve(goat.target, tokenId);
-    await expect(goat.connect(user).burnAndMint(tokenId)).to.be.revertedWith(
+    await expect(nft.connect(user).burn(tokenId)).to.be.revertedWith(
       "Weight update too old"
     );
   });

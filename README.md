@@ -210,28 +210,18 @@ Struktur dan hubungan antar kontrak:
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
   Pemilik dapat memperbarui berat melalui `updateWeight`; berat terakhir harus
-  masih valid (<=7 hari) saat dibakar. Fungsi `burn` memverifikasi syarat ini dan
-  memancarkan event `GoatBurned` berisi berat terkini dan jumlah GOAT yang harus
-  dicetak eksternal. Data dapat dibaca ulang melalui `getGoatData` dan dihapus
-  setelah `burn`.
+  masih valid (<=7 hari) saat dibakar. Fungsi `burn` kini memanggil kontrak GOAT untuk mencetak token otomatis dan memancarkan event `GoatBurned` berisi jumlah GOAT yang dicetak. Data dapat dibaca ulang melalui `getGoatData` dan dihapus setelah `burn`.
 - `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo`
-  untuk dipanggil MEAT saat membutuhkan GOAT baru.
+  untuk dipanggil MEAT saat membutuhkan GOAT baru. `IGoatToken` dipakai GoatNFT agar kontrak GOAT dapat mencetak token saat NFT dibakar.
 - `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test
   guna mensimulasikan kegagalan `transfer`.
-- `burnAndMint` pada GOAT memungkinkan pemilik `GoatNFT` menukar NFT mereka
-  menjadi token GOAT setara nilai `goatValue`. Sebelum memanggil fungsi ini
-  pemilik harus `approve` token tersebut ke kontrak GOAT. Fungsi kemudian
-  memanggil `burn` di `GoatNFT` dan mencetak jumlah GOAT yang sama ke alamat
-  pemilik.
 - `emergencyUnstake` memungkinkan penarikan token yang di-stake tanpa reward kapan saja.
 
 ### Contoh Penggunaan
 
 ```solidity
 // asumsikan "nft" dan "goat" sudah terdeploy
-nft.approve(goatAddress, tokenId);
-goat.burnAndMint(tokenId);
-```
+nft.burn(tokenId);
 
 Alur panggilan eksternal–internal secara ringkas:
 1. `swapMEATForGOAT` memanggil `transferFrom` MEAT dan `mintTo` GOAT jika saldo
