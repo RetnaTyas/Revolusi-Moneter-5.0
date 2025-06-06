@@ -8,6 +8,9 @@ This project includes CosmWasm implementations for all core contracts under `was
 
 ## Building
 
+For toolchain setup and additional details see
+[../wasm-contracts/README.md](../wasm-contracts/README.md).
+
 Install the WASM target if you have not already:
 
 ```bash
