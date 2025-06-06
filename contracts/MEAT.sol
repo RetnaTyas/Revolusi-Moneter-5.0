@@ -23,6 +23,7 @@ contract MEAT is ERC20 {
     event SwappedMEATForGOAT(address indexed user, uint256 meatIn, uint256 goatOut);
     event InitialSupplyMinted(address indexed to, uint256 amount);
     event MeatRedeemed(address indexed user, uint256 amount);
+    event GoatAddressUpdated(address indexed oldAddress, address indexed newAddress);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -123,7 +124,9 @@ contract MEAT is ERC20 {
 
     function setGOATAddress(address goatAddress) external onlyOwner {
         require(goatAddress != address(0), "Invalid address");
+        address old = address(GOAT);
         GOAT = IGOAT(goatAddress);
+        emit GoatAddressUpdated(old, goatAddress);
     }
 
     function owner() external view returns (address) {

@@ -66,4 +66,14 @@ describe("Setter address validation", function () {
       .to.emit(goat, "NftAddressUpdated")
       .withArgs(ethers.ZeroAddress, nft.target);
   });
+
+  it("emits GoatAddressUpdated when GOAT address changes", async function () {
+    const GOAT = await ethers.getContractFactory("GOAT");
+    const newGoat = await GOAT.deploy(owner.address);
+    await newGoat.waitForDeployment();
+
+    await expect(meat.setGOATAddress(newGoat.target))
+      .to.emit(meat, "GoatAddressUpdated")
+      .withArgs(goat.target, newGoat.target);
+  });
 });
