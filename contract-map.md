@@ -12,6 +12,7 @@
 
 * **MEAT** acts as the gateway: it accepts native coins, mints MEAT, and handles swaps in both directions. The owner may withdraw accumulated native balance.
 * **GOAT** receives minted supply from MEAT and provides staking functionality. Rewards and configuration parameters are adjustable by the owner.
+  - `emergencyUnstake` allows stakers to withdraw tokens without rewards at any time.
 * **FailingGOAT** is only for testing; it implements the same interface but allows simulated transfer failures.
 * **IGOAT** defines the `mintTo` function which enables MEAT to mint GOAT when necessary.
 
