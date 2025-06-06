@@ -47,6 +47,21 @@ wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
 Instantiate `meat` and `goatnft` with similar commands by providing the desired
 `goat_contract` or no parameters for the NFT.
 
+### Minting MEAT
+
+Call the `mint_with_native` entry point while sending native coins to mint MEAT.
+For example:
+
+```bash
+wasmd tx wasm execute <meat_address> '{"mint_with_native":{}}' \
+  --amount 1000000uatom --from wallet \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+```
+
+Sending coins without this message will **not** mint tokens; the coins simply
+remain in the contract until withdrawn by the owner.
+
 After deploying `goatnft`, each NFT owner must approve the GOAT contract before it can burn tokens. Example approval:
 
 ```bash
