@@ -199,8 +199,10 @@ Struktur dan hubungan antar kontrak:
 - `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test
   guna mensimulasikan kegagalan `transfer`.
 - `burnAndMint` pada GOAT memungkinkan pemilik `GoatNFT` menukar NFT mereka
-  menjadi token GOAT setara nilai `goatValue`. Fungsi ini memanggil `burn`
-  di `GoatNFT` lalu mencetak jumlah GOAT yang sama ke alamat pemilik.
+  menjadi token GOAT setara nilai `goatValue`. Sebelum memanggil fungsi ini
+  pemilik harus `approve` token tersebut ke kontrak GOAT. Fungsi kemudian
+  memanggil `burn` di `GoatNFT` dan mencetak jumlah GOAT yang sama ke alamat
+  pemilik.
 - `emergencyUnstake` memungkinkan penarikan token yang di-stake tanpa reward kapan saja.
 
 ### Contoh Penggunaan
