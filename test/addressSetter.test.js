@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("Setter address validation", function () {
-  let owner, nonOwner, goat, meat;
+  let owner, nonOwner, goat, meat, nft;
 
   beforeEach(async function () {
     [owner, nonOwner] = await ethers.getSigners();
@@ -13,6 +13,10 @@ describe("Setter address validation", function () {
     const MEAT = await ethers.getContractFactory("MEAT");
     meat = await MEAT.deploy(goat.target);
     await meat.waitForDeployment();
+
+    const GoatNFT = await ethers.getContractFactory("GoatNFT");
+    nft = await GoatNFT.deploy();
+    await nft.waitForDeployment();
   });
 
   it("reverts when setting MEAT address to zero", async function () {
@@ -49,5 +53,17 @@ describe("Setter address validation", function () {
     await expect(
       meat.connect(nonOwner).setGOATAddress(goat.target)
     ).to.be.revertedWith("Not the owner");
+  });
+
+  it("emits MeatAddressUpdated when MEAT address changes", async function () {
+    await expect(goat.setMEATAddress(meat.target))
+      .to.emit(goat, "MeatAddressUpdated")
+      .withArgs(owner.address, meat.target);
+  });
+
+  it("emits NftAddressUpdated when NFT address changes", async function () {
+    await expect(goat.setNFTAddress(nft.target))
+      .to.emit(goat, "NftAddressUpdated")
+      .withArgs(ethers.ZeroAddress, nft.target);
   });
 });

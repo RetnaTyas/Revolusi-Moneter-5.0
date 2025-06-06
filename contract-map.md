@@ -22,3 +22,6 @@ The MEAT contract relies on GOAT for minting new tokens when swapping MEAT for G
 | MEAT | ERC20 token minted with native deposits and swapped with GOAT. | `swapMEATForGOAT`, `swapGOATForMEAT`, `changeDepositRate`, `withdrawNative`, `setSwapEnabled`, `setGOATAddress` |
 | GoatNFT | ERC721 goat identifier redeemable for GOAT. Metadata stored on-chain in `goatMetadata` as `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). | `mint`, `burn`, `goatValue`, `goatMetadata`, `getGoatData` |
 | IGOAT | Interface for GOAT minting used by MEAT. | `mintTo` |
+
+GOAT emits `MeatAddressUpdated` and `NftAddressUpdated` whenever the owner updates
+the linked MEAT or GoatNFT contract addresses.
