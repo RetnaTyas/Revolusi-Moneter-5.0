@@ -21,6 +21,8 @@ event Staked(address indexed user, uint256 amount);
 event Unstaked(address indexed user, uint256 amount, uint256 reward);
 event RewardClaimed(address indexed user, uint256 reward);
 event Compounded(address indexed user, uint256 reward);
+event MeatAddressUpdated(address indexed oldAddress, address indexed newAddress);
+event NftAddressUpdated(address indexed oldAddress, address indexed newAddress);
 mapping(address => uint256) public stakingBalance;
 mapping(address => uint256) public lastStakedTime;
 uint256 public rewardRate = 5e18; // 500% per year, scaled to 1e18
@@ -43,13 +45,17 @@ modifier onlyOwner() {
 /// @param meatAddress Address of the MEAT contract
 function setMEATAddress(address meatAddress) external onlyOwner {
     require(meatAddress != address(0), "Invalid address");
+    address old = meatContract;
     meatContract = meatAddress;
+    emit MeatAddressUpdated(old, meatAddress);
 }
 /// @notice Sets the Goat NFT contract address
 /// @param nftAddress Address of the GoatNFT contract
 function setNFTAddress(address nftAddress) external onlyOwner {
     require(nftAddress != address(0), "Invalid address");
+    address old = nftContract;
     nftContract = nftAddress;
+    emit NftAddressUpdated(old, nftAddress);
 }
 /// @notice Allows the MEAT contract to mint GOAT tokens to any address
 /// @param to The recipient address

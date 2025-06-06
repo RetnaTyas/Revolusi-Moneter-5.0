@@ -104,6 +104,14 @@ This repository maintains both EVM and CosmWasm contract builds under the `artif
 - **minClaimInterval** – interval minimum pengguna dapat mengklaim atau
   meng-unstake dengan reward. Default-nya `7 days`.
 
+## Events
+
+Perubahan alamat penting pada kontrak GOAT dapat dipantau melalui dua event:
+
+- `MeatAddressUpdated(oldAddress, newAddress)` dicatat ketika pemilik mengganti
+  alamat kontrak MEAT.
+- `NftAddressUpdated(oldAddress, newAddress)` dicatat saat alamat GoatNFT diubah.
+
 ## Running Tests
 
 Hardhat tests for both contracts live in the `test/` directory. Run them with:
