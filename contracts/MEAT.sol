@@ -17,7 +17,7 @@ contract MEAT is ERC20 {
     bool public swapEnabled = true;
 
     event DepositRateChanged(uint256 oldRate, uint256 newRate);
-    event MintedWithNative(address indexed user, uint256 bnbReceived, uint256 meatMinted);
+    event MintedWithNative(address indexed user, uint256 nativeReceived, uint256 meatMinted);
     event NativeWithdrawn(address indexed to, uint256 amount);
     event SwappedGOATForMEAT(address indexed user, uint256 goatIn, uint256 meatOut);
     event SwappedMEATForGOAT(address indexed user, uint256 meatIn, uint256 goatOut);
