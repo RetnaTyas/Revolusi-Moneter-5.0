@@ -124,21 +124,32 @@ fn burn_and_mint_emits_burn() {
         &[]
     ).unwrap();
 
-    app.execute_contract(
-        Addr::unchecked("owner"),
-        nft_addr.clone(),
-        &nft_msg::ExecuteMsg::SetAllowedContract { contract: goat_addr.to_string() },
-        &[]
-    ).unwrap();
 
     let resp = app.execute_contract(
         Addr::unchecked("owner"),
         nft_addr.clone(),
-        &nft_msg::ExecuteMsg::Mint { to: "user".into(), value: Uint128::new(50) },
+        &nft_msg::ExecuteMsg::Mint {
+            to: "user".into(),
+            value: Uint128::new(50),
+            nfc_id: "nfc".into(),
+            breed: "breed".into(),
+            birth_year: 2024,
+            weight: 10,
+        },
         &[]
     ).unwrap();
     let token_id: u64 = resp.events.iter().find(|e| e.ty == "wasm").unwrap()
         .attributes.iter().find(|a| a.key == "token_id").unwrap().value.parse().unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("user"),
+        nft_addr.clone(),
+        &nft_msg::ExecuteMsg::Approve {
+            spender: goat_addr.to_string(),
+            token_id: token_id.to_string(),
+        },
+        &[]
+    ).unwrap();
 
     let res = app.execute_contract(
         Addr::unchecked("user"),

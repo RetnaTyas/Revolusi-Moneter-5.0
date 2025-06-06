@@ -6,7 +6,13 @@ use cosmwasm_std::{
 use cw2::set_contract_version;
 use serde_json_wasm;
 
-use crate::msg::{ExecuteMsg, GoatValueResponse, InstantiateMsg, QueryMsg};
+use crate::msg::{
+    ExecuteMsg,
+    GoatValueResponse,
+    GoatDataResponse,
+    InstantiateMsg,
+    QueryMsg,
+};
 use crate::state::*;
 
 pub mod msg;
@@ -24,7 +30,6 @@ pub fn instantiate(
 ) -> StdResult<Response> {
     OWNER.save(deps.storage, &info.sender)?;
     NEXT_ID.save(deps.storage, &0u64)?;
-    ALLOWED_CONTRACT.save(deps.storage, &None)?;
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::default())
 }
@@ -37,31 +42,36 @@ fn only_owner(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
     Ok(())
 }
 
-fn handle_execute(deps: DepsMut, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
+fn handle_execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
-        ExecuteMsg::Mint { to, value } => execute_mint(deps, info, to, value),
-        ExecuteMsg::Burn { token_id } => execute_burn(deps, info, token_id),
-        ExecuteMsg::SetAllowedContract { contract } => {
-            execute_set_allowed_contract(deps, info, contract)
+        ExecuteMsg::Mint { to, value, nfc_id, breed, birth_year, weight } => {
+            execute_mint(deps, env, info, to, value, nfc_id, breed, birth_year, weight)
         }
+        ExecuteMsg::Burn { token_id } => execute_burn(deps, info, token_id),
+        ExecuteMsg::Approve { spender, token_id } => execute_approve(deps, info, spender, token_id),
     }
 }
 
 #[entry_point]
 pub fn execute(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> StdResult<Response> {
-    handle_execute(deps, info, msg)
+    handle_execute(deps, env, info, msg)
 }
 
 fn execute_mint(
     mut deps: DepsMut,
+    env: Env,
     info: MessageInfo,
     to: String,
     value: Uint128,
+    nfc_id: String,
+    breed: String,
+    birth_year: u64,
+    weight: u64,
 ) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
     if value.is_zero() {
@@ -72,6 +82,14 @@ fn execute_mint(
     NEXT_ID.save(deps.storage, &id)?;
     OWNER_OF.save(deps.storage, id, &to_addr)?;
     GOAT_VALUE.save(deps.storage, id, &value)?;
+    let data = GoatData {
+        nfc_id,
+        breed,
+        birth_year,
+        weight,
+        minted_at: env.block.time.seconds(),
+    };
+    GOAT_METADATA.save(deps.storage, id, &data)?;
     Ok(Response::new().add_attribute("token_id", id.to_string()))
 }
 
@@ -81,24 +99,29 @@ fn execute_burn(deps: DepsMut, info: MessageInfo, token_id: String) -> StdResult
         .map_err(|_| StdError::generic_err("invalid id"))?;
     let owner = OWNER_OF.load(deps.storage, id)?;
     if owner != info.sender {
-        match ALLOWED_CONTRACT.load(deps.storage)? {
-            Some(addr) if addr == info.sender => {}
+        let approved = APPROVALS.may_load(deps.storage, id)?;
+        match approved {
+            Some(addr) if addr == info.sender => {},
             _ => return Err(StdError::generic_err("Unauthorized")),
         }
     }
     OWNER_OF.remove(deps.storage, id);
     GOAT_VALUE.remove(deps.storage, id);
+    GOAT_METADATA.remove(deps.storage, id);
+    APPROVALS.remove(deps.storage, id);
     Ok(Response::new())
 }
 
-fn execute_set_allowed_contract(
-    mut deps: DepsMut,
-    info: MessageInfo,
-    contract: String,
-) -> StdResult<Response> {
-    only_owner(deps.branch(), &info)?;
-    let addr = deps.api.addr_validate(&contract)?;
-    ALLOWED_CONTRACT.save(deps.storage, &Some(addr))?;
+fn execute_approve(deps: DepsMut, info: MessageInfo, spender: String, token_id: String) -> StdResult<Response> {
+    let id: u64 = token_id
+        .parse()
+        .map_err(|_| StdError::generic_err("invalid id"))?;
+    let owner = OWNER_OF.load(deps.storage, id)?;
+    if owner != info.sender {
+        return Err(StdError::generic_err("Unauthorized"));
+    }
+    let spender_addr = deps.api.addr_validate(&spender)?;
+    APPROVALS.save(deps.storage, id, &spender_addr)?;
     Ok(Response::new())
 }
 
@@ -107,6 +130,16 @@ fn handle_query(deps: Deps, q: QueryMsg) -> StdResult<Binary> {
         QueryMsg::GoatValue { token_id } => {
             let value = GOAT_VALUE.load(deps.storage, token_id)?;
             to_json_binary(&GoatValueResponse { value })
+        }
+        QueryMsg::GoatData { token_id } => {
+            let data = GOAT_METADATA.load(deps.storage, token_id)?;
+            to_json_binary(&GoatDataResponse {
+                nfc_id: data.nfc_id,
+                breed: data.breed,
+                birth_year: data.birth_year,
+                weight: data.weight,
+                minted_at: data.minted_at,
+            })
         }
         QueryMsg::Owner { token_id } => {
             let owner = OWNER_OF.load(deps.storage, token_id)?;
