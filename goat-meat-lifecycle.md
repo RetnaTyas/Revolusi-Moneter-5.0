@@ -20,4 +20,6 @@ The two tokens form a closed loop that allows value to enter the system via MEAT
 7. **Redeeming MEAT**
    * Holders burn their MEAT using `redeemForMeat(amount)` which emits `MeatRedeemed` for off-chain processing and delivery of physical meat.
 
+For a concise diagram of this burn and redemption path, see the section [Burn & Redeem Flow](README.md#burn--redeem-flow) in the README.
+
 This lifecycle ensures that every stage of participation is backed by explicit contract functions and transparent token flows.
