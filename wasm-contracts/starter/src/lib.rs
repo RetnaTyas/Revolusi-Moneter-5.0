@@ -29,7 +29,7 @@ pub fn instantiate(deps: DepsMut, _env: Env, info: MessageInfo, msg: Instantiate
     MEAT_CONTRACT.save(deps.storage, &meat_addr)?;
     NFT_CONTRACT.save(deps.storage, &None)?;
     TOTAL_SUPPLY.save(deps.storage, &Uint128::zero())?;
-    REWARD_RATE.save(deps.storage, &Uint128::new(500_000_000))?;
+    REWARD_RATE.save(deps.storage, &Uint128::new(5_000_000_000_000_000_000))?;
     REWARD_INTERVAL.save(deps.storage, &(365u64 * 24 * 60 * 60))?;
     MIN_CLAIM_INTERVAL.save(deps.storage, &(7u64 * 24 * 60 * 60))?;
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
