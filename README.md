@@ -97,6 +97,24 @@ npx hardhat compile
    ```
    The script outputs `.wasm` files to `artifacts/` and writes schema files under each package.
 
+## Perbandingan Perilaku CosmWasm
+
+Folder `wasm-contracts/` menyimpan versi CosmWasm dari setiap kontrak. Seluruh
+pesan mengikuti fungsi di Solidity namun ada beberapa perbedaan tak terelakkan:
+
+- **MEAT**: Pada `MEAT.sol` pengguna cukup mengirim native token dan fungsi
+  `receive()` otomatis mencetak token. CosmWasm tidak menyediakan mekanisme
+  auto‑mint saat menerima dana tanpa pesan sehingga pengguna **harus** memanggil
+  `mint_with_native` sambil menyertakan koin.
+- **GOAT**: Kontrak `starter` mereplikasi logika staking, klaim, kompaun dan
+  pembakaran NFT. Event Solidity diterjemahkan menjadi atribut di response
+  CosmWasm, sedangkan cara perhitungan reward sama persis.
+- **GoatNFT**: Struktur data serta fungsi `mint` dan `burn` identik. Perbedaan
+  hanya terletak pada penamaan pesan.
+
+Secara umum kedua implementasi mempertahankan rasio reward dan swap yang sama
+agar perilaku ekonomi konsisten di EVM maupun Cosmos.
+
 ## Parameter Penting
 
 - **SwapRate** – konstanta di kontrak MEAT yang menentukan rasio penukaran antar

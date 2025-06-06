@@ -6,6 +6,16 @@ This project includes CosmWasm implementations for all core contracts under `was
 - `meat` – MEAT token supporting swaps and native minting
 - `goatnft` – simple NFT contract whose tokens hold a GOAT value
 
+The packages mirror the Solidity contracts found under `contracts/`. Most
+functions have equivalent execute messages, but there are notable differences:
+
+- **MEAT** cannot auto‑mint when native tokens are sent without a message. Users
+  must call `mint_with_native` and include the funds.
+- **starter** implements GOAT staking and NFT redemption exactly like
+  `GOAT.sol`, though events become log attributes.
+- **goatnft** stores goat metadata and value the same way as `GoatNFT.sol` with
+  minor naming changes.
+
 ## Building
 
 For toolchain setup and additional details see
