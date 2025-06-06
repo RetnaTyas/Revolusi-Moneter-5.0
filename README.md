@@ -223,7 +223,8 @@ Simulasi tahapan staking hingga unstake:
    - `claimReward` untuk mengambil hasil tanpa menarik pokok;
    - `compoundReward` agar hasil otomatis ditambahkan ke saldo staking.
 3. Ketika keluar, panggil `unstake` sehingga pokok dan reward terkirim dan data
-   staking dihapus.
+   staking dihapus. Fungsi ini juga mengatur `lastStakedTime` kembali ke `0`
+   agar status staking pengguna bersih.
 
 4. Dalam keadaan darurat, `emergencyUnstake` dapat digunakan kapan saja untuk menarik pokok tanpa reward. Fungsi ini juga menghapus `lastStakedTime` sehingga status staking benar-benar bersih.
 
