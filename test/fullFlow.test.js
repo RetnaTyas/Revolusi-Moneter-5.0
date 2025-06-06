@@ -103,6 +103,7 @@ describe("Full flow integration", function () {
     await expect(goat.connect(user1).unstake())
       .to.emit(goat, "Unstaked")
       .withArgs(user1.address, stakeAfterCompound, anyValue);
+    expect(await goat.lastStakedTime(user1.address)).to.equal(0n);
     const goatReturn = await goat.balanceOf(user1.address);
     expect(goatReturn).to.be.gt(stakeAfterCompound);
 
@@ -140,6 +141,7 @@ describe("Full flow integration", function () {
     await expect(goat.connect(user2).unstake())
       .to.emit(goat, "Unstaked")
       .withArgs(user2.address, goatOut2, anyValue);
+    expect(await goat.lastStakedTime(user2.address)).to.equal(0n);
 
     const finalGoat2 = await goat.balanceOf(user2.address);
     expect(finalGoat2).to.be.gt(goatOut2);

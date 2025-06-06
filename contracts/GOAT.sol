@@ -108,7 +108,8 @@ function unstake() external {
     require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
     uint256 reward = calculateReward(msg.sender, lastTime);
     uint256 total = staked + reward;
-    stakingBalance[msg.sender] = 0;    
+    stakingBalance[msg.sender] = 0;
+    lastStakedTime[msg.sender] = 0;
     uint256 available = balanceOf(address(this));
     if (available >= total) {
         _transfer(address(this), msg.sender, total);
