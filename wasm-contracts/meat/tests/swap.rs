@@ -29,12 +29,14 @@ fn swap_meat_and_goat() {
     app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExecute::Transfer { recipient: "user".into(), amount: Uint128::new(1000) }, &[]).unwrap();
 
     app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::Approve { spender: meat_addr.to_string(), amount: Uint128::new(1000) }, &[]).unwrap();
-    app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::SwapMeatForGoat { meat_amount: Uint128::new(1000) }, &[]).unwrap();
+    let swap1 = app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::SwapMeatForGoat { meat_amount: Uint128::new(1000) }, &[]).unwrap();
+    assert!(swap1.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "SwappedMEATForGOAT")));
     let goat_bal: goat_msg::BalanceResponse = app.wrap().query_wasm_smart(goat_addr.clone(), &goat_msg::QueryMsg::Balance { address: "user".into() }).unwrap();
     assert_eq!(goat_bal.balance, Uint128::new(1000 / 85));
 
     app.execute_contract(Addr::unchecked("user"), goat_addr.clone(), &goat_msg::ExecuteMsg::Approve { spender: meat_addr.to_string(), amount: goat_bal.balance }, &[]).unwrap();
-    app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::SwapGoatForMeat { goat_amount: goat_bal.balance }, &[]).unwrap();
+    let swap2 = app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::SwapGoatForMeat { goat_amount: goat_bal.balance }, &[]).unwrap();
+    assert!(swap2.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "SwappedGOATForMEAT")));
     let meat_bal: BalanceResponse = app.wrap().query_wasm_smart(meat_addr, &MeatQuery::Balance { address: "user".into() }).unwrap();
     assert!(meat_bal.balance > Uint128::zero());
 }

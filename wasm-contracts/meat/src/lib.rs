@@ -105,10 +105,18 @@ fn execute_mint_with_native(deps: DepsMut, env: Env, info: MessageInfo) -> StdRe
         add_balance(deps.storage, &info.sender, to_mint)?;
         let total = TOTAL_SUPPLY.load(deps.storage)? + to_mint;
         TOTAL_SUPPLY.save(deps.storage, &total)?;
-        return Ok(Response::new());
+        return Ok(Response::new()
+            .add_attribute("action", "MintedWithNative")
+            .add_attribute("user", info.sender.clone())
+            .add_attribute("native", coin.amount)
+            .add_attribute("minted", to_mint));
     }
     add_balance(deps.storage, &info.sender, mint)?;
-    Ok(Response::new())
+    Ok(Response::new()
+        .add_attribute("action", "MintedWithNative")
+        .add_attribute("user", info.sender)
+        .add_attribute("native", coin.amount)
+        .add_attribute("minted", mint))
 }
 
 fn execute_withdraw_native(mut deps: DepsMut, env: Env, info: MessageInfo, to: Option<String>) -> StdResult<Response> {
@@ -116,13 +124,21 @@ fn execute_withdraw_native(mut deps: DepsMut, env: Env, info: MessageInfo, to: O
     let bal = deps.querier.query_all_balances(env.contract.address)?;
     if bal.is_empty() { return Err(StdError::generic_err("No funds")); }
     let to_addr = to.unwrap_or_else(|| info.sender.to_string());
-    Ok(Response::new().add_message(BankMsg::Send { to_address: to_addr, amount: bal }))
+    Ok(Response::new()
+        .add_message(BankMsg::Send { to_address: to_addr.clone(), amount: bal.clone() })
+        .add_attribute("action", "NativeWithdrawn")
+        .add_attribute("to", to_addr)
+        .add_attribute("amount", format!("{}", bal.iter().map(|c| c.amount).sum::<Uint128>())))
 }
 
 fn execute_change_rate(mut deps: DepsMut, info: MessageInfo, new_rate: Uint128) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
+    let old = RATE.load(deps.storage)?;
     RATE.save(deps.storage, &new_rate)?;
-    Ok(Response::new())
+    Ok(Response::new()
+        .add_attribute("action", "DepositRateChanged")
+        .add_attribute("old_rate", old)
+        .add_attribute("new_rate", new_rate))
 }
 
 fn execute_swap_goat_for_meat(deps: DepsMut, env: Env, info: MessageInfo, goat_amount: Uint128) -> StdResult<Response> {
@@ -133,7 +149,7 @@ fn execute_swap_goat_for_meat(deps: DepsMut, env: Env, info: MessageInfo, goat_a
     let meat_needed = Uint128::new(goat_amount.u128() * SWAP_RATE);
     let contract = env.contract.address;
     let bal = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
-    let resp = Response::new().add_message(transfer);
+    let mut resp = Response::new().add_message(transfer);
     if bal >= meat_needed {
         sub_balance(deps.storage, &contract, meat_needed)?;
         add_balance(deps.storage, &info.sender, meat_needed)?;
@@ -147,6 +163,11 @@ fn execute_swap_goat_for_meat(deps: DepsMut, env: Env, info: MessageInfo, goat_a
         let total = TOTAL_SUPPLY.load(deps.storage)? + mint_amt;
         TOTAL_SUPPLY.save(deps.storage, &total)?;
     }
+    resp = resp
+        .add_attribute("action", "SwappedGOATForMEAT")
+        .add_attribute("user", info.sender)
+        .add_attribute("goat_in", goat_amount)
+        .add_attribute("meat_out", meat_needed);
     Ok(resp)
 }
 
@@ -177,7 +198,11 @@ fn execute_swap_meat_for_goat(deps: DepsMut, env: Env, info: MessageInfo, meat_a
         msg: to_json_binary(&goat_msg::ExecuteMsg::Transfer { recipient: info.sender.to_string(), amount: goat_amount })?,
         funds: vec![],
     });
-    Ok(resp)
+    Ok(resp
+        .add_attribute("action", "SwappedMEATForGOAT")
+        .add_attribute("user", info.sender)
+        .add_attribute("meat_in", meat_amount)
+        .add_attribute("goat_out", goat_amount))
 }
 
 fn execute_set_swap_enabled(mut deps: DepsMut, info: MessageInfo, enabled: bool) -> StdResult<Response> {

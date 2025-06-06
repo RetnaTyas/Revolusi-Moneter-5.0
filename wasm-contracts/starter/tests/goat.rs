@@ -46,9 +46,11 @@ fn stake_and_claim() {
     ).unwrap();
     // mint and stake
     app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
-    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
+    let resp = app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
+    assert!(resp.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "Staked")));
     app.update_block(|b| b.time = b.time.plus_seconds(1));
-    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::ClaimReward {}, &[]).unwrap();
+    let claim_res = app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::ClaimReward {}, &[]).unwrap();
+    assert!(claim_res.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "RewardClaimed")));
     let bal: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "staker".into() }).unwrap();
     assert_eq!(bal.balance, Uint128::new(100));
 }
@@ -63,7 +65,8 @@ fn stake_and_compound() {
         &[]
     ).unwrap();
     app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
-    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
+    let stake_res = app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
+    assert!(stake_res.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "Staked")));
     app.update_block(|b| b.time = b.time.plus_seconds(1));
     app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::CompoundReward {}, &[]).unwrap();
     let staking: StakingInfoResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::StakingBalance { address: "staker".into() }).unwrap();
@@ -82,7 +85,8 @@ fn stake_and_unstake() {
     app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
     app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
     app.update_block(|b| b.time = b.time.plus_seconds(1));
-    app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Unstake {}, &[]).unwrap();
+    let unstake_res = app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Unstake {}, &[]).unwrap();
+    assert!(unstake_res.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "Unstaked")));
     let bal: BalanceResponse = app.wrap().query_wasm_smart(addr.clone(), &QueryMsg::Balance { address: "staker".into() }).unwrap();
     assert_eq!(bal.balance, Uint128::new(200));
 }
