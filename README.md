@@ -148,6 +148,7 @@ Perubahan alamat penting pada kontrak GOAT dapat dipantau melalui dua event:
 - `MeatAddressUpdated(oldAddress, newAddress)` dicatat ketika pemilik mengganti
   alamat kontrak MEAT.
 - `NftAddressUpdated(oldAddress, newAddress)` dicatat saat alamat GoatNFT diubah.
+- `GoatAddressUpdated(oldAddress, newAddress)` dicatat ketika alamat GOAT pada kontrak MEAT diubah.
 
 MEAT juga memunculkan event utama berikut:
 

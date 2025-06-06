@@ -28,3 +28,4 @@ The MEAT contract relies on GOAT for minting new tokens when swapping MEAT for G
 
 GOAT emits `MeatAddressUpdated` and `NftAddressUpdated` whenever the owner updates
 the linked MEAT or GoatNFT contract addresses.
+MEAT emits `GoatAddressUpdated` whenever the owner updates the linked GOAT contract address.
