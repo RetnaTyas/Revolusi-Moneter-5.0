@@ -8,8 +8,8 @@ The two tokens form a closed loop that allows value to enter the system via MEAT
 2. **Swapping**
    * MEAT can be swapped to GOAT and vice versa through the MEAT contract when `swapEnabled` is true. The fixed conversion constant `SwapRate` maintains proportional supply.
 3. **GoatNFTs**
-   * A [GoatNFT](contracts/GoatNFT.sol) represents a live goat and stores its value in `goatValue`.
-   * By calling `burnAndMint` on `GOAT.sol`, the NFT is burned and the same amount of GOAT is minted to the owner.
+   * A [GoatNFT](contracts/GoatNFT.sol) represents a live goat and stores its current weight in `goatValue`.
+   * Owners may update the weight anytime. Before `burnAndMint` is executed the weight must have been updated within the last seven days. `burn` emits `GoatBurned` so off-chain logic can mint GOAT tokens matching the weight.
 4. **Staking GOAT**
    * GOAT holders stake tokens in `GOAT.sol` which records staking balances and timestamps. Rewards accrue linearly according to `rewardRate` and `rewardInterval`.
    *Calling `stake()` again resets `lastStakedTime` and discards any pending reward. Claim your reward first if you plan to restake.*
