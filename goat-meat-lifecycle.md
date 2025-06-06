@@ -18,8 +18,6 @@ The two tokens form a closed loop that allows value to enter the system via MEAT
 6. **Returning to MEAT**
    * Unstaked GOAT can be swapped back for MEAT which may then be withdrawn from the ecosystem or used again for future interactions.
 7. **Redeeming MEAT**
-   * Holders burn their MEAT using `redeemForMeat(amount)` which emits `MeatRedeemed` for off-chain processing and delivery of physical meat.
-
-For a concise diagram of this burn and redemption path, see the section [Burn & Redeem Flow](README.md#burn--redeem-flow) in the README.
+   * Holders burn their MEAT using `redeemForMeat(amount)` which emits `MeatRedeemed` for off-chain processing. Each token redeemed entitles them to **one kilogram of meat** from our authorised distribution partners. For a concise diagram of this burn and redemption path, see the section [Burn & Redeem Flow](README.md#burn--redeem-flow) in the README.
 
 This lifecycle ensures that every stage of participation is backed by explicit contract functions and transparent token flows.
