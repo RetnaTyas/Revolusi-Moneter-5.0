@@ -174,7 +174,10 @@ fn execute_stake(deps: DepsMut, env: Env, info: MessageInfo, amount: Uint128) ->
     add_balance(deps.storage, &env.contract.address, amount)?;
     STAKING_BALANCE.update(deps.storage, &info.sender, |b| -> StdResult<_> { Ok(b.unwrap_or_default() + amount) })?;
     LAST_STAKED_TIME.save(deps.storage, &info.sender, &env.block.time.seconds())?;
-    Ok(Response::new())
+    Ok(Response::new()
+        .add_attribute("action", "Staked")
+        .add_attribute("user", info.sender)
+        .add_attribute("amount", amount))
 }
 
 fn execute_emergency_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
@@ -200,7 +203,10 @@ fn execute_emergency_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdR
         let supply = TOTAL_SUPPLY.load(deps.storage)? + diff;
         TOTAL_SUPPLY.save(deps.storage, &supply)?;
     }
-    Ok(Response::new())
+    Ok(Response::new()
+        .add_attribute("action", "EmergencyUnstaked")
+        .add_attribute("user", info.sender)
+        .add_attribute("amount", staked))
 }
 
 fn execute_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
@@ -232,7 +238,11 @@ fn execute_unstake(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Resp
         let supply = TOTAL_SUPPLY.load(deps.storage)? + diff;
         TOTAL_SUPPLY.save(deps.storage, &supply)?;
     }
-    Ok(Response::new())
+    Ok(Response::new()
+        .add_attribute("action", "Unstaked")
+        .add_attribute("user", info.sender)
+        .add_attribute("amount", staked)
+        .add_attribute("reward", reward))
 }
 
 fn execute_claim_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
@@ -261,7 +271,10 @@ fn execute_claim_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult
         TOTAL_SUPPLY.save(deps.storage, &supply)?;
     }
     LAST_STAKED_TIME.save(deps.storage, &info.sender, &env.block.time.seconds())?;
-    Ok(Response::new())
+    Ok(Response::new()
+        .add_attribute("action", "RewardClaimed")
+        .add_attribute("user", info.sender)
+        .add_attribute("amount", reward))
 }
 
 fn execute_compound_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
@@ -284,7 +297,10 @@ fn execute_compound_reward(deps: DepsMut, env: Env, info: MessageInfo) -> StdRes
     }
     STAKING_BALANCE.update(deps.storage, &info.sender, |b| -> StdResult<_> { Ok(b.unwrap_or_default() + reward) })?;
     LAST_STAKED_TIME.save(deps.storage, &info.sender, &env.block.time.seconds())?;
-    Ok(Response::new())
+    Ok(Response::new()
+        .add_attribute("action", "Compounded")
+        .add_attribute("user", info.sender)
+        .add_attribute("amount", reward))
 }
 
 #[entry_point]

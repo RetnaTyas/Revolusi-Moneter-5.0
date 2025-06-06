@@ -43,7 +43,8 @@ fn mint_with_native_mints_meat() {
     let goat_addr = app.instantiate_contract(goat_id, Addr::unchecked("owner"), &starter::msg::InstantiateMsg { meat_contract: "meat".into() }, &[], "goat", None).unwrap();
     let meat_addr = app.instantiate_contract(meat_id, Addr::unchecked("owner"), &MeatInstantiate { goat_contract: goat_addr.to_string() }, &[], "meat", None).unwrap();
 
-    app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::MintWithNative {}, &[coin(1000, "ucosm")]).unwrap();
+    let resp = app.execute_contract(Addr::unchecked("user"), meat_addr.clone(), &MeatExecute::MintWithNative {}, &[coin(1000, "ucosm")]).unwrap();
+    assert!(resp.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "MintedWithNative")));
     let bal: BalanceResponse = app.wrap().query_wasm_smart(meat_addr, &MeatQuery::Balance { address: "user".into() }).unwrap();
     assert_eq!(bal.balance, Uint128::new(100));
 }
