@@ -123,6 +123,18 @@ MEAT juga memunculkan event utama berikut:
 Hardhat tests for both contracts live in the `test/` directory. Run them with:
 
 ```bash
+npm install
+```
+
+If the `artifacts/` folder doesn't contain compiled contracts, run:
+
+```bash
+npx hardhat compile
+```
+
+Then execute the test suite:
+
+```bash
 npx hardhat test
 ```
 
