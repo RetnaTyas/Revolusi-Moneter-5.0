@@ -6,6 +6,7 @@ This project revolves around two ERC20 contracts – **GOAT** and **MEAT** – d
 
 * **GOAT (`contracts/GOAT.sol`)** – provides staking with time‑based rewards, the ability for the MEAT contract to mint new supply and various owner controls (reward settings, MEAT address).
 * **MEAT (`contracts/MEAT.sol`)** – mints tokens when receiving native currency (using a `DepositRate` measured per 1000 units), swaps MEAT to and from GOAT, controls swap availability and deposit rate and can withdraw collected native tokens.
+* **GoatNFT (`contracts/GoatNFT.sol`)** – stores goat details on‑chain in `goatMetadata` as `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`) and tracks a redeemable value in `goatValue`. GOAT's `burnAndMint` burns the NFT and mints the same amount of GOAT to its owner.
 * **Interfaces and mocks** – `IGOAT` defines the minting hook used by MEAT and `FailingGOAT` is a test helper for simulating failed transfers.
 
 ## Backend
