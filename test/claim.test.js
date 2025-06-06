@@ -53,4 +53,20 @@ describe("GOAT claim timing", function () {
     const stakedAfter = await goat.stakingBalance(user.address);
     expect(stakedAfter).to.be.gt(stakeAmt);
   });
+
+  it("returns correct next claim time", async function () {
+    const stakeAmt = await goat.balanceOf(user.address);
+    await goat.connect(user).stake(stakeAmt);
+
+    const last = await goat.lastStakedTime(user.address);
+    const interval = await goat.minClaimInterval();
+    const initialNext = await goat.nextClaimTime(user.address);
+    expect(initialNext).to.equal(last + interval);
+
+    await ethers.provider.send("evm_increaseTime", [3 * 24 * 60 * 60]);
+    await ethers.provider.send("evm_mine", []);
+
+    const next = await goat.nextClaimTime(user.address);
+    expect(next).to.equal(last + interval);
+  });
 });
