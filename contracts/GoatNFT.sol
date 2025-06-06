@@ -10,10 +10,10 @@ contract GoatNFT is ERC721Burnable {
     uint256 public nextId;
     mapping(uint256 => uint256) public goatValue;
     struct GoatData {
-        uint256 nfcId;
+        string nfcId;
         string breed;
-        uint16 birthYear;
-        uint16 weight;
+        uint256 birthYear;
+        uint256 weight;
         uint256 mintedAt;
     }
     mapping(uint256 => GoatData) public goatMetadata;
@@ -31,10 +31,10 @@ contract GoatNFT is ERC721Burnable {
     function mint(
         address to,
         uint256 value,
-        uint256 nfcId,
-        string calldata breed,
-        uint16 birthYear,
-        uint16 weight
+        string memory nfcId,
+        string memory breed,
+        uint256 birthYear,
+        uint256 weight
     ) external onlyOwner returns (uint256) {
         require(value > 0, "Value must be > 0");
         uint256 tokenId = ++nextId;
