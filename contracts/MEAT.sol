@@ -22,6 +22,7 @@ contract MEAT is ERC20 {
     event SwappedGOATForMEAT(address indexed user, uint256 goatIn, uint256 meatOut);
     event SwappedMEATForGOAT(address indexed user, uint256 meatIn, uint256 goatOut);
     event InitialSupplyMinted(address indexed to, uint256 amount);
+    event MeatRedeemed(address indexed user, uint256 amount);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -108,6 +109,12 @@ contract MEAT is ERC20 {
         }
         GOAT.transfer(msg.sender, goatAmount);
         emit SwappedMEATForGOAT(msg.sender, meatAmount, goatAmount);
+    }
+
+    function redeemForMeat(uint256 amount) external {
+        require(amount > 0, "Amount must be > 0");
+        _burn(msg.sender, amount);
+        emit MeatRedeemed(msg.sender, amount);
     }
 
     function setSwapEnabled(bool status) external onlyOwner {

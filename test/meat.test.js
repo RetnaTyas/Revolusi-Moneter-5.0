@@ -40,4 +40,25 @@ describe("MEAT", function () {
       meat.connect(user).swapMEATForGOAT(meatAmount)
     ).to.be.revertedWith("Transfer failed");
   });
+
+  it("should burn tokens on redeem", async function () {
+    const [owner, user] = await ethers.getSigners();
+
+    const GOAT = await ethers.getContractFactory("GOAT");
+    const goat = await GOAT.deploy(owner.address);
+    await goat.waitForDeployment();
+
+    const MEAT = await ethers.getContractFactory("MEAT");
+    const meat = await MEAT.deploy(goat.target);
+    await meat.waitForDeployment();
+
+    const amount = ethers.parseEther("50");
+    await meat.transfer(user.address, amount);
+
+    await expect(meat.connect(user).redeemForMeat(amount))
+      .to.emit(meat, "MeatRedeemed")
+      .withArgs(user.address, amount);
+
+    expect(await meat.balanceOf(user.address)).to.equal(0n);
+  });
 });

@@ -17,5 +17,7 @@ The two tokens form a closed loop that allows value to enter the system via MEAT
    * After `minClaimInterval` stakers may claim rewards or compound them back into the stake. If they choose to exit entirely they call `unstake` to receive the principal plus reward.
 6. **Returning to MEAT**
    * Unstaked GOAT can be swapped back for MEAT which may then be withdrawn from the ecosystem or used again for future interactions.
+7. **Redeeming MEAT**
+   * Holders burn their MEAT using `redeemForMeat(amount)` which emits `MeatRedeemed` for off-chain processing and delivery of physical meat.
 
 This lifecycle ensures that every stage of participation is backed by explicit contract functions and transparent token flows.
