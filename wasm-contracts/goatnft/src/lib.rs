@@ -49,6 +49,8 @@ fn handle_execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -
         }
         ExecuteMsg::Burn { token_id } => execute_burn(deps, info, token_id),
         ExecuteMsg::Approve { spender, token_id } => execute_approve(deps, info, spender, token_id),
+        ExecuteMsg::Transfer { to, token_id } => execute_transfer(deps, info, to, token_id),
+        ExecuteMsg::TransferFrom { owner, to, token_id } => execute_transfer_from(deps, info, owner, to, token_id),
     }
 }
 
@@ -122,6 +124,52 @@ fn execute_approve(deps: DepsMut, info: MessageInfo, spender: String, token_id: 
     }
     let spender_addr = deps.api.addr_validate(&spender)?;
     APPROVALS.save(deps.storage, id, &spender_addr)?;
+    Ok(Response::new())
+}
+
+fn execute_transfer(deps: DepsMut, info: MessageInfo, to: String, token_id: String) -> StdResult<Response> {
+    let id: u64 = token_id
+        .parse()
+        .map_err(|_| StdError::generic_err("invalid id"))?;
+    let owner = OWNER_OF.load(deps.storage, id)?;
+    if owner != info.sender {
+        let approved = APPROVALS.may_load(deps.storage, id)?;
+        match approved {
+            Some(addr) if addr == info.sender => {},
+            _ => return Err(StdError::generic_err("Unauthorized")),
+        }
+    }
+    let to_addr = deps.api.addr_validate(&to)?;
+    OWNER_OF.save(deps.storage, id, &to_addr)?;
+    APPROVALS.remove(deps.storage, id);
+    Ok(Response::new())
+}
+
+fn execute_transfer_from(
+    deps: DepsMut,
+    info: MessageInfo,
+    owner: String,
+    to: String,
+    token_id: String,
+) -> StdResult<Response> {
+    let id: u64 = token_id
+        .parse()
+        .map_err(|_| StdError::generic_err("invalid id"))?;
+    let owner_addr = deps.api.addr_validate(&owner)?;
+    let current_owner = OWNER_OF.load(deps.storage, id)?;
+    if current_owner != owner_addr {
+        return Err(StdError::generic_err("Owner mismatch"));
+    }
+    if owner_addr != info.sender {
+        let approved = APPROVALS.may_load(deps.storage, id)?;
+        match approved {
+            Some(addr) if addr == info.sender => {},
+            _ => return Err(StdError::generic_err("Unauthorized")),
+        }
+    }
+    let to_addr = deps.api.addr_validate(&to)?;
+    OWNER_OF.save(deps.storage, id, &to_addr)?;
+    APPROVALS.remove(deps.storage, id);
     Ok(Response::new())
 }
 
