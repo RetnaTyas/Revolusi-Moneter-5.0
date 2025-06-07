@@ -27,6 +27,7 @@ contract GoatNFT is ERC721Burnable {
 
     mapping(uint256 => GoatData) public goatMetadata;
     mapping(uint256 => uint256) public lastWeightUpdateAt;
+    mapping(bytes32 => uint256) public nfcIdToTokenId;
 
     address private immutable _owner;
     IGoatToken public goatTokenContract;
@@ -59,7 +60,10 @@ contract GoatNFT is ERC721Burnable {
         uint256 birthYear
     ) external onlyOwner returns (uint256) {
         require(weight > 0, "Weight must be > 0");
+        bytes32 hash = keccak256(bytes(nfcId));
+        require(nfcIdToTokenId[hash] == 0, "NFC ID already used");
         uint256 tokenId = ++nextId;
+        nfcIdToTokenId[hash] = tokenId;
         goatValue[tokenId] = weight;
         goatMetadata[tokenId] = GoatData(nfcId, breed, birthYear, weight, block.timestamp);
         lastWeightUpdateAt[tokenId] = block.timestamp;
@@ -92,6 +96,8 @@ contract GoatNFT is ERC721Burnable {
         uint256 currentWeight = goatValue[tokenId];
         require(currentWeight > 0, "Invalid weight");
 
+        bytes32 hash = keccak256(bytes(goatMetadata[tokenId].nfcId));
+
         uint256 goatAmount = (currentWeight * 1e18) / SwapConfig.SWAP_RATE;
 
         // Mint GOAT tokens directly to the token owner
@@ -103,6 +109,7 @@ contract GoatNFT is ERC721Burnable {
         delete goatValue[tokenId];
         delete goatMetadata[tokenId];
         delete lastWeightUpdateAt[tokenId];
+        delete nfcIdToTokenId[hash];
     }
 
     function getGoatData(uint256 tokenId) external view returns (GoatData memory) {

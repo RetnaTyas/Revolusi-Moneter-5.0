@@ -23,6 +23,7 @@ Diagram sederhana berikut menjelaskan jalur dari kambing hidup hingga daging sia
 Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
 
 - Kambing lahir → pencetakan **GoatNFT** dengan `nfcId`, `breed`, `birthYear`, dan `weight` awal.
+- `nfcId` bersifat unik; pencetakan kedua dengan ID sama akan gagal.
 - Pemilik dapat memperbarui berat melalui `updateWeight()` agar nilainya tetap valid (dibutuhkan sebelum burn).
 - NFT (standar ERC721) bebas dipindahtangankan ke pemilik baru.
 - Ketika kambing disembelih, pemilik membakar NFT; kontrak otomatis mencetak GOAT sejumlah `weight / SWAP_RATE`.

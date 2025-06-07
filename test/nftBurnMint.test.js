@@ -76,4 +76,19 @@ describe("GoatNFT burn and GOAT mint", function () {
       "Weight update too old"
     );
   });
+
+  it("reverts when minting with duplicate nfcId", async function () {
+    await nft.mint(user.address, 40, "dup", "Boer", 2022);
+    await expect(
+      nft.mint(user.address, 50, "dup", "Boer", 2022)
+    ).to.be.revertedWith("NFC ID already used");
+  });
+
+  it("allows reusing nfcId after burn", async function () {
+    const tx = await nft.mint(user.address, 30, "reuse", "Boer", 2022);
+    const receipt = await tx.wait();
+    const tokenId = receipt.logs[0].args[2];
+    await nft.connect(user).burn(tokenId);
+    await expect(nft.mint(user.address, 35, "reuse", "Boer", 2022)).to.not.be.reverted;
+  });
 });
