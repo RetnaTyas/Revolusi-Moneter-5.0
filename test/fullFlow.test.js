@@ -154,8 +154,8 @@ describe("Full flow integration", function () {
     await meat.connect(user3).swapMEATForGOAT(amountSwap3);
     await goat.connect(user3).stake(goatOut3);
     await expect(goat.connect(user3).emergencyUnstake())
-      .to.emit(goat, "Unstaked")
-      .withArgs(user3.address, goatOut3, 0);
+      .to.emit(goat, "EmergencyUnstaked")
+      .withArgs(user3.address, goatOut3);
 
     expect(await goat.balanceOf(user3.address)).to.equal(goatOut3);
     expect(await goat.lastStakedTime(user3.address)).to.equal(0n);
