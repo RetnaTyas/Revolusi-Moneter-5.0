@@ -71,6 +71,7 @@ contract GoatNFT is ERC721Burnable {
         goatValue[tokenId] = newWeight;
         goatMetadata[tokenId].weight = newWeight;
         lastWeightUpdateAt[tokenId] = block.timestamp;
+        emit WeightUpdated(tokenId, newWeight);
     }
 
     function burn(uint256 tokenId) public override {
@@ -107,4 +108,6 @@ contract GoatNFT is ERC721Burnable {
 
     /// @notice Emitted when NFT is burned and GOAT token minted automatically
     event GoatBurned(uint256 indexed tokenId, address indexed user, uint256 weight, uint256 goatAmount);
+    /// @notice Emitted when the goat weight is updated
+    event WeightUpdated(uint256 indexed tokenId, uint256 newWeight);
 }

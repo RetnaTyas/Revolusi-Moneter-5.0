@@ -223,7 +223,7 @@ Struktur dan hubungan antar kontrak:
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
-  Pemilik dapat memperbarui berat melalui `updateWeight`; berat terakhir harus
+  Pemilik dapat memperbarui berat melalui `updateWeight` (memancarkan `WeightUpdated`); berat terakhir harus
   masih valid (<=7 hari) saat dibakar. Fungsi `burn` kini memanggil kontrak GOAT untuk mencetak token otomatis dan memancarkan event `GoatBurned` berisi jumlah GOAT yang dicetak. Data dapat dibaca ulang melalui `getGoatData` dan dihapus setelah `burn`.
 - `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo`
   untuk dipanggil MEAT saat membutuhkan GOAT baru. `IGoatToken` dipakai GoatNFT agar kontrak GOAT dapat mencetak token saat NFT dibakar.

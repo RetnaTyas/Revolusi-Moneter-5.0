@@ -51,6 +51,16 @@ describe("GoatNFT burn and GOAT mint", function () {
     await expect(nft.ownerOf(tokenId)).to.be.reverted;
   });
 
+  it("emits WeightUpdated when updating weight", async function () {
+    const tx = await nft.mint(user.address, 1, "tag", "type", 2022, 50);
+    const receipt = await tx.wait();
+    const tokenId = receipt.logs[0].args[2];
+
+    await expect(nft.connect(user).updateWeight(tokenId, 55n))
+      .to.emit(nft, "WeightUpdated")
+      .withArgs(tokenId, 55n);
+  });
+
   it("reverts burn when weight update is stale", async function () {
     const value = ethers.parseEther("2");
     const tx = await nft.mint(user.address, value, "n", "b", 2020, 60);

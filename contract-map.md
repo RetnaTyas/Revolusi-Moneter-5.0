@@ -22,7 +22,7 @@ The MEAT contract relies on GOAT for minting new tokens when swapping MEAT for G
 |---------|-------------|---------------|
 | GOAT | ERC20 staking token minted by MEAT and GoatNFT burns. | `stake`, `unstake`, `claimReward`, `compoundReward`, `emergencyUnstake`, `mintTo`, `mint`, `setMEATAddress`, `setNFTAddress` |
 | MEAT | ERC20 token minted with native deposits and swapped with GOAT. | `swapMEATForGOAT`, `swapGOATForMEAT`, `changeDepositRate`, `withdrawNative`, `setSwapEnabled`, `setGOATAddress` |
-| GoatNFT | ERC721 goat identifier redeemable for GOAT. Metadata stored on-chain in `goatMetadata` as `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Weight can be updated via `updateWeight` and must be fresh when burning. Burning mints GOAT automatically and emits `GoatBurned`. | `mint`, `updateWeight`, `burn`, `goatValue`, `goatMetadata`, `getGoatData` |
+| GoatNFT | ERC721 goat identifier redeemable for GOAT. Metadata stored on-chain in `goatMetadata` as `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Weight can be updated via `updateWeight` (emits `WeightUpdated`) and must be fresh when burning. Burning mints GOAT automatically and emits `GoatBurned`. | `mint`, `updateWeight`, `burn`, `goatValue`, `goatMetadata`, `getGoatData` |
 | IGOAT | Interface for GOAT minting used by MEAT. | `mintTo` |
 | IGoatToken | Interface for GOAT minting used by GoatNFT. | `mint` |
 
