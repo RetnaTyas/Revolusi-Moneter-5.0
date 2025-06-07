@@ -20,6 +20,15 @@ Berikut gambaran umum alur penggunaan kedua token:
 
 Diagram sederhana berikut menjelaskan jalur dari kambing hidup hingga daging siap tebus:
 
+Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
+
+- Kambing lahir → pencetakan **GoatNFT** dengan `nfcId`, `breed`, `birthYear`, dan `weight` awal.
+- Pemilik dapat memperbarui berat melalui `updateWeight()` agar nilainya tetap valid (dibutuhkan sebelum burn).
+- NFT (standar ERC721) bebas dipindahtangankan ke pemilik baru.
+- Ketika kambing disembelih, pemilik membakar NFT; kontrak otomatis mencetak GOAT sejumlah `weight / 85`.
+- GOAT dapat diperdagangkan atau ditukar menjadi MEAT memakai fungsi swap kontrak.
+- MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
+
 ```text
 GoatNFT burn --(weight / 85)--> GOAT --(SwapRate)--> MEAT --redeemForMeat--> Real Meat
 ```
