@@ -345,6 +345,23 @@ Pemanggilan `claimReward` tidak otomatis menambah stake agar pengguna bebas
 menarik hasil tanpa memperpanjang penguncian. Fleksibilitas ini diharapkan
 mencegah inflasi berlebih sekaligus memberi kontrol penuh pada komunitas.
 
+## Vision of Monetary 5.0
+
+This repository and its code are fully open and transparent by design.
+The goal is not to lock the system, but to **enable replication, understanding, and adoption** in as many communities as possible.
+
+You are encouraged to fork, learn, implement, and improve the system — **as long as the core principles of transparency, fairness, and lifecycle-based value integrity are preserved.**
+
+**Real money is a myth — only system persist. Value must remain alive.**
+
+### Guiding Principles:
+
+- Full lifecycle anchoring of value
+- Transparency of supply and flow
+- Fair and redeemable value exchange
+- Anti-inflationary and anti-fiat trap architecture
+- Community-driven adoption and governance
+
 ## 📚 Dokumentasi Tambahan
 
 Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
