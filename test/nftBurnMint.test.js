@@ -19,18 +19,16 @@ describe("GoatNFT burn and GOAT mint", function () {
   });
 
   it("burns NFT and mints GOAT", async function () {
-    const value = ethers.parseEther("5");
     const nfcId = "1234";
     const breed = "Boer";
     const birthYear = 2021;
     const weight = 70;
     const tx = await nft.mint(
       user.address,
-      value,
+      weight,
       nfcId,
       breed,
-      birthYear,
-      weight
+      birthYear
     );
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
@@ -52,7 +50,7 @@ describe("GoatNFT burn and GOAT mint", function () {
   });
 
   it("emits WeightUpdated when updating weight", async function () {
-    const tx = await nft.mint(user.address, 1, "tag", "type", 2022, 50);
+    const tx = await nft.mint(user.address, 50, "tag", "type", 2022);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
 
@@ -62,8 +60,7 @@ describe("GoatNFT burn and GOAT mint", function () {
   });
 
   it("reverts burn when weight update is stale", async function () {
-    const value = ethers.parseEther("2");
-    const tx = await nft.mint(user.address, value, "n", "b", 2020, 60);
+    const tx = await nft.mint(user.address, 60, "n", "b", 2020);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
 

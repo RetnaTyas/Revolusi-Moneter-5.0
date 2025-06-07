@@ -44,8 +44,8 @@ fn only_owner(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
 
 fn handle_execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
-        ExecuteMsg::Mint { to, value, nfc_id, breed, birth_year, weight } => {
-            execute_mint(deps, env, info, to, value, nfc_id, breed, birth_year, weight)
+        ExecuteMsg::Mint { to, nfc_id, breed, birth_year, weight } => {
+            execute_mint(deps, env, info, to, weight, nfc_id, breed, birth_year)
         }
         ExecuteMsg::Burn { token_id } => execute_burn(deps, info, token_id),
         ExecuteMsg::Approve { spender, token_id } => execute_approve(deps, info, spender, token_id),
@@ -69,21 +69,20 @@ fn execute_mint(
     env: Env,
     info: MessageInfo,
     to: String,
-    value: Uint128,
+    weight: u64,
     nfc_id: String,
     breed: String,
     birth_year: u64,
-    weight: u64,
 ) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
-    if value.is_zero() {
-        return Err(StdError::generic_err("Value must be > 0"));
+    if weight == 0 {
+        return Err(StdError::generic_err("Weight must be > 0"));
     }
     let to_addr = deps.api.addr_validate(&to)?;
     let id = NEXT_ID.load(deps.storage)? + 1;
     NEXT_ID.save(deps.storage, &id)?;
     OWNER_OF.save(deps.storage, id, &to_addr)?;
-    GOAT_VALUE.save(deps.storage, id, &value)?;
+    GOAT_VALUE.save(deps.storage, id, &Uint128::from(weight as u128))?;
     let data = GoatData {
         nfc_id,
         breed,
