@@ -4,13 +4,17 @@ const { ethers } = require("hardhat");
 
 describe("Full flow integration", function () {
   let owner, user1, user2, user3;
-  let goat, meat;
+  let goat, meat, swapConfig, SWAP_RATE;
 
   beforeEach(async function () {
     [owner, user1, user2, user3] = await ethers.getSigners();
     const GOAT = await ethers.getContractFactory("GOAT");
     goat = await GOAT.deploy(owner.address);
     await goat.waitForDeployment();
+
+    swapConfig = await ethers.deployContract("SwapConfig");
+    await swapConfig.waitForDeployment();
+    SWAP_RATE = await swapConfig.SWAP_RATE();
 
     const MEAT = await ethers.getContractFactory("MEAT");
     meat = await MEAT.deploy(goat.target);
@@ -62,7 +66,7 @@ describe("Full flow integration", function () {
     );
     await meat.setSwapEnabled(true);
 
-    const goatOut1 = amountSwap1 / 85n;
+    const goatOut1 = amountSwap1 / SWAP_RATE;
     await expect(meat.connect(user1).swapMEATForGOAT(amountSwap1))
       .to.emit(meat, "SwappedMEATForGOAT")
       .withArgs(user1.address, amountSwap1, goatOut1);
@@ -110,18 +114,18 @@ describe("Full flow integration", function () {
     await goat.connect(user1).approve(meat.target, goatReturn);
     await expect(meat.connect(user1).swapGOATForMEAT(goatReturn))
       .to.emit(meat, "SwappedGOATForMEAT")
-      .withArgs(user1.address, goatReturn, goatReturn * 85n);
+      .withArgs(user1.address, goatReturn, goatReturn * SWAP_RATE);
 
     const finalMeat1 =
       ethers.parseEther("100") +
       minted1 -
       amountSwap1 +
-      goatReturn * 85n;
+      goatReturn * SWAP_RATE;
     expect(await meat.balanceOf(user1.address)).to.equal(finalMeat1);
     expect(await goat.balanceOf(user1.address)).to.equal(0n);
 
     const amountSwap2 = ethers.parseEther("20");
-    const goatOut2 = amountSwap2 / 85n;
+    const goatOut2 = amountSwap2 / SWAP_RATE;
     await meat.connect(user2).approve(meat.target, amountSwap2);
     await expect(meat.connect(user2).swapMEATForGOAT(amountSwap2))
       .to.emit(meat, "SwappedMEATForGOAT")
@@ -149,7 +153,7 @@ describe("Full flow integration", function () {
     expect(await meat.balanceOf(user2.address)).to.equal(finalMeat2);
 
     const amountSwap3 = ethers.parseEther("15");
-    const goatOut3 = amountSwap3 / 85n;
+    const goatOut3 = amountSwap3 / SWAP_RATE;
     await meat.connect(user3).approve(meat.target, amountSwap3);
     await meat.connect(user3).swapMEATForGOAT(amountSwap3);
     await goat.connect(user3).stake(goatOut3);

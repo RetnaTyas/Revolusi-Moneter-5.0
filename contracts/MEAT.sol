@@ -4,6 +4,7 @@ pragma solidity ^0.8.29;
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IGOAT } from "./interfaces/IGOAT.sol";
+import { SwapConfig } from "./SwapConfig.sol";
 
 /// @title MEAT Token - Monetary Exchange for Agricultural Transactions
 /// @notice Smart contract untuk mint MEAT pakai Native Token dan swap ke GOAT serta sebaliknya.
@@ -13,7 +14,6 @@ contract MEAT is ERC20 {
     address private immutable _owner;
 
     uint256 private _rate = 100;
-    uint256 public constant SwapRate = 85;
     bool public swapEnabled = true;
 
     event DepositRateChanged(uint256 oldRate, uint256 newRate);
@@ -83,7 +83,7 @@ contract MEAT is ERC20 {
         require(goatAmount > 0, "Amount must be > 0");
         GOAT.transferFrom(msg.sender, address(this), goatAmount);
 
-        uint256 meatAmount = goatAmount * SwapRate;
+        uint256 meatAmount = goatAmount * SwapConfig.SWAP_RATE;
         uint256 contractBalance = balanceOf(address(this));
         if (contractBalance >= meatAmount) {
             _transfer(address(this), msg.sender, meatAmount);
@@ -103,7 +103,7 @@ contract MEAT is ERC20 {
         require(meatAmount > 0, "Amount must be > 0");
         IERC20(address(this)).transferFrom(msg.sender, address(this), meatAmount);
 
-        uint256 goatAmount = meatAmount / SwapRate;
+        uint256 goatAmount = meatAmount / SwapConfig.SWAP_RATE;
         uint256 goatBalance = GOAT.balanceOf(address(this));
         if (goatBalance < goatAmount) {
             GOAT.mintTo(address(this), goatAmount - goatBalance);
@@ -134,10 +134,10 @@ contract MEAT is ERC20 {
     }
 
     function getEquivalentMEAT(uint256 goatAmount) external pure returns (uint256) {
-        return goatAmount * SwapRate;
+        return goatAmount * SwapConfig.SWAP_RATE;
     }
 
     function getEquivalentGOAT(uint256 meatAmount) external pure returns (uint256) {
-        return meatAmount / SwapRate;
+        return meatAmount / SwapConfig.SWAP_RATE;
     }
 }

@@ -12,7 +12,7 @@ The two tokens form a closed loop that allows value to enter the system via MEAT
    * Users send native currency to the MEAT contract. Its `receive()` function mints MEAT to the sender using the `DepositRate`, scaled per 1000 units (default `100`, i.e. 100 MEAT per 1000 native).
    * The contract emits `MintedWithNative(user, nativeReceived, meatMinted)` recording who minted and how much native token was received.
 2. **Swapping**
-   * MEAT can be swapped to GOAT and vice versa through the MEAT contract when `swapEnabled` is true. The fixed conversion constant `SwapRate` maintains proportional supply.
+   * MEAT can be swapped to GOAT and vice versa through the MEAT contract when `swapEnabled` is true. The fixed conversion constant `SWAP_RATE` maintains proportional supply.
 3. **GoatNFTs**
    * A [GoatNFT](contracts/GoatNFT.sol) represents a live goat and stores its current weight in `goatValue`.
    * Owners may update the weight anytime, emitting `WeightUpdated`. Before burning the NFT the weight must have been updated within the last seven days. `burn` mints GOAT automatically and emits `GoatBurned`.

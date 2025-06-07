@@ -10,7 +10,7 @@ This repository contains two ERC20 tokens:
 Berikut gambaran umum alur penggunaan kedua token:
 
 1. **Mint MEAT** – Kirim native token langsung ke alamat kontrak `MEAT` untuk mencetak token sesuai rasio `DepositRate`. Fungsi `receive()` otomatis memproses dana dan mengirim MEAT ke pengirim. Versi CosmWasm menggunakan pesan `mint_with_native` seperti dijelaskan pada bagian berikutnya.
-2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi ditentukan oleh konstanta `SwapRate` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
+2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi ditentukan oleh konstanta `SWAP_RATE` di `SwapConfig` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
 3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
 4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
@@ -25,16 +25,16 @@ Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
 - Kambing lahir → pencetakan **GoatNFT** dengan `nfcId`, `breed`, `birthYear`, dan `weight` awal.
 - Pemilik dapat memperbarui berat melalui `updateWeight()` agar nilainya tetap valid (dibutuhkan sebelum burn).
 - NFT (standar ERC721) bebas dipindahtangankan ke pemilik baru.
-- Ketika kambing disembelih, pemilik membakar NFT; kontrak otomatis mencetak GOAT sejumlah `weight / 85`.
+- Ketika kambing disembelih, pemilik membakar NFT; kontrak otomatis mencetak GOAT sejumlah `weight / SWAP_RATE`.
 - GOAT dapat diperdagangkan atau ditukar menjadi MEAT memakai fungsi swap kontrak.
 - MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
 
 ```text
-GoatNFT burn --(weight / 85)--> GOAT --(SwapRate)--> MEAT --redeemForMeat--> Real Meat
+GoatNFT burn --(weight / SWAP_RATE)--> GOAT --(SWAP_RATE)--> MEAT --redeemForMeat--> Real Meat
 ```
 
-- Membakar `GoatNFT` otomatis mencetak GOAT sejumlah `weight / 85`.
-- GOAT dapat ditukar dengan MEAT atau sebaliknya menggunakan `SwapRate` yang sama persis dengan fungsi swap pada kontrak.
+- Membakar `GoatNFT` otomatis mencetak GOAT sejumlah `weight / SWAP_RATE`.
+- GOAT dapat ditukar dengan MEAT atau sebaliknya menggunakan `SWAP_RATE` yang sama persis dengan fungsi swap pada kontrak.
 - Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
 
 ## What is GoatNFT?
@@ -161,8 +161,7 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 
 ## Parameter Penting
 
-- **SwapRate** – konstanta di kontrak MEAT yang menentukan rasio penukaran antar
-  kedua token. Nilai default `85` berarti 1 GOAT setara dengan 85 MEAT.
+- **SWAP_RATE** – konstanta di `SwapConfig` yang menentukan rasio penukaran antar kedua token. Nilai default `85` berarti 1 GOAT setara dengan 85 MEAT.
 - **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
   dihitung per 1000 unit native token sehingga `100` berarti 100 MEAT untuk 1000
   unit native (0.1 MEAT per 1 unit).

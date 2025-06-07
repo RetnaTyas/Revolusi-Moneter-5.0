@@ -5,7 +5,7 @@ This document outlines a typical experience for a new participant in the GOAT/ME
 1. **Acquire MEAT**
    * The user opens the web app, connects their wallet and sends a small amount of native token to the MEAT contract. The contract mints MEAT based on the current `DepositRate`.
 2. **Convert to GOAT**
-   * Using the swap interface they approve MEAT and call `swapMEATForGOAT` which transfers MEAT and returns GOAT at the fixed `SwapRate`.
+   * Using the swap interface they approve MEAT and call `swapMEATForGOAT` which transfers MEAT and returns GOAT at the fixed `SWAP_RATE`.
 3. **Stake for Rewards**
    * With GOAT tokens in the wallet the user stakes them to start accruing rewards. The UI shows how long until claiming is allowed (`minClaimInterval`).
 4. **Harvest**
