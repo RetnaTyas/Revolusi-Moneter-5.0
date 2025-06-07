@@ -19,6 +19,7 @@ event RewardConfigChanged(
 );
 event Staked(address indexed user, uint256 amount);
 event Unstaked(address indexed user, uint256 amount, uint256 reward);
+event EmergencyUnstaked(address indexed user, uint256 amount);
 event RewardClaimed(address indexed user, uint256 reward);
 event Compounded(address indexed user, uint256 reward);
 event MeatAddressUpdated(address indexed oldAddress, address indexed newAddress);
@@ -94,7 +95,7 @@ function emergencyUnstake() external {
         if (available > 0) _transfer(address(this), msg.sender, available);
         _mint(msg.sender, staked - available);
     }
-    emit Unstaked(msg.sender, staked, 0);
+    emit EmergencyUnstaked(msg.sender, staked);
 }
 /// @notice Unstake and claim staking rewards if eligible
 function unstake() external {
