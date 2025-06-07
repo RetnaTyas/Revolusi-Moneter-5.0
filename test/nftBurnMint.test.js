@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("GoatNFT burn and GOAT mint", function () {
-  let owner, user, goat, nft;
+  let owner, user, goat, nft, swapConfig, SWAP_RATE;
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
@@ -10,6 +10,10 @@ describe("GoatNFT burn and GOAT mint", function () {
     const GOAT = await ethers.getContractFactory("GOAT");
     goat = await GOAT.deploy(owner.address);
     await goat.waitForDeployment();
+
+    swapConfig = await ethers.deployContract("SwapConfig");
+    await swapConfig.waitForDeployment();
+    SWAP_RATE = await swapConfig.SWAP_RATE();
 
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
     nft = await GoatNFT.deploy(goat.target);
@@ -40,7 +44,7 @@ describe("GoatNFT burn and GOAT mint", function () {
     const stored = await nft.getGoatData(tokenId);
     expect(stored.weight).to.equal(newWeight);
 
-    const goatAmount = (newWeight * 10n ** 18n) / 85n;
+    const goatAmount = (newWeight * 10n ** 18n) / SWAP_RATE;
     await expect(nft.connect(user).burn(tokenId))
       .to.emit(nft, "GoatBurned")
       .withArgs(tokenId, user.address, newWeight, goatAmount);

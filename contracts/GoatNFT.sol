@@ -4,6 +4,7 @@ pragma solidity ^0.8.29;
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IGoatToken} from "./interfaces/IGoatToken.sol";
+import {SwapConfig} from "./SwapConfig.sol";
 
 /// @title GoatNFT - tokenized goat identification
 /// @notice Each NFT holds a weight value redeemable for GOAT tokens
@@ -91,7 +92,7 @@ contract GoatNFT is ERC721Burnable {
         uint256 currentWeight = goatValue[tokenId];
         require(currentWeight > 0, "Invalid weight");
 
-        uint256 goatAmount = (currentWeight * 1e18) / 85;
+        uint256 goatAmount = (currentWeight * 1e18) / SwapConfig.SWAP_RATE;
 
         // Mint GOAT tokens directly to the token owner
         goatTokenContract.mint(tokenOwner, goatAmount);
