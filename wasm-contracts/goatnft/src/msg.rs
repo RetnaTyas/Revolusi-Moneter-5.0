@@ -10,7 +10,6 @@ pub struct InstantiateMsg {}
 pub enum ExecuteMsg {
     Mint {
         to: String,
-        value: Uint128,
         nfc_id: String,
         breed: String,
         birth_year: u64,

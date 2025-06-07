@@ -63,14 +63,13 @@ fn burn_nft_for_goat() {
         .execute_contract(
             Addr::unchecked("owner"),
             nft_addr.clone(),
-            &NftExecute::Mint {
-                to: "user".into(),
-                value: Uint128::new(50),
-                nfc_id: "nfc".into(),
-                breed: "breed".into(),
-                birth_year: 2024,
-                weight: 10,
-            },
+        &NftExecute::Mint {
+            to: "user".into(),
+            nfc_id: "nfc".into(),
+            breed: "breed".into(),
+            birth_year: 2024,
+            weight: 10,
+        },
             &[],
         )
         .unwrap();
@@ -115,7 +114,7 @@ fn burn_nft_for_goat() {
             },
         )
         .unwrap();
-    assert_eq!(goat_bal.balance, Uint128::new(50));
+    assert_eq!(goat_bal.balance, Uint128::new(10));
     let owner_res: Result<String, _> = app
         .wrap()
         .query_wasm_smart(nft_addr, &NftQuery::Owner { token_id });
@@ -156,14 +155,13 @@ fn burn_nft_unauthorized() {
         .execute_contract(
             Addr::unchecked("owner"),
             nft_addr.clone(),
-            &NftExecute::Mint {
-                to: "user".into(),
-                value: Uint128::new(50),
-                nfc_id: "nfc".into(),
-                breed: "breed".into(),
-                birth_year: 2024,
-                weight: 10,
-            },
+        &NftExecute::Mint {
+            to: "user".into(),
+            nfc_id: "nfc".into(),
+            breed: "breed".into(),
+            birth_year: 2024,
+            weight: 10,
+        },
             &[],
         )
         .unwrap();

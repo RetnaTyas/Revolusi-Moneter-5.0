@@ -15,7 +15,6 @@ fn mint_sample(app: &mut App, nft_addr: Addr) -> u64 {
             nft_addr.clone(),
             &NftExecute::Mint {
                 to: "user1".into(),
-                value: Uint128::new(10),
                 nfc_id: "nfc".into(),
                 breed: "breed".into(),
                 birth_year: 2024,

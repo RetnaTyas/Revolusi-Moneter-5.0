@@ -45,15 +45,14 @@ contract GoatNFT is ERC721Burnable {
 
     function mint(
         address to,
-        uint256 value,
+        uint256 weight,
         string memory nfcId,
         string memory breed,
-        uint256 birthYear,
-        uint256 weight
+        uint256 birthYear
     ) external onlyOwner returns (uint256) {
-        require(value > 0, "Value must be > 0");
+        require(weight > 0, "Weight must be > 0");
         uint256 tokenId = ++nextId;
-        goatValue[tokenId] = value;
+        goatValue[tokenId] = weight;
         goatMetadata[tokenId] = GoatData(nfcId, breed, birthYear, weight, block.timestamp);
         lastWeightUpdateAt[tokenId] = block.timestamp;
         _mint(to, tokenId);

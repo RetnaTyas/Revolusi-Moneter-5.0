@@ -19,7 +19,7 @@ describe("GoatNFT owner restrictions", function () {
     await expect(
       nft
         .connect(nonOwner)
-        .mint(nonOwner.address, 1, "nfc", "breed", 2020, 50)
+        .mint(nonOwner.address, 50, "nfc", "breed", 2020)
     ).to.be.revertedWith("Not the owner");
   });
 });
