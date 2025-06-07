@@ -44,7 +44,10 @@ contract GoatNFT is ERC721Burnable {
     }
 
     function setGoatTokenContract(address goatTokenAddress) external onlyOwner {
+        require(goatTokenAddress != address(0), "Invalid address");
+        address old = address(goatTokenContract);
         goatTokenContract = IGoatToken(goatTokenAddress);
+        emit GoatTokenAddressUpdated(old, goatTokenAddress);
     }
 
     function mint(
@@ -109,6 +112,8 @@ contract GoatNFT is ERC721Burnable {
         return _owner;
     }
 
+    /// @notice Emitted when the GOAT token contract address changes
+    event GoatTokenAddressUpdated(address indexed oldAddress, address indexed newAddress);
     /// @notice Emitted when NFT is burned and GOAT token minted automatically
     event GoatBurned(uint256 indexed tokenId, address indexed user, uint256 weight, uint256 goatAmount);
     /// @notice Emitted when the goat weight is updated

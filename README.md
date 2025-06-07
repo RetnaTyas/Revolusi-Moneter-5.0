@@ -174,12 +174,13 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 
 ## Events
 
-Perubahan alamat penting pada kontrak GOAT dapat dipantau melalui dua event:
+Perubahan alamat penting pada kontrak GOAT dan GoatNFT dapat dipantau melalui event berikut:
 
 - `MeatAddressUpdated(oldAddress, newAddress)` dicatat ketika pemilik mengganti
   alamat kontrak MEAT.
 - `NftAddressUpdated(oldAddress, newAddress)` dicatat saat alamat GoatNFT diubah.
 - `GoatAddressUpdated(oldAddress, newAddress)` dicatat ketika alamat GOAT pada kontrak MEAT diubah.
+- `GoatTokenAddressUpdated(oldAddress, newAddress)` dicatat ketika kontrak GoatNFT mengubah alamat GOAT yang dipakai untuk mint.
 
 MEAT juga memunculkan event utama berikut:
 
