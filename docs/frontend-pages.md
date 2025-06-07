@@ -28,7 +28,7 @@ This document summarises the main pages expected in the full UI and how they map
   - `unstake()` – withdraw principal plus reward after `minClaimInterval`.
 
 ## `/burn`
-*Overview*: burn a `GoatNFT` to redeem its value in GOAT tokens.
+*Overview*: burn a `GoatNFT` to redeem its weight value in GOAT tokens.
 - **User Inputs**: NFT `tokenId` to burn.
 - **Contract Calls**: `burn(tokenId)` on `GoatNFT` which internally mints equivalent GOAT.
 
