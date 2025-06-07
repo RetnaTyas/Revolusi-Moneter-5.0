@@ -37,6 +37,28 @@ GoatNFT burn --(weight / 85)--> GOAT --(SwapRate)--> MEAT --redeemForMeat--> Rea
 - GOAT dapat ditukar dengan MEAT atau sebaliknya menggunakan `SwapRate` yang sama persis dengan fungsi swap pada kontrak.
 - Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
 
+## What is GoatNFT?
+
+GoatNFT bukan sekadar NFT koleksi. Token ini berfungsi sebagai **identitas digital** dan **ledger siklus hidup** bagi setiap kambing di ekosistem. Setiap NFT mencatat `nfcId`, ras, tahun lahir, dan berat yang terus diperbarui hingga saat penyembelihan.
+
+### Digital Commodity Identity
+
+- **Birth Certificate** – GoatNFT dicetak saat kambing lahir atau didaftarkan.
+- **Living Ledger** – Berat terakhir selalu di-update agar valuasi mengikuti kondisi riil.
+- **Ownership Record** – Mengikuti standar ERC721 sehingga kepemilikan dapat dipindahtangankan.
+- **Slaughter Certificate** – NFT wajib dibakar ketika kambing disembelih; pembakaran ini otomatis mencetak token GOAT berdasarkan berat terakhir.
+- **Fraud Prevention** – Proses burn menghapus NFT selamanya sehingga tidak ada klaim ganda.
+
+### Lifecycle Tokenization
+
+Alurnya ringkas sebagai berikut:
+
+```
+Goat lahir → mint GoatNFT → update berat → transfer bila dijual → burn saat disembelih → mint GOAT → swap ke MEAT → tebus daging fisik
+```
+
+Semua peristiwa tersebut tercatat on-chain sehingga pasokan GOAT dan MEAT selalu dapat diaudit. Dengan desain ini, nilai digital senantiasa terhubung ke komoditas nyata.
+
 ## Deployment
 
 1. Install [Hardhat](https://hardhat.org/) and initialise a project:
