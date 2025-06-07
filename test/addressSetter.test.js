@@ -83,6 +83,12 @@ describe("Setter address validation", function () {
     ).to.be.revertedWith("Invalid address");
   });
 
+  it("reverts when non-owner calls setGoatTokenContract", async function () {
+    await expect(
+      nft.connect(nonOwner).setGoatTokenContract(nonOwner.address)
+    ).to.be.revertedWith("Not the owner");
+  });
+
   it("emits GoatTokenAddressUpdated when goat token contract changes", async function () {
     const GOAT = await ethers.getContractFactory("GOAT");
     const newGoat = await GOAT.deploy(owner.address);
