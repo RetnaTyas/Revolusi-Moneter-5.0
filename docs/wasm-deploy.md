@@ -4,7 +4,7 @@ This project includes CosmWasm implementations for all core contracts under `was
 
 - `starter` – GOAT token with staking logic
 - `meat` – MEAT token supporting swaps and native minting
-- `goatnft` – simple NFT contract whose tokens hold a GOAT value
+- `goatnft` – simple NFT contract whose tokens hold a weight value redeemable for GOAT
 
 The packages mirror the Solidity contracts found under `contracts/`. Most
 functions have equivalent execute messages, but there are notable differences:
@@ -13,7 +13,7 @@ functions have equivalent execute messages, but there are notable differences:
   must call `mint_with_native` and include the funds.
 - **starter** implements GOAT staking and NFT redemption exactly like
   `GOAT.sol`, though events become log attributes.
-- **goatnft** stores goat metadata and value the same way as `GoatNFT.sol` with
+- **goatnft** stores goat metadata and weight the same way as `GoatNFT.sol` with
   minor naming changes.
 
 ## Building

@@ -6,8 +6,12 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IGoatToken} from "./interfaces/IGoatToken.sol";
 
 /// @title GoatNFT - tokenized goat identification
-/// @notice Each NFT holds a value redeemable for GOAT tokens
+/// @notice Each NFT holds a weight value redeemable for GOAT tokens
 /// @dev Enforces fresh weight updates before burning so GOAT minted matches the actual commodity value.
+/// @dev Flow:
+/// - Mint: Stores initial goat weight.
+/// - UpdateWeight: Updates latest weight.
+/// - Burn: Requires fresh weight update, mints GOAT based on latest weight, burns NFT.
 contract GoatNFT is ERC721Burnable {
     uint256 public nextId;
     mapping(uint256 => uint256) public goatValue;
