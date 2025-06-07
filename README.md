@@ -9,7 +9,7 @@ This repository contains two ERC20 tokens:
 
 Berikut gambaran umum alur penggunaan kedua token:
 
-1. **Mint MEAT** – Panggil `mint_with_native` pada kontrak `MEAT` sambil mengirimkan native token (misalnya ETH/BNB). Fungsi ini mencetak MEAT sesuai rasio `DepositRate` dan mengirimkannya ke pengirim. Mengirim dana tanpa pesan ini tidak memicu pencetakan.
+1. **Mint MEAT** – Kirim native token langsung ke alamat kontrak `MEAT` untuk mencetak token sesuai rasio `DepositRate`. Fungsi `receive()` otomatis memproses dana dan mengirim MEAT ke pengirim. Versi CosmWasm menggunakan pesan `mint_with_native` seperti dijelaskan pada bagian berikutnya.
 2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi ditentukan oleh konstanta `SwapRate` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
 3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
@@ -152,9 +152,9 @@ Perubahan alamat penting pada kontrak GOAT dapat dipantau melalui dua event:
 
 MEAT juga memunculkan event utama berikut:
 
-- `MintedWithNative(user, nativeReceived, meatMinted)` dicatat ketika fungsi
-  `mint_with_native` dipanggil dengan mengirimkan dana. Kontrak mencetak MEAT
-  kepada pengirim sejumlah `meatMinted`.
+- `MintedWithNative(user, nativeReceived, meatMinted)` dicatat ketika kontrak
+  menerima native token dan mencetak MEAT. Pada versi CosmWasm event ini
+  dipicu saat `mint_with_native` dipanggil.
 
 ## Running Tests
 
