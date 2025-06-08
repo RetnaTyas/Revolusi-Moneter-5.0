@@ -3,8 +3,9 @@
 This project includes CosmWasm implementations for all core contracts under `wasm-contracts/`:
 
 - `starter` – GOAT token with staking logic
-- `meat` – MEAT token supporting swaps and native minting
+- `meat` – MEAT token supporting swaps and native minting. Provides `redeem_for_meat` and can link a `ratehandler` contract for dynamic rates
 - `goatnft` – simple NFT contract whose tokens hold a weight value redeemable for GOAT
+- `ratehandler` – small utility contract that stores the latest swap rate and allows the owner to update or invalidate it
 
 The packages mirror the Solidity contracts found under `contracts/`. Most
 functions have equivalent execute messages, but there are notable differences:
@@ -40,10 +41,16 @@ If `cargo schema` is not available, install it via `cargo install cargo-run-scri
 
 ## Upload & Instantiate
 
-1. Upload the wasm bytecode:
+1. Upload the wasm bytecode (example for GOAT):
 ```bash
 # example upload of the GOAT contract
 wasmd tx wasm store artifacts/starter.wasm --from wallet \
+ --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+```
+To upload `ratehandler` simply replace the file name:
+```bash
+wasmd tx wasm store artifacts/ratehandler.wasm --from wallet \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
@@ -56,8 +63,9 @@ wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
 
-Instantiate `meat` and `goatnft` with similar commands by providing the desired
-`goat_contract` or no parameters for the NFT.
+Instantiate `meat`, `goatnft` and `ratehandler` with similar commands. `ratehandler`
+requires no parameters and its address can be linked to MEAT using the
+`set_rate_handler` message after deployment.
 
 ### Minting MEAT
 

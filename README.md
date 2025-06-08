@@ -148,15 +148,18 @@ npx hardhat compile
 Folder `wasm-contracts/` menyimpan versi CosmWasm dari setiap kontrak. Seluruh
 pesan mengikuti fungsi di Solidity namun ada beberapa perbedaan tak terelakkan:
 
-- **MEAT**: Pada `MEAT.sol` pengguna cukup mengirim native token dan fungsi
-  `receive()` otomatis mencetak token. CosmWasm tidak menyediakan mekanisme
-  auto‑mint saat menerima dana tanpa pesan sehingga pengguna **harus** memanggil
-  `mint_with_native` sambil menyertakan koin.
+ - **MEAT**: Pada `MEAT.sol` pengguna cukup mengirim native token dan fungsi
+   `receive()` otomatis mencetak token. CosmWasm tidak menyediakan mekanisme
+   auto‑mint saat menerima dana tanpa pesan sehingga pengguna **harus** memanggil
+   `mint_with_native` sambil menyertakan koin. Versi CosmWasm juga menyediakan
+   pesan `redeem_for_meat` serta mendukung penggunaan paket `ratehandler` untuk
+   pembaruan rasio dinamis ketika implementasinya siap.
 - **GOAT**: Kontrak `starter` mereplikasi logika staking, klaim, kompaun dan
   pembakaran NFT. Event Solidity diterjemahkan menjadi atribut di response
   CosmWasm, sedangkan cara perhitungan reward sama persis.
 - **GoatNFT**: Struktur data serta fungsi `mint` dan `burn` identik. Perbedaan
-  hanya terletak pada penamaan pesan.
+  hanya terletak pada penamaan pesan. Kontrak ini tetap mendukung `update_weight`
+  dan memeriksa kesegaran data berat seperti implementasi Solidity.
 
 Secara umum kedua implementasi mempertahankan rasio reward dan swap yang sama
 agar perilaku ekonomi konsisten di EVM maupun Cosmos.
@@ -254,9 +257,9 @@ and `NEXT_PUBLIC_MEAT_ADDRESS` values.
 Struktur dan hubungan antar kontrak:
 - `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan
   fungsi staking, klaim, kompaun, serta konfigurasi reward. Hanya kontrak `MEAT`
-  yang dapat mencetak GOAT melalui `mintTo`.
+  yang dapat mencetak GOAT melalui `mintTo`. Versi CosmWasm memakai pesan `burn_and_mint` untuk menebus GoatNFT dan menyediakan `emergency_unstake`.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
-  untuk mint, memungkinkan penukaran MEAT ↔ GOAT, dan mengontrol fitur swap.
+  untuk mint, memungkinkan penukaran MEAT ↔ GOAT, dan mengontrol fitur swap. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Pengaturan `set_rate_handler` menghubungkan kontrak RateHandler guna mendukung rasio dinamis.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
