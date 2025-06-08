@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { ethers } = require("hardhat");
 
 describe("RateHandler integration", function () {
@@ -90,5 +91,17 @@ describe("RateHandler integration", function () {
       .withArgs(BigInt(block.timestamp));
 
     expect(await handler.dynamicRateValid()).to.be.false;
+  });
+
+  it("allows ownership transfer and restricts owner-only methods", async function () {
+    await expect(handler.transferOwnership(user.address))
+      .to.emit(handler, "OwnershipTransferred")
+      .withArgs(owner.address, user.address);
+
+    await expect(handler.updateRate(300)).to.be.revertedWith("Not the owner");
+
+    await expect(handler.connect(user).updateRate(300))
+      .to.emit(handler, "RateUpdated")
+      .withArgs(300n, anyValue);
   });
 });
