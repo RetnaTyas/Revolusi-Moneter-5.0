@@ -7,9 +7,9 @@ import { IGOAT } from "./interfaces/IGOAT.sol";
 import { SwapConfig } from "./SwapConfig.sol";
 import { RateHandler } from "./RateHandler.sol";
 
-/// @title MEAT Token - Monetary Exchange for Agricultural Transactions
-/// @notice Smart contract untuk mint MEAT pakai Native Token dan swap ke GOAT serta sebaliknya.
-/// Dirancang untuk revolusi moneter berbasis aset peternakan dan pertanian.
+/// @title Token MEAT - Monetary Exchange for Agricultural Transactions
+/// @notice Kontrak pintar untuk mencetak MEAT menggunakan token native dan melakukan swap dengan GOAT.
+/// Dirancang sebagai revolusi moneter berbasis aset peternakan dan pertanian.
 contract MEAT is ERC20 {
     IGOAT public GOAT;
     address private immutable _owner;
@@ -43,7 +43,7 @@ contract MEAT is ERC20 {
         emit InitialSupplyMinted(_owner, initialSupply);
     }
 
-    /// @notice Terima native token & mint MEAT berdasarkan rate
+    /// @notice Menerima token native dan mencetak MEAT sesuai rate
     receive() external payable {
         require(msg.value != 0, "Must send Native Token to mint MEAT");
         uint256 meatAmount = (msg.value * _rate) / 1e3;
@@ -136,8 +136,8 @@ contract MEAT is ERC20 {
         emit GoatAddressUpdated(old, goatAddress);
     }
 
-    /// @notice Sets the rate handler contract address used for swap rates
-    /// @param rateHandlerAddress Address of the RateHandler contract
+    /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap
+    /// @param rateHandlerAddress Alamat kontrak RateHandler
     function setRateHandler(address rateHandlerAddress) external onlyOwner {
         require(rateHandlerAddress != address(0), "Invalid address");
         address old = address(rateHandler);

@@ -1,30 +1,30 @@
-# GOAT & MEAT Token Lifecycle
+# Siklus Hidup Token GOAT & MEAT
 
-The two tokens form a closed loop that allows value to enter the system via MEAT and be rewarded through GOAT staking.
+Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT dan diberikan imbalan lewat staking GOAT.
 
-- Each **GoatNFT** records the goat's *breed*, *NFC tag*, *birth year* and current *weight*.
-- Owners may freely transfer the NFT and update its weight as the animal grows.
-- Before a goat is slaughtered, the token must be **burned** with a fresh weight which automatically mints GOAT.
-- GOAT tokens may then be staked for rewards or swapped for MEAT.
-- MEAT is ultimately burned with `redeemForMeat` to claim the physical meat.
+- Setiap **GoatNFT** mencatat *ras*, *NFC tag*, *tahun lahir*, dan *berat* terkini.
+- Pemilik bebas memindahkan NFT dan memperbarui berat seiring pertumbuhan hewan.
+- Sebelum kambing disembelih, token harus **dibakar** dengan berat terbaru yang secara otomatis mencetak GOAT.
+- Token GOAT kemudian dapat di-stake untuk reward atau ditukar menjadi MEAT.
+- MEAT pada akhirnya dibakar menggunakan `redeemForMeat` untuk menebus daging fisik.
 
-1. **Minting MEAT**
-   * Users send native currency to the MEAT contract. Its `receive()` function mints MEAT to the sender using the `DepositRate`, scaled per 1000 units (default `100`, i.e. 100 MEAT per 1000 native).
-   * The contract emits `MintedWithNative(user, nativeReceived, meatMinted)` recording who minted and how much native token was received.
-2. **Swapping**
-   * MEAT can be swapped to GOAT and vice versa through the MEAT contract when `swapEnabled` is true. The conversion rate comes from `RateHandler` with a fallback to `SWAP_RATE`.
-3. **GoatNFTs**
-   * A [GoatNFT](contracts/GoatNFT.sol) represents a live goat and stores its current weight in `goatValue`.
-   * Owners may update the weight anytime, emitting `WeightUpdated`. The weight uses one decimal place (`WEIGHT_DECIMALS = 1`) so `425` means **42.5 kg**.
-   * Before burning the NFT the weight must have been updated within the last seven days. `burn` mints GOAT automatically and emits `GoatBurned`.
+1. **Mencetak MEAT**
+   * Pengguna mengirim mata uang native ke kontrak MEAT. Fungsi `receive()` mencetak MEAT ke pengirim berdasarkan `DepositRate`, dihitung per 1000 unit (default `100`, artinya 100 MEAT per 1000 native).
+   * Kontrak memancarkan `MintedWithNative(user, nativeReceived, meatMinted)` yang mencatat siapa mencetak dan berapa jumlah token native diterima.
+2. **Swap**
+   * MEAT dapat ditukar ke GOAT dan sebaliknya melalui kontrak MEAT saat `swapEnabled` bernilai true. Rasio konversi berasal dari `RateHandler` dengan fallback ke `SWAP_RATE`.
+3. **GoatNFT**
+   * [GoatNFT](contracts/GoatNFT.sol) mewakili kambing hidup dan menyimpan beratnya di `goatValue`.
+   * Pemilik dapat memperbarui berat kapan saja (event `WeightUpdated`). Berat memakai satu desimal (`WEIGHT_DECIMALS = 1`) sehingga `425` berarti **42.5 kg**.
+   * Sebelum membakar NFT, berat harus diperbarui dalam tujuh hari terakhir. Fungsi `burn` otomatis mencetak GOAT dan memancarkan `GoatBurned`.
 4. **Staking GOAT**
-   * GOAT holders stake tokens in `GOAT.sol` which records staking balances and timestamps. Rewards accrue linearly according to `rewardRate` and `rewardInterval`.
-   *Calling `stake()` again resets `lastStakedTime` and discards any pending reward. Claim your reward first if you plan to restake.*
-5. **Claiming Rewards**
-   * After `minClaimInterval` stakers may claim rewards or compound them back into the stake. If they choose to exit entirely they call `unstake` to receive the principal plus reward.
-6. **Returning to MEAT**
-   * Unstaked GOAT can be swapped back for MEAT which may then be withdrawn from the ecosystem or used again for future interactions.
-7. **Redeeming MEAT**
-   * Holders burn their MEAT using `redeemForMeat(amount)` which emits `MeatRedeemed` for off-chain processing. Each token redeemed entitles them to **one kilogram of meat** from our authorised distribution partners. For a concise diagram of this burn and redemption path, see the section [Burn & Redeem Flow](README.md#burn--redeem-flow) in the README.
+   * Pemegang GOAT melakukan staking di `GOAT.sol` yang mencatat saldo dan timestamp. Reward terakumulasi secara linier berdasarkan `rewardRate` dan `rewardInterval`.
+   * Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil. Klaim terlebih dahulu jika ingin menambah stake.
+5. **Mengambil Reward**
+   * Setelah `minClaimInterval`, staker bisa mengambil reward atau menggabungkannya kembali ke stake. Untuk keluar sepenuhnya panggil `unstake` agar pokok dan reward diterima.
+6. **Kembali ke MEAT**
+   * GOAT yang tidak di-stake dapat ditukar kembali ke MEAT yang lalu dapat ditarik dari ekosistem atau digunakan lagi.
+7. **Menebus MEAT**
+   * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain. Tiap token yang ditebus mewakili **satu kilogram daging** dari mitra distribusi kami. Diagram singkat jalur burn dan redemption dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow) di README.
 
-This lifecycle ensures that every stage of participation is backed by explicit contract functions and transparent token flows.
+Siklus ini memastikan setiap tahap partisipasi didukung oleh fungsi kontrak yang eksplisit dan alur token yang transparan.
