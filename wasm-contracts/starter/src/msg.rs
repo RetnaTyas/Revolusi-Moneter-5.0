@@ -74,3 +74,12 @@ pub struct NextClaimResponse {
     pub timestamp: u64,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct GoatDataResponse {
+    pub nfc_id: String,
+    pub breed: String,
+    pub birth_year: u64,
+    pub weight: u64,
+    pub minted_at: u64,
+}
+

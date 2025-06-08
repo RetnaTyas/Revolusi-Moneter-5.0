@@ -12,6 +12,7 @@ use crate::msg::{
     PendingRewardResponse,
     NextClaimResponse,
     GoatValueResponse,
+    GoatDataResponse,
 };
 use crate::state::*;
 
@@ -72,7 +73,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
         ExecuteMsg::Approve { spender, amount } => execute_approve(deps, info, spender, amount),
         ExecuteMsg::TransferFrom { owner, recipient, amount } => execute_transfer_from(deps, info, owner, recipient, amount),
         ExecuteMsg::MintTo { to, amount } => execute_mint_to(deps, info, to, amount),
-        ExecuteMsg::BurnAndMint { token_id } => execute_burn_and_mint(deps, info, token_id),
+        ExecuteMsg::BurnAndMint { token_id } => execute_burn_and_mint(deps, env, info, token_id),
         ExecuteMsg::Stake { amount } => execute_stake(deps, env, info, amount),
         ExecuteMsg::EmergencyUnstake {} => execute_emergency_unstake(deps, env, info),
         ExecuteMsg::Unstake {} => execute_unstake(deps, env, info),
@@ -120,11 +121,37 @@ fn execute_mint_to(mut deps: DepsMut, info: MessageInfo, to: String, amount: Uin
     Ok(Response::new())
 }
 
-fn execute_burn_and_mint(deps: DepsMut, info: MessageInfo, token_id: u64) -> StdResult<Response> {
-    let nft = NFT_CONTRACT.load(deps.storage)?.ok_or_else(|| StdError::generic_err("NFT not set"))?;
-    let query = to_json_binary(&serde_json::json!({"goat_value": {"token_id": token_id}}))?;
-    let resp: GoatValueResponse = deps.querier.query_wasm_smart(nft.clone(), &query)?;
-    let burn = WasmMsg::Execute { contract_addr: nft.to_string(), msg: to_json_binary(&Cw721ExecuteMsg::Burn { token_id: token_id.to_string() })?, funds: vec![] };
+fn execute_burn_and_mint(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    token_id: u64,
+) -> StdResult<Response> {
+    const WEIGHT_UPDATE_VALIDITY: u64 = 60 * 60 * 24 * 7;
+    let nft = NFT_CONTRACT
+        .load(deps.storage)?
+        .ok_or_else(|| StdError::generic_err("NFT not set"))?;
+
+    // query goat value
+    let query_val = to_json_binary(&serde_json::json!({"goat_value": {"token_id": token_id}}))?;
+    let resp: GoatValueResponse = deps.querier.query_wasm_smart(nft.clone(), &query_val)?;
+
+    // query last weight update timestamp via goat_data
+    let query_data = to_json_binary(&serde_json::json!({"goat_data": {"token_id": token_id}}))?;
+    let data: GoatDataResponse = deps.querier.query_wasm_smart(nft.clone(), &query_data)?;
+
+    if env.block.time.seconds().saturating_sub(data.minted_at) > WEIGHT_UPDATE_VALIDITY {
+        return Err(StdError::generic_err("Weight update too old"));
+    }
+
+    let burn = WasmMsg::Execute {
+        contract_addr: nft.to_string(),
+        msg: to_json_binary(&Cw721ExecuteMsg::Burn {
+            token_id: token_id.to_string(),
+        })?,
+        funds: vec![],
+    };
+
     add_balance(deps.storage, &info.sender, resp.value)?;
     let supply = TOTAL_SUPPLY.load(deps.storage)? + resp.value;
     TOTAL_SUPPLY.save(deps.storage, &supply)?;
