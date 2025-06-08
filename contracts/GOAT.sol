@@ -3,7 +3,6 @@ pragma solidity ^0.8.29;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { RateHandler } from "./RateHandler.sol";
 
 /// @title GOAT Token - Guardian of Organic Agriculture Trust
 /// @notice A smart contract enabling staking, compounding, and minting by MEAT contract
@@ -25,7 +24,6 @@ event RewardClaimed(address indexed user, uint256 reward);
 event Compounded(address indexed user, uint256 reward);
 event MeatAddressUpdated(address indexed oldAddress, address indexed newAddress);
 event NftAddressUpdated(address indexed oldAddress, address indexed newAddress);
-event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
 mapping(address => uint256) public stakingBalance;
 mapping(address => uint256) public lastStakedTime;
 uint256 public rewardRate = 5e18; // 500% per year, scaled to 1e18
@@ -33,8 +31,7 @@ uint256 public rewardInterval = 365 days;
 uint256 public minClaimInterval = 7 days;
 uint256 private constant REWARD_PRECISION = 1e18;
 address public meatContract;
-address public nftContract;
-RateHandler public rateHandler;
+    address public nftContract;
 
 constructor(address meatAddress) ERC20("Guardian of Agricultural Trade", "GOAT") {
     _owner = msg.sender;
@@ -60,14 +57,6 @@ function setNFTAddress(address nftAddress) external onlyOwner {
     address old = nftContract;
     nftContract = nftAddress;
     emit NftAddressUpdated(old, nftAddress);
-}
-/// @notice Sets the rate handler contract address
-/// @param rateHandlerAddress Address of the RateHandler contract
-function setRateHandler(address rateHandlerAddress) external onlyOwner {
-    require(rateHandlerAddress != address(0), "Invalid address");
-    address old = address(rateHandler);
-    rateHandler = RateHandler(rateHandlerAddress);
-    emit RateHandlerUpdated(old, rateHandlerAddress);
 }
 /// @notice Allows the MEAT contract to mint GOAT tokens to any address
 /// @param to The recipient address
