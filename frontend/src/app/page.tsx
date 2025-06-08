@@ -15,9 +15,9 @@ export default function Home() {
         />
         <ol>
           <li>
-            Get started by editing <code>src/app/page.tsx</code>.
+            Mulai dengan mengedit <code>src/app/page.tsx</code>.
           </li>
-          <li>Save and see your changes instantly.</li>
+          <li>Simpan dan lihat perubahan Anda seketika.</li>
         </ol>
 
         <div className={styles.ctas}>
@@ -34,7 +34,7 @@ export default function Home() {
               width={20}
               height={20}
             />
-            Deploy now
+            Deploy sekarang
           </a>
           <a
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
@@ -42,7 +42,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className={styles.secondary}
           >
-            Read our docs
+            Baca dokumentasi
           </a>
         </div>
       </main>
@@ -59,7 +59,7 @@ export default function Home() {
             width={16}
             height={16}
           />
-          Learn
+          Pelajari
         </a>
         <a
           href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
@@ -73,7 +73,7 @@ export default function Home() {
             width={16}
             height={16}
           />
-          Examples
+          Contoh
         </a>
         <a
           href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
@@ -87,7 +87,7 @@ export default function Home() {
             width={16}
             height={16}
           />
-          Go to nextjs.org →
+          Kunjungi nextjs.org →
         </a>
       </footer>
     </div>

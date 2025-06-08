@@ -1,13 +1,19 @@
 # Peta Kontrak
 
-```
-[User Wallet]
-    |  (native token)
-    v
-[MEAT] <----> [GOAT]
-   |              ^
-   |              |
-   +-- withdraw -->|
+```mermaid
+flowchart TD
+  UserWallet((User Wallet))
+  GoatNFT[GoatNFT]
+  GOAT[GOAT]
+  MEAT[MEAT]
+  RateHandler[RateHandler]
+
+  UserWallet -- "native token" --> MEAT
+  GoatNFT -- burn --> GOAT
+  GOAT <--> MEAT
+  MEAT -->|withdraw| UserWallet
+  RateHandler --> GOAT
+  RateHandler --> MEAT
 ```
 
 * **MEAT** berperan sebagai gerbang: menerima koin native, mencetak MEAT, dan menangani swap dua arah. Pemilik dapat menarik saldo native yang terkumpul.
