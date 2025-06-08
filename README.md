@@ -198,6 +198,8 @@ MEAT juga memunculkan event utama berikut:
 - `MintedWithNative(user, nativeReceived, meatMinted)` dicatat ketika kontrak
   menerima native token dan mencetak MEAT. Pada versi CosmWasm event ini
   dipicu saat `mint_with_native` dipanggil.
+- `SwapEnabledUpdated(status)` dicatat ketika pemilik mengubah status swap
+  MEAT dan GOAT.
 
 ## Running Tests
 
