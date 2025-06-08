@@ -10,17 +10,44 @@ pub struct InstantiateMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
-    Transfer { recipient: String, amount: Uint128 },
-    Approve { spender: String, amount: Uint128 },
-    TransferFrom { owner: String, recipient: String, amount: Uint128 },
+    Transfer {
+        recipient: String,
+        amount: Uint128,
+    },
+    Approve {
+        spender: String,
+        amount: Uint128,
+    },
+    TransferFrom {
+        owner: String,
+        recipient: String,
+        amount: Uint128,
+    },
     MintWithNative {},
-    WithdrawNative { to: Option<String> },
-    ChangeDepositRate { new_rate: Uint128 },
-    SwapGoatForMeat { goat_amount: Uint128 },
-    SwapMeatForGoat { meat_amount: Uint128 },
-    RedeemForMeat { amount: Uint128 },
-    SetSwapEnabled { enabled: bool },
-    SetGoatAddress { goat_address: String },
+    WithdrawNative {
+        to: Option<String>,
+    },
+    ChangeDepositRate {
+        new_rate: Uint128,
+    },
+    SwapGoatForMeat {
+        goat_amount: Uint128,
+    },
+    SwapMeatForGoat {
+        meat_amount: Uint128,
+    },
+    RedeemForMeat {
+        amount: Uint128,
+    },
+    SetSwapEnabled {
+        enabled: bool,
+    },
+    SetGoatAddress {
+        goat_address: String,
+    },
+    SetRateHandler {
+        addr: String,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

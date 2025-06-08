@@ -1,9 +1,16 @@
-use cosmwasm_std::{entry_point, to_json_binary, Addr, Binary, Coin, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg, BankMsg};
+use cosmwasm_std::{
+    entry_point, to_json_binary, Addr, BankMsg, Binary, Coin, Deps, DepsMut, Env, MessageInfo,
+    Response, StdError, StdResult, Uint128, WasmMsg,
+};
 use cw2::set_contract_version;
 
+use ratehandler::{QueryMsg as RateQueryMsg, RateResponse as RateInfo};
 use starter::msg as goat_msg;
 
-use crate::msg::{InstantiateMsg, ExecuteMsg, QueryMsg, BalanceResponse, AllowanceResponse, TokenInfoResponse, RateResponse, EnabledResponse, EquivalentResponse};
+use crate::msg::{
+    AllowanceResponse, BalanceResponse, EnabledResponse, EquivalentResponse, ExecuteMsg,
+    InstantiateMsg, QueryMsg, RateResponse, TokenInfoResponse,
+};
 use crate::state::*;
 
 pub mod msg;
@@ -12,23 +19,51 @@ pub mod state;
 const CONTRACT_NAME: &str = "meat";
 const CONTRACT_VERSION: &str = "0.1.0";
 
-fn add_balance(store: &mut dyn cosmwasm_std::Storage, addr: &Addr, amount: Uint128) -> StdResult<()> {
+fn add_balance(
+    store: &mut dyn cosmwasm_std::Storage,
+    addr: &Addr,
+    amount: Uint128,
+) -> StdResult<()> {
     let bal = BALANCES.may_load(store, addr)?.unwrap_or_default() + amount;
     BALANCES.save(store, addr, &bal)
 }
 
-fn sub_balance(store: &mut dyn cosmwasm_std::Storage, addr: &Addr, amount: Uint128) -> StdResult<()> {
+fn sub_balance(
+    store: &mut dyn cosmwasm_std::Storage,
+    addr: &Addr,
+    amount: Uint128,
+) -> StdResult<()> {
     let bal = BALANCES.may_load(store, addr)?.unwrap_or_default();
-    if bal < amount { return Err(StdError::generic_err("Insufficient balance")); }
+    if bal < amount {
+        return Err(StdError::generic_err("Insufficient balance"));
+    }
     BALANCES.save(store, addr, &(bal - amount))
 }
 
+fn get_swap_rate(deps: Deps) -> StdResult<u128> {
+    if let Some(addr) = RATE_HANDLER.load(deps.storage)? {
+        let resp: RateInfo = deps
+            .querier
+            .query_wasm_smart(addr, &RateQueryMsg::GetRate {})?;
+        if resp.valid {
+            return Ok(resp.rate.u128());
+        }
+    }
+    Ok(SWAP_RATE)
+}
+
 #[entry_point]
-pub fn instantiate(deps: DepsMut, _env: Env, info: MessageInfo, msg: InstantiateMsg) -> StdResult<Response> {
+pub fn instantiate(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    msg: InstantiateMsg,
+) -> StdResult<Response> {
     let owner = info.sender.clone();
     OWNER.save(deps.storage, &owner)?;
     let goat_addr = deps.api.addr_validate(&msg.goat_contract)?;
     GOAT_CONTRACT.save(deps.storage, &goat_addr)?;
+    RATE_HANDLER.save(deps.storage, &None)?;
     RATE.save(deps.storage, &Uint128::new(100))?;
     SWAP_ENABLED.save(deps.storage, &true)?;
     let init = Uint128::new(INITIAL_SUPPLY);
@@ -40,45 +75,78 @@ pub fn instantiate(deps: DepsMut, _env: Env, info: MessageInfo, msg: Instantiate
 
 fn only_owner(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
     let owner = OWNER.load(deps.storage)?;
-    if info.sender != owner { return Err(StdError::generic_err("Not the owner")); }
+    if info.sender != owner {
+        return Err(StdError::generic_err("Not the owner"));
+    }
     Ok(())
 }
 
 #[entry_point]
 pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
-        ExecuteMsg::Transfer { recipient, amount } => execute_transfer(deps, info, recipient, amount),
+        ExecuteMsg::Transfer { recipient, amount } => {
+            execute_transfer(deps, info, recipient, amount)
+        }
         ExecuteMsg::Approve { spender, amount } => execute_approve(deps, info, spender, amount),
-        ExecuteMsg::TransferFrom { owner, recipient, amount } => execute_transfer_from(deps, info, owner, recipient, amount),
+        ExecuteMsg::TransferFrom {
+            owner,
+            recipient,
+            amount,
+        } => execute_transfer_from(deps, info, owner, recipient, amount),
         ExecuteMsg::MintWithNative {} => execute_mint_with_native(deps, env, info),
         ExecuteMsg::WithdrawNative { to } => execute_withdraw_native(deps, env, info, to),
         ExecuteMsg::ChangeDepositRate { new_rate } => execute_change_rate(deps, info, new_rate),
-        ExecuteMsg::SwapGoatForMeat { goat_amount } => execute_swap_goat_for_meat(deps, env, info, goat_amount),
-        ExecuteMsg::SwapMeatForGoat { meat_amount } => execute_swap_meat_for_goat(deps, env, info, meat_amount),
+        ExecuteMsg::SwapGoatForMeat { goat_amount } => {
+            execute_swap_goat_for_meat(deps, env, info, goat_amount)
+        }
+        ExecuteMsg::SwapMeatForGoat { meat_amount } => {
+            execute_swap_meat_for_goat(deps, env, info, meat_amount)
+        }
         ExecuteMsg::RedeemForMeat { amount } => execute_redeem_for_meat(deps, info, amount),
         ExecuteMsg::SetSwapEnabled { enabled } => execute_set_swap_enabled(deps, info, enabled),
         ExecuteMsg::SetGoatAddress { goat_address } => execute_set_goat(deps, info, goat_address),
+        ExecuteMsg::SetRateHandler { addr } => execute_set_rate_handler(deps, info, addr),
     }
 }
 
-fn execute_transfer(deps: DepsMut, info: MessageInfo, recipient: String, amount: Uint128) -> StdResult<Response> {
+fn execute_transfer(
+    deps: DepsMut,
+    info: MessageInfo,
+    recipient: String,
+    amount: Uint128,
+) -> StdResult<Response> {
     let recipient = deps.api.addr_validate(&recipient)?;
     sub_balance(deps.storage, &info.sender, amount)?;
     add_balance(deps.storage, &recipient, amount)?;
     Ok(Response::new())
 }
 
-fn execute_approve(deps: DepsMut, info: MessageInfo, spender: String, amount: Uint128) -> StdResult<Response> {
+fn execute_approve(
+    deps: DepsMut,
+    info: MessageInfo,
+    spender: String,
+    amount: Uint128,
+) -> StdResult<Response> {
     let spender = deps.api.addr_validate(&spender)?;
     ALLOWANCES.save(deps.storage, (&info.sender, &spender), &amount)?;
     Ok(Response::new())
 }
 
-fn execute_transfer_from(deps: DepsMut, info: MessageInfo, owner: String, recipient: String, amount: Uint128) -> StdResult<Response> {
+fn execute_transfer_from(
+    deps: DepsMut,
+    info: MessageInfo,
+    owner: String,
+    recipient: String,
+    amount: Uint128,
+) -> StdResult<Response> {
     let owner_addr = deps.api.addr_validate(&owner)?;
     let recipient = deps.api.addr_validate(&recipient)?;
-    let mut allowance = ALLOWANCES.may_load(deps.storage, (&owner_addr, &info.sender))?.unwrap_or_default();
-    if allowance < amount { return Err(StdError::generic_err("Allowance exceeded")); }
+    let mut allowance = ALLOWANCES
+        .may_load(deps.storage, (&owner_addr, &info.sender))?
+        .unwrap_or_default();
+    if allowance < amount {
+        return Err(StdError::generic_err("Allowance exceeded"));
+    }
     allowance -= amount;
     ALLOWANCES.save(deps.storage, (&owner_addr, &info.sender), &allowance)?;
     sub_balance(deps.storage, &owner_addr, amount)?;
@@ -87,13 +155,20 @@ fn execute_transfer_from(deps: DepsMut, info: MessageInfo, owner: String, recipi
 }
 
 fn execute_mint_with_native(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
-    let coin: &Coin = info.funds.first().ok_or_else(|| StdError::generic_err("No funds"))?;
-    if coin.amount.is_zero() { return Err(StdError::generic_err("No funds")); }
+    let coin: &Coin = info
+        .funds
+        .first()
+        .ok_or_else(|| StdError::generic_err("No funds"))?;
+    if coin.amount.is_zero() {
+        return Err(StdError::generic_err("No funds"));
+    }
     let rate = RATE.load(deps.storage)?.u128();
     let meat_amount = coin.amount.u128() * rate / 1000u128;
     let mint = Uint128::new(meat_amount);
     let contract = env.contract.address.clone();
-    let mut contract_bal = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
+    let mut contract_bal = BALANCES
+        .may_load(deps.storage, &contract)?
+        .unwrap_or_default();
     if contract_bal >= mint {
         contract_bal -= mint;
         BALANCES.save(deps.storage, &contract, &contract_bal)?;
@@ -120,19 +195,36 @@ fn execute_mint_with_native(deps: DepsMut, env: Env, info: MessageInfo) -> StdRe
         .add_attribute("minted", mint))
 }
 
-fn execute_withdraw_native(mut deps: DepsMut, env: Env, info: MessageInfo, to: Option<String>) -> StdResult<Response> {
+fn execute_withdraw_native(
+    mut deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    to: Option<String>,
+) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
     let bal = deps.querier.query_all_balances(env.contract.address)?;
-    if bal.is_empty() { return Err(StdError::generic_err("No funds")); }
+    if bal.is_empty() {
+        return Err(StdError::generic_err("No funds"));
+    }
     let to_addr = to.unwrap_or_else(|| info.sender.to_string());
     Ok(Response::new()
-        .add_message(BankMsg::Send { to_address: to_addr.clone(), amount: bal.clone() })
+        .add_message(BankMsg::Send {
+            to_address: to_addr.clone(),
+            amount: bal.clone(),
+        })
         .add_attribute("action", "NativeWithdrawn")
         .add_attribute("to", to_addr)
-        .add_attribute("amount", format!("{}", bal.iter().map(|c| c.amount).sum::<Uint128>())))
+        .add_attribute(
+            "amount",
+            format!("{}", bal.iter().map(|c| c.amount).sum::<Uint128>()),
+        ))
 }
 
-fn execute_change_rate(mut deps: DepsMut, info: MessageInfo, new_rate: Uint128) -> StdResult<Response> {
+fn execute_change_rate(
+    mut deps: DepsMut,
+    info: MessageInfo,
+    new_rate: Uint128,
+) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
     let old = RATE.load(deps.storage)?;
     RATE.save(deps.storage, &new_rate)?;
@@ -142,14 +234,34 @@ fn execute_change_rate(mut deps: DepsMut, info: MessageInfo, new_rate: Uint128) 
         .add_attribute("new_rate", new_rate))
 }
 
-fn execute_swap_goat_for_meat(deps: DepsMut, env: Env, info: MessageInfo, goat_amount: Uint128) -> StdResult<Response> {
-    if !SWAP_ENABLED.load(deps.storage)? { return Err(StdError::generic_err("Swap disabled")); }
-    if goat_amount.is_zero() { return Err(StdError::generic_err("Amount must be > 0")); }
+fn execute_swap_goat_for_meat(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    goat_amount: Uint128,
+) -> StdResult<Response> {
+    if !SWAP_ENABLED.load(deps.storage)? {
+        return Err(StdError::generic_err("Swap disabled"));
+    }
+    if goat_amount.is_zero() {
+        return Err(StdError::generic_err("Amount must be > 0"));
+    }
     let goat = GOAT_CONTRACT.load(deps.storage)?;
-    let transfer = WasmMsg::Execute { contract_addr: goat.to_string(), msg: to_json_binary(&goat_msg::ExecuteMsg::TransferFrom { owner: info.sender.to_string(), recipient: env.contract.address.to_string(), amount: goat_amount })?, funds: vec![] };
-    let meat_needed = Uint128::new(goat_amount.u128() * SWAP_RATE);
+    let transfer = WasmMsg::Execute {
+        contract_addr: goat.to_string(),
+        msg: to_json_binary(&goat_msg::ExecuteMsg::TransferFrom {
+            owner: info.sender.to_string(),
+            recipient: env.contract.address.to_string(),
+            amount: goat_amount,
+        })?,
+        funds: vec![],
+    };
+    let rate = get_swap_rate(deps.as_ref())?;
+    let meat_needed = Uint128::new(goat_amount.u128() * rate);
     let contract = env.contract.address;
-    let bal = BALANCES.may_load(deps.storage, &contract)?.unwrap_or_default();
+    let bal = BALANCES
+        .may_load(deps.storage, &contract)?
+        .unwrap_or_default();
     let mut resp = Response::new().add_message(transfer);
     if bal >= meat_needed {
         sub_balance(deps.storage, &contract, meat_needed)?;
@@ -172,31 +284,58 @@ fn execute_swap_goat_for_meat(deps: DepsMut, env: Env, info: MessageInfo, goat_a
     Ok(resp)
 }
 
-fn execute_swap_meat_for_goat(deps: DepsMut, env: Env, info: MessageInfo, meat_amount: Uint128) -> StdResult<Response> {
-    if !SWAP_ENABLED.load(deps.storage)? { return Err(StdError::generic_err("Swap disabled")); }
-    if meat_amount.is_zero() { return Err(StdError::generic_err("Amount must be > 0")); }
+fn execute_swap_meat_for_goat(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    meat_amount: Uint128,
+) -> StdResult<Response> {
+    if !SWAP_ENABLED.load(deps.storage)? {
+        return Err(StdError::generic_err("Swap disabled"));
+    }
+    if meat_amount.is_zero() {
+        return Err(StdError::generic_err("Amount must be > 0"));
+    }
     let goat = GOAT_CONTRACT.load(deps.storage)?;
-    let mut allowance = ALLOWANCES.may_load(deps.storage, (&info.sender, &env.contract.address))?.unwrap_or_default();
-    if allowance < meat_amount { return Err(StdError::generic_err("Allowance exceeded")); }
+    let mut allowance = ALLOWANCES
+        .may_load(deps.storage, (&info.sender, &env.contract.address))?
+        .unwrap_or_default();
+    if allowance < meat_amount {
+        return Err(StdError::generic_err("Allowance exceeded"));
+    }
     allowance -= meat_amount;
-    ALLOWANCES.save(deps.storage, (&info.sender, &env.contract.address), &allowance)?;
+    ALLOWANCES.save(
+        deps.storage,
+        (&info.sender, &env.contract.address),
+        &allowance,
+    )?;
     sub_balance(deps.storage, &info.sender, meat_amount)?;
     add_balance(deps.storage, &env.contract.address, meat_amount)?;
-    let goat_amount = Uint128::new(meat_amount.u128() / SWAP_RATE);
-    let query = goat_msg::QueryMsg::Balance { address: env.contract.address.to_string() };
-    let goat_bal: goat_msg::BalanceResponse = deps.querier.query_wasm_smart(goat.clone(), &query)?;
+    let rate = get_swap_rate(deps.as_ref())?;
+    let goat_amount = Uint128::new(meat_amount.u128() / rate);
+    let query = goat_msg::QueryMsg::Balance {
+        address: env.contract.address.to_string(),
+    };
+    let goat_bal: goat_msg::BalanceResponse =
+        deps.querier.query_wasm_smart(goat.clone(), &query)?;
     let mut resp = Response::new();
     if goat_bal.balance < goat_amount {
         let diff = goat_amount.checked_sub(goat_bal.balance)?;
         resp = resp.add_message(WasmMsg::Execute {
             contract_addr: goat.to_string(),
-            msg: to_json_binary(&goat_msg::ExecuteMsg::MintTo { to: env.contract.address.to_string(), amount: diff })?,
+            msg: to_json_binary(&goat_msg::ExecuteMsg::MintTo {
+                to: env.contract.address.to_string(),
+                amount: diff,
+            })?,
             funds: vec![],
         });
     }
     resp = resp.add_message(WasmMsg::Execute {
         contract_addr: goat.to_string(),
-        msg: to_json_binary(&goat_msg::ExecuteMsg::Transfer { recipient: info.sender.to_string(), amount: goat_amount })?,
+        msg: to_json_binary(&goat_msg::ExecuteMsg::Transfer {
+            recipient: info.sender.to_string(),
+            amount: goat_amount,
+        })?,
         funds: vec![],
     });
     Ok(resp
@@ -206,7 +345,11 @@ fn execute_swap_meat_for_goat(deps: DepsMut, env: Env, info: MessageInfo, meat_a
         .add_attribute("goat_out", goat_amount))
 }
 
-fn execute_redeem_for_meat(deps: DepsMut, info: MessageInfo, amount: Uint128) -> StdResult<Response> {
+fn execute_redeem_for_meat(
+    deps: DepsMut,
+    info: MessageInfo,
+    amount: Uint128,
+) -> StdResult<Response> {
     if amount.is_zero() {
         return Err(StdError::generic_err("Amount must be > 0"));
     }
@@ -222,16 +365,35 @@ fn execute_redeem_for_meat(deps: DepsMut, info: MessageInfo, amount: Uint128) ->
         .add_attribute("amount", amount))
 }
 
-fn execute_set_swap_enabled(mut deps: DepsMut, info: MessageInfo, enabled: bool) -> StdResult<Response> {
+fn execute_set_swap_enabled(
+    mut deps: DepsMut,
+    info: MessageInfo,
+    enabled: bool,
+) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
     SWAP_ENABLED.save(deps.storage, &enabled)?;
     Ok(Response::new())
 }
 
-fn execute_set_goat(mut deps: DepsMut, info: MessageInfo, goat_address: String) -> StdResult<Response> {
+fn execute_set_goat(
+    mut deps: DepsMut,
+    info: MessageInfo,
+    goat_address: String,
+) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
     let addr = deps.api.addr_validate(&goat_address)?;
     GOAT_CONTRACT.save(deps.storage, &addr)?;
+    Ok(Response::new())
+}
+
+fn execute_set_rate_handler(
+    mut deps: DepsMut,
+    info: MessageInfo,
+    addr: String,
+) -> StdResult<Response> {
+    only_owner(deps.branch(), &info)?;
+    let addr = deps.api.addr_validate(&addr)?;
+    RATE_HANDLER.save(deps.storage, &Some(addr))?;
     Ok(Response::new())
 }
 
@@ -246,12 +408,19 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::Allowance { owner, spender } => {
             let owner = deps.api.addr_validate(&owner)?;
             let spender = deps.api.addr_validate(&spender)?;
-            let allowance = ALLOWANCES.may_load(deps.storage, (&owner, &spender))?.unwrap_or_default();
+            let allowance = ALLOWANCES
+                .may_load(deps.storage, (&owner, &spender))?
+                .unwrap_or_default();
             to_json_binary(&AllowanceResponse { allowance })
         }
         QueryMsg::TokenInfo {} => {
             let total_supply = TOTAL_SUPPLY.load(deps.storage)?;
-            to_json_binary(&TokenInfoResponse { name: NAME.to_string(), symbol: SYMBOL.to_string(), decimals: DECIMALS, total_supply })
+            to_json_binary(&TokenInfoResponse {
+                name: NAME.to_string(),
+                symbol: SYMBOL.to_string(),
+                decimals: DECIMALS,
+                total_supply,
+            })
         }
         QueryMsg::DepositRate {} => {
             let rate = RATE.load(deps.storage)?;
@@ -266,11 +435,13 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             to_json_binary(&owner.into_string())
         }
         QueryMsg::EquivalentMeat { goat_amount } => {
-            let amount = Uint128::new(goat_amount.u128() * SWAP_RATE);
+            let rate = get_swap_rate(deps)?;
+            let amount = Uint128::new(goat_amount.u128() * rate);
             to_json_binary(&EquivalentResponse { amount })
         }
         QueryMsg::EquivalentGoat { meat_amount } => {
-            let amount = Uint128::new(meat_amount.u128() / SWAP_RATE);
+            let rate = get_swap_rate(deps)?;
+            let amount = Uint128::new(meat_amount.u128() / rate);
             to_json_binary(&EquivalentResponse { amount })
         }
     }
