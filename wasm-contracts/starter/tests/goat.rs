@@ -5,6 +5,7 @@ use starter::{execute, instantiate, query};
 use starter::msg::{InstantiateMsg, ExecuteMsg, QueryMsg, BalanceResponse, StakingInfoResponse, TokenInfoResponse, PendingRewardResponse};
 use goatnft::{execute as nft_execute, instantiate as nft_instantiate, query as nft_query};
 use goatnft::msg as nft_msg;
+use goatnft::state::WEIGHT_UPDATE_VALIDITY;
 
 fn contract_goat() -> Box<dyn cw_multi_test::Contract<Empty>> {
     let contract = ContractWrapper::new(execute, instantiate, query);
@@ -134,7 +135,6 @@ fn burn_and_mint_emits_burn() {
         nft_addr.clone(),
         &nft_msg::ExecuteMsg::Mint {
             to: "user".into(),
-            value: Uint128::new(50),
             nfc_id: "nfc".into(),
             breed: "breed".into(),
             birth_year: 2024,
@@ -169,6 +169,72 @@ fn burn_and_mint_emits_burn() {
 
     let owner_res: Result<String, _> = app.wrap().query_wasm_smart(nft_addr, &nft_msg::QueryMsg::Owner { token_id });
     assert!(owner_res.is_err());
+}
+
+#[test]
+fn burn_and_mint_fails_with_stale_update() {
+    let mut app = App::default();
+    let goat_id = app.store_code(contract_goat());
+    let nft_id = app.store_code(contract_nft());
+
+    let goat_addr = app
+        .instantiate_contract(goat_id, Addr::unchecked("owner"), &InstantiateMsg { meat_contract: "meat".into() }, &[], "goat", None)
+        .unwrap();
+    let nft_addr = app
+        .instantiate_contract(nft_id, Addr::unchecked("owner"), &nft_msg::InstantiateMsg {}, &[], "nft", None)
+        .unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        goat_addr.clone(),
+        &ExecuteMsg::SetNftAddress { nft_address: nft_addr.to_string() },
+        &[]
+    ).unwrap();
+
+    let resp = app.execute_contract(
+        Addr::unchecked("owner"),
+        nft_addr.clone(),
+        &nft_msg::ExecuteMsg::Mint {
+            to: "user".into(),
+            nfc_id: "nfc".into(),
+            breed: "breed".into(),
+            birth_year: 2024,
+            weight: 10,
+        },
+        &[]
+    ).unwrap();
+    let token_id: u64 = resp.events.iter().find(|e| e.ty == "wasm").unwrap()
+        .attributes.iter().find(|a| a.key == "token_id").unwrap().value.parse().unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("user"),
+        nft_addr.clone(),
+        &nft_msg::ExecuteMsg::Approve {
+            spender: goat_addr.to_string(),
+            token_id: token_id.to_string(),
+        },
+        &[]
+    ).unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("user"),
+        nft_addr.clone(),
+        &nft_msg::ExecuteMsg::UpdateWeight {
+            token_id: token_id.to_string(),
+            new_weight: 12,
+        },
+        &[]
+    ).unwrap();
+
+    app.update_block(|b| b.time = b.time.plus_seconds(WEIGHT_UPDATE_VALIDITY + 1));
+
+    let err = app.execute_contract(
+        Addr::unchecked("user"),
+        goat_addr.clone(),
+        &ExecuteMsg::BurnAndMint { token_id },
+        &[]
+    ).unwrap_err();
+    assert!(!err.to_string().is_empty());
 }
 
 #[test]
