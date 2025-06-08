@@ -77,4 +77,29 @@ describe("MEAT", function () {
 
     expect(await meat.balanceOf(user.address)).to.equal(0n);
   });
+
+  it("swaps MEAT for GOAT with fractional amount", async function () {
+    const [owner, user] = await ethers.getSigners();
+
+    const GOAT = await ethers.getContractFactory("GOAT");
+    const goat = await GOAT.deploy(owner.address);
+    await goat.waitForDeployment();
+
+    const MEAT = await ethers.getContractFactory("MEAT");
+    const meat = await MEAT.deploy(goat.target);
+    await meat.waitForDeployment();
+
+    await goat.setMEATAddress(meat.target);
+
+    const meatAmount = ethers.parseEther("21.25");
+    await meat.transfer(user.address, meatAmount);
+    await meat.connect(user).approve(meat.target, meatAmount);
+
+    const goatOut = ethers.parseEther("0.25");
+    await expect(meat.connect(user).swapMEATForGOAT(meatAmount))
+      .to.emit(meat, "SwappedMEATForGOAT")
+      .withArgs(user.address, meatAmount, goatOut);
+
+    expect(await goat.balanceOf(user.address)).to.equal(goatOut);
+  });
 });
