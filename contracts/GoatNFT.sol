@@ -5,6 +5,7 @@ import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ER
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IGoatToken} from "./interfaces/IGoatToken.sol";
 import {SwapConfig} from "./SwapConfig.sol";
+import {RateHandler} from "./RateHandler.sol";
 
 /// @title GoatNFT - tokenized goat identification
 /// @notice Each NFT holds a weight value redeemable for GOAT tokens
@@ -31,6 +32,7 @@ contract GoatNFT is ERC721Burnable {
 
     address private immutable _owner;
     IGoatToken public goatTokenContract;
+    RateHandler public rateHandler;
 
     /// @notice Weight update validity window in seconds (7 days)
     uint256 public constant WEIGHT_UPDATE_VALIDITY = 7 days;
@@ -50,6 +52,22 @@ contract GoatNFT is ERC721Burnable {
         address old = address(goatTokenContract);
         goatTokenContract = IGoatToken(goatTokenAddress);
         emit GoatTokenAddressUpdated(old, goatTokenAddress);
+    }
+
+    /// @notice Sets the rate handler contract used for GOAT mint amounts
+    /// @param rateHandlerAddress Address of the RateHandler contract
+    function setRateHandler(address rateHandlerAddress) external onlyOwner {
+        require(rateHandlerAddress != address(0), "Invalid address");
+        address old = address(rateHandler);
+        rateHandler = RateHandler(rateHandlerAddress);
+        emit RateHandlerUpdated(old, rateHandlerAddress);
+    }
+
+    function _getSwapRate() internal view returns (uint256) {
+        if (address(rateHandler) != address(0)) {
+            return rateHandler.getCurrentRate();
+        }
+        return SwapConfig.SWAP_RATE;
     }
 
     function mint(
@@ -98,7 +116,8 @@ contract GoatNFT is ERC721Burnable {
 
         bytes32 hash = keccak256(bytes(goatMetadata[tokenId].nfcId));
 
-        uint256 goatAmount = (currentWeight * 1e18) / SwapConfig.SWAP_RATE;
+        uint256 rate = _getSwapRate();
+        uint256 goatAmount = (currentWeight * 1e18) / rate;
 
         // Mint GOAT tokens directly to the token owner
         goatTokenContract.mint(tokenOwner, goatAmount);
@@ -122,6 +141,7 @@ contract GoatNFT is ERC721Burnable {
 
     /// @notice Emitted when the GOAT token contract address changes
     event GoatTokenAddressUpdated(address indexed oldAddress, address indexed newAddress);
+    event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
     /// @notice Emitted when NFT is burned and GOAT token minted automatically
     event GoatBurned(uint256 indexed tokenId, address indexed user, uint256 weight, uint256 goatAmount);
     /// @notice Emitted when the goat weight is updated
