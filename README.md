@@ -12,8 +12,13 @@ Berikut gambaran umum alur penggunaan kedua token:
 1. **Mint MEAT** – Kirim native token langsung ke alamat kontrak `MEAT` untuk mencetak token sesuai rasio `DepositRate`. Fungsi `receive()` otomatis memproses dana dan mengirim MEAT ke pengirim. Versi CosmWasm menggunakan pesan `mint_with_native` seperti dijelaskan pada bagian berikutnya.
 2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi diperoleh dari `RateHandler` yang bisa diperbarui oleh Oracle melalui `updateRate`. Bila `dynamicRateValid` `false` (contohnya setelah `invalidateRate`), kontrak otomatis memakai `SWAP_RATE` dari `SwapConfig` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
 RateHandler mencatat pembaruan melalui event `RateUpdated` dan `RateInvalidated` untuk audit. Alur singkatnya:
-```text
-Oracle --updateRate--> RateHandler --getRate--> MEAT/GOAT
+```mermaid
+sequenceDiagram
+  participant Oracle
+  participant RateHandler
+  participant Contracts as MEAT/GOAT
+  Oracle->>RateHandler: updateRate
+  RateHandler->>Contracts: getRate
 ```
 3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
@@ -35,8 +40,11 @@ Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
 - GOAT dapat diperdagangkan atau ditukar menjadi MEAT memakai fungsi swap kontrak.
 - MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
 
-```text
-GoatNFT burn --(weight / rate)--> GOAT --(rate)--> MEAT --redeemForMeat--> Real Meat
+```mermaid
+flowchart LR
+  GoatNFT -- "burn" --> GOAT
+  GOAT -- "rate" --> MEAT
+  MEAT -- "redeemForMeat" --> RealMeat["Real Meat"]
 ```
 
 - Membakar `GoatNFT` otomatis mencetak GOAT sejumlah `weight / rate`.
@@ -90,7 +98,7 @@ Semua peristiwa tersebut tercatat on-chain sehingga pasokan GOAT dan MEAT selalu
    console.log('GOAT deployed to:', goat.target);
    console.log('MEAT deployed to:', meat.target);
    ```
-   Run using `npx hardhat run scripts/deploy.js --network <network>` and specify your desired Hardhat network with the `--network` option.
+Jalankan dengan perintah `npx hardhat run scripts/deploy.js --network <network>` dan ganti `<network>` sesuai konfigurasi Hardhat yang diinginkan.
 
 ## Contoh Konfigurasi Hardhat
 
@@ -199,19 +207,19 @@ MEAT juga memunculkan event utama berikut:
 
 ## Running Tests
 
-Hardhat tests for both contracts live in the `test/` directory. Run them with:
+Seluruh pengujian Hardhat berada di direktori `test/`. Jalankan dengan perintah berikut:
 
 ```bash
 npm install
 ```
 
-If the `artifacts/` folder doesn't contain compiled contracts, run:
+Jika folder `artifacts/` belum berisi kontrak terkompilasi, jalankan:
 
 ```bash
 npx hardhat compile
 ```
 
-Then execute the test suite:
+Setelah itu eksekusi seluruh test dengan:
 
 ```bash
 npx hardhat test
@@ -220,17 +228,17 @@ npx hardhat test
 
 ## Backend Server
 
-A small Express backend in `backend/` exposes cached contract analytics. Start it with:
+Backend Express sederhana di folder `backend/` menyediakan analitik kontrak secara cache. Jalankan dengan perintah berikut:
 
 ```bash
 npm run start:server
 ```
 
-Prepare the environment variables before starting the server:
+Siapkan variabel lingkungan sebelum menyalakan server:
 ```bash
 cp backend/.env.example backend/.env
 ```
-Edit `backend/.env` and set `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` and `PORT` so the server can read on-chain data after Hardhat compilation.
+Edit `backend/.env` lalu isi `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS`, dan `PORT` agar server dapat membaca data on-chain setelah kompilasi Hardhat.
 
 ### API Endpoints
 - `GET /health` – health check.
@@ -242,13 +250,11 @@ Frontend mengambil data dari endpoint-endpoint ini alih-alih langsung mengakses 
 
 Antarmuka pengguna lengkap berada pada repositori terpisah sehingga proyek ini dapat berfokus pada smart contract dan utilitas backend. Template Next.js minimal tetap disertakan di direktori `frontend/` sebagai placeholder dan contoh penggunaan variabel lingkungan.
 
-Clone the dedicated UI repository (when available) and follow its README for
-installation and `npm run dev` instructions. Prepare the environment variables:
+Clone repositori UI terpisah (jika tersedia) dan ikuti README‑nya untuk proses instalasi serta perintah `npm run dev`. Siapkan variabel lingkungan dengan:
 ```bash
 cp frontend/.env.example frontend/.env.local
 ```
-Then edit `frontend/.env.local` to set your deployed `NEXT_PUBLIC_GOAT_ADDRESS`
-and `NEXT_PUBLIC_MEAT_ADDRESS` values.
+Setelah itu edit `frontend/.env.local` dan isi `NEXT_PUBLIC_GOAT_ADDRESS` serta `NEXT_PUBLIC_MEAT_ADDRESS` sesuai alamat hasil deploy.
 
 ## 🧱 Struktur Kontrak
 
