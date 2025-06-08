@@ -16,6 +16,7 @@
 * **FailingGOAT** is only for testing; it implements the same interface but allows simulated transfer failures.
 * **IGOAT** defines the `mintTo` function which enables MEAT to mint GOAT when necessary.
 * **IGoatToken** is used by GoatNFT so the GOAT contract can mint upon burn.
+* **RateHandler** controls the current swap rate. `updateRate` emits `RateUpdated` while `invalidateRate` reverts to the constant in `SwapConfig`.
 
 The MEAT contract relies on GOAT for minting new tokens when swapping MEAT for GOAT. Both share the same owner who can manage rates and enable or disable swapping. The table below summarises the main contracts and their roles.
 | Contract | Description | Key Functions |
