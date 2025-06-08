@@ -58,13 +58,17 @@ describe("Full flow integration", function () {
       .withArgs(owner.address, totalNative);
     expect(await ethers.provider.getBalance(meat.target)).to.equal(0n);
 
-    await meat.setSwapEnabled(false);
+    await expect(meat.setSwapEnabled(false))
+      .to.emit(meat, "SwapEnabledUpdated")
+      .withArgs(false);
     const amountSwap1 = ethers.parseEther("10");
     await meat.connect(user1).approve(meat.target, amountSwap1);
     await expect(meat.connect(user1).swapMEATForGOAT(amountSwap1)).to.be.revertedWith(
       "Swap disabled"
     );
-    await meat.setSwapEnabled(true);
+    await expect(meat.setSwapEnabled(true))
+      .to.emit(meat, "SwapEnabledUpdated")
+      .withArgs(true);
 
     const goatOut1 = amountSwap1 / SWAP_RATE;
     await expect(meat.connect(user1).swapMEATForGOAT(amountSwap1))

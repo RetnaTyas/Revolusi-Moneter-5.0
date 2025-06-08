@@ -27,6 +27,7 @@ contract MEAT is ERC20 {
     event MeatRedeemed(address indexed user, uint256 amount);
     event GoatAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
+    event SwapEnabledUpdated(bool status);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -125,6 +126,7 @@ contract MEAT is ERC20 {
 
     function setSwapEnabled(bool status) external onlyOwner {
         swapEnabled = status;
+        emit SwapEnabledUpdated(status);
     }
 
     function setGOATAddress(address goatAddress) external onlyOwner {
