@@ -33,15 +33,15 @@ describe("RateHandler integration", function () {
 
     await handler.updateRate(100);
 
-    const tx = await nft.mint(user.address, 50, "id", "breed", 2022);
+    const tx = await nft.mint(user.address, 500, "id", "breed", 2022);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
-    await nft.connect(user).updateWeight(tokenId, 60);
+    await nft.connect(user).updateWeight(tokenId, 600);
 
-    const expectedGoat = (60n * 10n ** 18n) / 100n;
+    const expectedGoat = (600n * 10n ** 18n) / 100n / 10n;
     await expect(nft.connect(user).burn(tokenId))
       .to.emit(nft, "GoatBurned")
-      .withArgs(tokenId, user.address, 60n, expectedGoat);
+      .withArgs(tokenId, user.address, 600n, expectedGoat);
 
     await goat.connect(user).approve(meat.target, expectedGoat);
     await meat.connect(user).swapGOATForMEAT(expectedGoat);

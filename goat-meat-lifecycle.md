@@ -15,7 +15,8 @@ The two tokens form a closed loop that allows value to enter the system via MEAT
    * MEAT can be swapped to GOAT and vice versa through the MEAT contract when `swapEnabled` is true. The conversion rate comes from `RateHandler` with a fallback to `SWAP_RATE`.
 3. **GoatNFTs**
    * A [GoatNFT](contracts/GoatNFT.sol) represents a live goat and stores its current weight in `goatValue`.
-   * Owners may update the weight anytime, emitting `WeightUpdated`. Before burning the NFT the weight must have been updated within the last seven days. `burn` mints GOAT automatically and emits `GoatBurned`.
+   * Owners may update the weight anytime, emitting `WeightUpdated`. The weight uses one decimal place (`WEIGHT_DECIMALS = 1`) so `425` means **42.5 kg**.
+   * Before burning the NFT the weight must have been updated within the last seven days. `burn` mints GOAT automatically and emits `GoatBurned`.
 4. **Staking GOAT**
    * GOAT holders stake tokens in `GOAT.sol` which records staking balances and timestamps. Rewards accrue linearly according to `rewardRate` and `rewardInterval`.
    *Calling `stake()` again resets `lastStakedTime` and discards any pending reward. Claim your reward first if you plan to restake.*
