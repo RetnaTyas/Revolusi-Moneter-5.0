@@ -63,4 +63,32 @@ describe("RateHandler integration", function () {
       .to.emit(meat, "SwappedMEATForGOAT")
       .withArgs(user.address, amount, goatOut);
   });
+
+  it("emits RateUpdated and updates timestamp", async function () {
+    const before = await handler.lastUpdateTimestamp();
+    expect(before).to.equal(0n);
+
+    const tx = await handler.updateRate(150);
+    const receipt = await tx.wait();
+    const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+    await expect(tx)
+      .to.emit(handler, "RateUpdated")
+      .withArgs(150n, BigInt(block.timestamp));
+
+    expect(await handler.lastUpdateTimestamp()).to.equal(BigInt(block.timestamp));
+  });
+
+  it("emits RateInvalidated after invalidateRate", async function () {
+    await handler.updateRate(200);
+    const tx = await handler.invalidateRate();
+    const receipt = await tx.wait();
+    const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+    await expect(tx)
+      .to.emit(handler, "RateInvalidated")
+      .withArgs(BigInt(block.timestamp));
+
+    expect(await handler.dynamicRateValid()).to.be.false;
+  });
 });
