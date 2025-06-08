@@ -1,19 +1,19 @@
-# Building the CosmWasm contracts
+# Membangun Kontrak CosmWasm
 
-This folder contains the Rust implementations of the GOAT, MEAT and GoatNFT contracts. To compile them you need the standard Rust toolchain and the WebAssembly target.
+Folder ini memuat implementasi Rust untuk kontrak GOAT, MEAT, dan GoatNFT. Untuk mengompilasinya Anda memerlukan toolchain Rust standar serta target WebAssembly.
 
-## Prerequisites
+## Prasyarat
 
-1. Install [rustup](https://rustup.rs/) if you do not already have it.
-2. Add the `wasm32-unknown-unknown` build target:
+1. Instal [rustup](https://rustup.rs/) jika belum tersedia.
+2. Tambahkan target build `wasm32-unknown-unknown`:
    ```bash
    rustup target add wasm32-unknown-unknown
    ```
 
-## Building
+## Membangun
 
-Run the build script from the repository root:
+Jalankan skrip build dari root repositori:
 ```bash
 ./wasm-contracts/build.sh
 ```
-The script compiles all packages in this directory. The resulting `.wasm` files are placed in the top‑level `artifacts/` folder while JSON schemas are written to each package's `schema/` directory.
+Skrip akan mengompilasi seluruh paket di direktori ini. Berkas `.wasm` yang dihasilkan ditempatkan pada folder `artifacts/` sementara schema JSON ditulis ke direktori `schema/` masing-masing paket.

@@ -1,76 +1,64 @@
-# Deploying the CosmWasm Contract
+# Deploy Kontrak CosmWasm
 
-This project includes CosmWasm implementations for all core contracts under `wasm-contracts/`:
+Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direktori `wasm-contracts/`:
 
-- `starter` – GOAT token with staking logic
-- `meat` – MEAT token supporting swaps and native minting. Provides `redeem_for_meat` and can link a `ratehandler` contract for dynamic rates
-- `goatnft` – simple NFT contract whose tokens hold a weight value redeemable for GOAT
-- `ratehandler` – small utility contract that stores the latest swap rate and allows the owner to update or invalidate it
+- `starter` – token GOAT dengan logika staking
+- `meat` – token MEAT yang mendukung swap dan pencetakan menggunakan native token. Menyediakan `redeem_for_meat` dan dapat menautkan kontrak `ratehandler` untuk rasio dinamis
+- `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
+- `ratehandler` – utilitas kecil yang menyimpan rasio swap terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
 
-The packages mirror the Solidity contracts found under `contracts/`. Most
-functions have equivalent execute messages, but there are notable differences:
+Paket-paket ini mencerminkan kontrak Solidity di `contracts/`. Sebagian besar fungsi memiliki pesan execute yang setara, namun terdapat beberapa perbedaan penting:
 
-- **MEAT** cannot auto‑mint when native tokens are sent without a message. Users
-  must call `mint_with_native` and include the funds.
-- **starter** implements GOAT staking and NFT redemption exactly like
-  `GOAT.sol`, though events become log attributes.
-- **goatnft** stores goat metadata and weight the same way as `GoatNFT.sol` with
-  minor naming changes. Owners can call `update_weight` to refresh a goat's
-  weight. Burning requires the last update to be within
-  `WEIGHT_UPDATE_VALIDITY` (7 days).
+- **MEAT** tidak dapat mencetak otomatis ketika menerima token native tanpa pesan. Pengguna **harus** memanggil `mint_with_native` dan menyertakan dana.
+- **starter** menerapkan staking GOAT dan penebusan NFT sama seperti `GOAT.sol`, hanya saja event menjadi atribut log.
+- **goatnft** menyimpan metadata kambing dan berat mirip dengan `GoatNFT.sol` dengan sedikit perbedaan penamaan. Pemilik dapat memanggil `update_weight` untuk memperbarui berat. Pembakaran membutuhkan pembaruan terakhir dalam rentang `WEIGHT_UPDATE_VALIDITY` (7 hari).
 
-## Building
+## Membangun
 
-For toolchain setup and additional details see
-[../wasm-contracts/README.md](../wasm-contracts/README.md).
+Untuk penyiapan toolchain dan detail tambahan lihat [../wasm-contracts/README.md](../wasm-contracts/README.md).
 
-Install the WASM target if you have not already:
+Pasang target WASM jika belum:
 
 ```bash
 rustup target add wasm32-unknown-unknown
 ```
 
-Then run the build script:
+Lalu jalankan skrip build:
 
 ```bash
 ./wasm-contracts/build.sh
 ```
 
-The script compiles all packages and places their `.wasm` files under `artifacts/`. JSON schemas produced by `cargo schema` are stored in each package's `schema/` directory.
-If `cargo schema` is not available, install it via `cargo install cargo-run-script` before running the build script.
+Skrip ini mengompilasi seluruh paket dan menempatkan berkas `.wasm` di `artifacts/`. Skema JSON hasil `cargo schema` disimpan di direktori `schema/` masing-masing paket. Jika `cargo schema` belum tersedia, instal dengan `cargo install cargo-run-script` sebelum menjalankan skrip build.
 
-## Upload & Instantiate
+## Unggah & Instansiasi
 
-1. Upload the wasm bytecode (example for GOAT):
+1. Unggah bytecode wasm (contoh untuk GOAT):
 ```bash
-# example upload of the GOAT contract
+# contoh upload kontrak GOAT
 wasmd tx wasm store artifacts/starter.wasm --from wallet \
  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
-To upload `ratehandler` simply replace the file name:
+Untuk mengunggah `ratehandler` cukup ganti nama berkas:
 ```bash
 wasmd tx wasm store artifacts/ratehandler.wasm --from wallet \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
-Save the resulting `code_id`.
-2. Instantiate the contract (example for GOAT):
+Simpan `code_id` yang dihasilkan.
+2. Instansiasi kontrak (contoh untuk GOAT):
 ```bash
 wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
   --from wallet --label "goat" \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
+Instansiasi `meat`, `goatnft` dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan alamatnya dapat ditautkan ke MEAT menggunakan pesan `set_rate_handler` setelah deployment.
 
-Instantiate `meat`, `goatnft` and `ratehandler` with similar commands. `ratehandler`
-requires no parameters and its address can be linked to MEAT using the
-`set_rate_handler` message after deployment.
+### Mencetak MEAT
 
-### Minting MEAT
-
-Call the `mint_with_native` entry point while sending native coins to mint MEAT.
-For example:
+Panggil entri `mint_with_native` sambil mengirim koin native untuk mencetak MEAT. Contoh:
 
 ```bash
 wasmd tx wasm execute <meat_address> '{"mint_with_native":{}}' \
@@ -79,10 +67,9 @@ wasmd tx wasm execute <meat_address> '{"mint_with_native":{}}' \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
 
-Sending coins without this message will **not** mint tokens; the coins simply
-remain in the contract until withdrawn by the owner.
+Mengirim koin tanpa pesan ini **tidak** akan mencetak token; koin hanya tersimpan di kontrak sampai ditarik pemilik.
 
-After deploying `goatnft`, each NFT owner must approve the GOAT contract before it can burn tokens. Example approval:
+Setelah `goatnft` dideploy, setiap pemilik NFT harus memberi approval pada kontrak GOAT sebelum token dapat dibakar. Contoh approval:
 
 ```bash
 wasmd tx wasm execute <nft_address> '{"approve":{"spender":"<goat_addr>","token_id":"1"}}' \
@@ -90,7 +77,7 @@ wasmd tx wasm execute <nft_address> '{"approve":{"spender":"<goat_addr>","token_
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
 
-Once approved, redeem the NFT's value by calling `burn_and_mint` on the GOAT contract:
+Jika sudah di-approve, tebus nilai NFT dengan memanggil `burn_and_mint` pada kontrak GOAT:
 
 ```bash
 wasmd tx wasm execute <goat_address> '{"burn_and_mint":{"token_id":1}}' \
@@ -98,15 +85,14 @@ wasmd tx wasm execute <goat_address> '{"burn_and_mint":{"token_id":1}}' \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
 
-## Query Examples
+## Contoh Query
 
 ```bash
-# check balance
+# cek saldo
 wasmd query wasm contract-state smart <address> '{"balance":{"address":"cosmos1..."}}'
 
 # pending reward
 wasmd query wasm contract-state smart <address> '{"pending_reward":{"address":"cosmos1..."}}'
 ```
 
-Ensure your `wasmd` CLI is configured with a key named `wallet` that matches the mnemonic path in `deploy-config/wasm-config.json`.
-
+Pastikan CLI `wasmd` Anda dikonfigurasi dengan key bernama `wallet` yang sesuai dengan jalur mnemonic pada `deploy-config/wasm-config.json`.

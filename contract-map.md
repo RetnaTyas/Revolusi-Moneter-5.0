@@ -1,4 +1,4 @@
-# Contract Map
+# Peta Kontrak
 
 ```
 [User Wallet]
@@ -10,24 +10,24 @@
    +-- withdraw -->|
 ```
 
-* **MEAT** acts as the gateway: it accepts native coins, mints MEAT, and handles swaps in both directions. The owner may withdraw accumulated native balance.
-* **GOAT** receives minted supply from MEAT and provides staking functionality. Rewards and configuration parameters are adjustable by the owner.
-  - `emergencyUnstake` allows stakers to withdraw tokens without rewards at any time.
-* **FailingGOAT** is only for testing; it implements the same interface but allows simulated transfer failures.
-* **IGOAT** defines the `mintTo` function which enables MEAT to mint GOAT when necessary.
-* **IGoatToken** is used by GoatNFT so the GOAT contract can mint upon burn.
-* **RateHandler** controls the current swap rate. `updateRate` emits `RateUpdated` while `invalidateRate` reverts to the constant in `SwapConfig`.
+* **MEAT** berperan sebagai gerbang: menerima koin native, mencetak MEAT, dan menangani swap dua arah. Pemilik dapat menarik saldo native yang terkumpul.
+* **GOAT** menerima suplai hasil cetak dari MEAT dan menyediakan fungsi staking. Reward serta parameter konfigurasi dapat diatur pemilik.
+  - `emergencyUnstake` memungkinkan staker menarik token tanpa reward kapan saja.
+* **FailingGOAT** hanya untuk pengujian; menerapkan antarmuka yang sama namun memungkinkan simulasi kegagalan transfer.
+* **IGOAT** mendefinisikan fungsi `mintTo` yang memungkinkan MEAT mencetak GOAT bila diperlukan.
+* **IGoatToken** dipakai GoatNFT agar kontrak GOAT dapat mencetak token saat NFT dibakar.
+* **RateHandler** mengendalikan rasio swap terkini. `updateRate` memancarkan `RateUpdated` sedangkan `invalidateRate` mengembalikan nilai ke konstanta di `SwapConfig`.
 
-The MEAT contract relies on GOAT for minting new tokens when swapping MEAT for GOAT. Both share the same owner who can manage rates and enable or disable swapping. The table below summarises the main contracts and their roles.
-| Contract | Description | Key Functions |
-|---------|-------------|---------------|
-| GOAT | ERC20 staking token minted by MEAT and GoatNFT burns. | `stake`, `unstake`, `claimReward`, `compoundReward`, `emergencyUnstake`, `mintTo`, `mint`, `setMEATAddress`, `setNFTAddress` |
-| MEAT | ERC20 token minted with native deposits and swapped with GOAT. | `swapMEATForGOAT`, `swapGOATForMEAT`, `changeDepositRate`, `withdrawNative`, `setSwapEnabled`, `setGOATAddress` |
-| GoatNFT | ERC721 goat identifier redeemable for GOAT. Metadata stored on-chain in `goatMetadata` as `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Weight can be updated via `updateWeight` (emits `WeightUpdated`) and must be fresh when burning. Burning mints GOAT automatically and emits `GoatBurned`. | `mint`, `updateWeight`, `burn`, `goatValue`, `goatMetadata`, `getGoatData` |
-| IGOAT | Interface for GOAT minting used by MEAT. | `mintTo` |
-| IGoatToken | Interface for GOAT minting used by GoatNFT. | `mint` |
+Kontrak MEAT bergantung pada GOAT untuk mencetak token baru saat menukar MEAT menjadi GOAT. Keduanya memiliki pemilik yang sama yang dapat mengatur rate serta mengaktifkan atau menonaktifkan swap. Tabel di bawah merangkum kontrak utama beserta perannya.
 
-GOAT emits `MeatAddressUpdated` and `NftAddressUpdated` whenever the owner updates
-the linked MEAT or GoatNFT contract addresses.
-MEAT emits `GoatAddressUpdated` whenever the owner updates the linked GOAT contract address.
-GoatNFT emits `GoatTokenAddressUpdated` whenever the owner updates the GOAT token address it uses for minting.
+| Kontrak | Deskripsi | Fungsi Kunci |
+|---------|-----------|--------------|
+| GOAT | Token ERC20 untuk staking yang dicetak oleh MEAT dan pembakaran GoatNFT. | `stake`, `unstake`, `claimReward`, `compoundReward`, `emergencyUnstake`, `mintTo`, `mint`, `setMEATAddress`, `setNFTAddress` |
+| MEAT | Token ERC20 yang dicetak dengan deposit native dan dapat ditukar dengan GOAT. | `swapMEATForGOAT`, `swapGOATForMEAT`, `changeDepositRate`, `withdrawNative`, `setSwapEnabled`, `setGOATAddress` |
+| GoatNFT | Identitas kambing ERC721 yang bisa ditebus menjadi GOAT. Metadata disimpan on-chain di `goatMetadata` sebagai `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Berat dapat diperbarui via `updateWeight` (memancarkan `WeightUpdated`) dan harus segar saat dibakar. Pembakaran otomatis mencetak GOAT dan memancarkan `GoatBurned`. | `mint`, `updateWeight`, `burn`, `goatValue`, `goatMetadata`, `getGoatData` |
+| IGOAT | Antarmuka pencetakan GOAT yang digunakan MEAT. | `mintTo` |
+| IGoatToken | Antarmuka pencetakan GOAT yang digunakan GoatNFT. | `mint` |
+
+GOAT memancarkan `MeatAddressUpdated` dan `NftAddressUpdated` setiap kali pemilik memperbarui alamat kontrak MEAT atau GoatNFT.
+MEAT memancarkan `GoatAddressUpdated` setiap kali pemilik memperbarui alamat kontrak GOAT.
+GoatNFT memancarkan `GoatTokenAddressUpdated` setiap kali pemilik memperbarui alamat token GOAT yang dipakai untuk mint.

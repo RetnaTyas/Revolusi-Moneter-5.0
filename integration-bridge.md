@@ -1,10 +1,10 @@
-# Integration Bridge
+# Jembatan Integrasi
 
-Integration between the smart contracts and external applications is handled through a small Node/Hardhat backend.
+Integrasi antara smart contract dan aplikasi eksternal ditangani melalui backend Node/Hardhat yang ringan.
 
-1. **Deployment Script** – `scripts/deploy.js` compiles and deploys GOAT and MEAT then links the two contracts by calling `setMEATAddress`.
-2. **ABI Artifacts** – Hardhat outputs the ABI and bytecode which can be imported by backend services or directly by the frontend to construct `ethers.Contract` instances.
-3. **API Layer** – An optional Express server can expose REST endpoints wrapping calls such as `swapMEATForGOAT` or `stake`. This keeps private keys on the server while the frontend signs transactions client‑side when necessary.
-4. **Event Listening** – Both layers watch for important events (`MintedWithNative`, `Staked`, `Unstaked`, `EmergencyUnstaked`, etc.) to keep the UI in sync.
+1. **Skrip Deploy** – `scripts/deploy.js` mengompilasi dan mendepoy GOAT serta MEAT lalu menautkan keduanya dengan memanggil `setMEATAddress`.
+2. **Artefak ABI** – Hardhat menghasilkan ABI dan bytecode yang dapat diimpor layanan backend atau langsung digunakan frontend untuk membangun instance `ethers.Contract`.
+3. **Lapisan API** – Server Express opsional dapat menyediakan endpoint REST yang membungkus panggilan seperti `swapMEATForGOAT` atau `stake`. Cara ini menjaga kunci privat di server sementara frontend menandatangani transaksi di sisi klien bila diperlukan.
+4. **Pemantauan Event** – Kedua lapisan memantau event penting (`MintedWithNative`, `Staked`, `Unstaked`, `EmergencyUnstaked`, dll.) agar UI tetap sinkron.
 
-This bridge ensures seamless coordination between on‑chain logic and user interfaces without duplicating business rules.
+Jembatan ini memastikan koordinasi mulus antara logika on-chain dan antarmuka pengguna tanpa menduplikasi aturan bisnis.

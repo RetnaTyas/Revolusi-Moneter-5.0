@@ -7,13 +7,13 @@ import {IGoatToken} from "./interfaces/IGoatToken.sol";
 import {SwapConfig} from "./SwapConfig.sol";
 import {RateHandler} from "./RateHandler.sol";
 
-/// @title GoatNFT - tokenized goat identification
-/// @notice Each NFT holds a weight value redeemable for GOAT tokens
-/// @dev Enforces fresh weight updates before burning so GOAT minted matches the actual commodity value.
-/// @dev Flow:
-/// - Mint: Stores initial goat weight.
-/// - UpdateWeight: Updates latest weight.
-/// - Burn: Requires fresh weight update, mints GOAT based on latest weight, burns NFT.
+/// @title GoatNFT - identitas kambing dalam bentuk token
+/// @notice Setiap NFT menyimpan nilai berat yang dapat ditebus menjadi token GOAT
+/// @dev Memastikan pembaruan berat terkini sebelum dibakar agar jumlah GOAT yang dicetak sesuai nilai komoditas
+/// @dev Alur:
+/// - Mint: Menyimpan berat awal kambing
+/// - UpdateWeight: Memperbarui berat terbaru
+/// - Burn: Membutuhkan berat terbaru, mencetak GOAT berdasarkan berat terakhir, lalu membakar NFT
 contract GoatNFT is ERC721Burnable {
     uint256 public nextId;
     mapping(uint256 => uint256) public goatValue;
@@ -34,9 +34,9 @@ contract GoatNFT is ERC721Burnable {
     IGoatToken public goatTokenContract;
     RateHandler public rateHandler;
 
-    /// @notice Weight update validity window in seconds (7 days)
+    /// @notice Jangka waktu validitas pembaruan berat dalam detik (7 hari)
     uint256 public constant WEIGHT_UPDATE_VALIDITY = 7 days;
-    /// @notice Number of decimal places used for weight values
+    /// @notice Jumlah digit desimal yang digunakan untuk berat
     uint256 public constant WEIGHT_DECIMALS = 1;
 
     constructor(address goatTokenAddress) ERC721("Goat Identifier", "GOATNFT") {
@@ -56,8 +56,8 @@ contract GoatNFT is ERC721Burnable {
         emit GoatTokenAddressUpdated(old, goatTokenAddress);
     }
 
-    /// @notice Sets the rate handler contract used for GOAT mint amounts
-    /// @param rateHandlerAddress Address of the RateHandler contract
+    /// @notice Mengatur kontrak rate handler yang dipakai untuk jumlah mint GOAT
+    /// @param rateHandlerAddress Alamat kontrak RateHandler
     function setRateHandler(address rateHandlerAddress) external onlyOwner {
         require(rateHandlerAddress != address(0), "Invalid address");
         address old = address(rateHandler);
@@ -72,7 +72,7 @@ contract GoatNFT is ERC721Burnable {
         return SwapConfig.SWAP_RATE;
     }
 
-    /// @param weight Weight value scaled by `WEIGHT_DECIMALS`
+    /// @param weight Nilai berat yang diskalakan dengan `WEIGHT_DECIMALS`
     function mint(
         address to,
         uint256 weight,
@@ -92,9 +92,9 @@ contract GoatNFT is ERC721Burnable {
         return tokenId;
     }
 
-    /// @notice Update the goat's latest weight
-    /// @param tokenId ID of the NFT to update
-    /// @param newWeight New weight value scaled by `WEIGHT_DECIMALS`
+    /// @notice Memperbarui berat terkini kambing
+    /// @param tokenId ID NFT yang diperbarui
+    /// @param newWeight Nilai berat baru yang diskalakan dengan `WEIGHT_DECIMALS`
     function updateWeight(uint256 tokenId, uint256 newWeight) external {
         address tokenOwner = ownerOf(tokenId);
         require(msg.sender == tokenOwner, "Not token owner");
@@ -123,7 +123,7 @@ contract GoatNFT is ERC721Burnable {
         uint256 goatAmount =
             (currentWeight * 1e18) / rate / (10 ** WEIGHT_DECIMALS);
 
-        // Mint GOAT tokens directly to the token owner
+        // Mencetak token GOAT langsung ke pemilik NFT
         goatTokenContract.mint(tokenOwner, goatAmount);
 
         emit GoatBurned(tokenId, tokenOwner, currentWeight, goatAmount);
@@ -143,11 +143,11 @@ contract GoatNFT is ERC721Burnable {
         return _owner;
     }
 
-    /// @notice Emitted when the GOAT token contract address changes
+    /// @notice Dipancarkan ketika alamat kontrak token GOAT berubah
     event GoatTokenAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
-    /// @notice Emitted when NFT is burned and GOAT token minted automatically
+    /// @notice Dipancarkan ketika NFT dibakar dan token GOAT otomatis dicetak
     event GoatBurned(uint256 indexed tokenId, address indexed user, uint256 weight, uint256 goatAmount);
-    /// @notice Emitted when the goat weight is updated
+    /// @notice Dipancarkan ketika berat kambing diperbarui
     event WeightUpdated(uint256 indexed tokenId, uint256 newWeight);
 }

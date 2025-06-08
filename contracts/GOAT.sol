@@ -4,8 +4,8 @@ pragma solidity ^0.8.29;
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/// @title GOAT Token - Guardian of Organic Agriculture Trust
-/// @notice A smart contract enabling staking, compounding, and minting by MEAT contract
+/// @title Token GOAT - Guardian of Organic Agriculture Trust
+/// @notice Kontrak pintar yang memungkinkan staking, kompaun, dan pencetakan oleh kontrak MEAT
 contract GOAT is ERC20 {
     address private immutable _owner;
 
@@ -37,44 +37,44 @@ constructor(address meatAddress) ERC20("Guardian of Agricultural Trade", "GOAT")
     _owner = msg.sender;
     meatContract = meatAddress;
 }
-/// @notice Ensures only the contract owner can execute
+/// @notice Memastikan hanya pemilik kontrak yang dapat mengeksekusi
 modifier onlyOwner() {
     require(msg.sender == _owner, "Not the owner");
     _;
 }
-/// @notice Sets the MEAT contract address
-/// @param meatAddress Address of the MEAT contract
+/// @notice Mengatur alamat kontrak MEAT
+/// @param meatAddress Alamat kontrak MEAT
 function setMEATAddress(address meatAddress) external onlyOwner {
     require(meatAddress != address(0), "Invalid address");
     address old = meatContract;
     meatContract = meatAddress;
     emit MeatAddressUpdated(old, meatAddress);
 }
-/// @notice Sets the Goat NFT contract address
-/// @param nftAddress Address of the GoatNFT contract
+/// @notice Mengatur alamat kontrak GoatNFT
+/// @param nftAddress Alamat kontrak GoatNFT
 function setNFTAddress(address nftAddress) external onlyOwner {
     require(nftAddress != address(0), "Invalid address");
     address old = nftContract;
     nftContract = nftAddress;
     emit NftAddressUpdated(old, nftAddress);
 }
-/// @notice Allows the MEAT contract to mint GOAT tokens to any address
-/// @param to The recipient address
-/// @param amount The amount of GOAT to mint
+/// @notice Mengizinkan kontrak MEAT mencetak token GOAT ke alamat tertentu
+/// @param to Alamat penerima
+/// @param amount Jumlah GOAT yang dicetak
 function mintTo(address to, uint256 amount) external {
     require(msg.sender == meatContract, "Unauthorized mint");
     _mint(to, amount);
 }
 
-/// @notice Mint tokens when a GoatNFT is burned
-/// @param to Recipient of minted GOAT
-/// @param amount Amount to mint
+/// @notice Mencetak token saat GoatNFT dibakar
+/// @param to Penerima GOAT hasil cetak
+/// @param amount Jumlah yang dicetak
 function mint(address to, uint256 amount) external {
     require(msg.sender == nftContract, "Unauthorized mint");
     _mint(to, amount);
 }
-/// @notice Stake GOAT tokens to earn rewards
-/// @param amount The amount of GOAT tokens to stake
+/// @notice Stake token GOAT untuk memperoleh reward
+/// @param amount Jumlah GOAT yang di-stake
 function stake(uint256 amount) external {
     require(amount > 0, "Amount must be > 0");
     _transfer(msg.sender, address(this), amount);
@@ -82,7 +82,7 @@ function stake(uint256 amount) external {
     lastStakedTime[msg.sender] = block.timestamp;
     emit Staked(msg.sender, amount);
 }
-/// @notice Emergency unstake anytime without claiming rewards
+/// @notice Unstake darurat kapan saja tanpa klaim reward
 function emergencyUnstake() external {
     uint256 staked = stakingBalance[msg.sender];
     require(staked > 0, "Nothing to unstake");
@@ -97,7 +97,7 @@ function emergencyUnstake() external {
     }
     emit EmergencyUnstaked(msg.sender, staked);
 }
-/// @notice Unstake and claim staking rewards if eligible
+/// @notice Unstake dan klaim reward jika memenuhi syarat
 function unstake() external {
     uint256 staked = stakingBalance[msg.sender];
     require(staked > 0, "Nothing to unstake");
@@ -116,7 +116,7 @@ function unstake() external {
     }
     emit Unstaked(msg.sender, staked, reward);
 }
-/// @notice Claim only the reward without unstaking
+/// @notice Klaim hanya reward tanpa unstake
 function claimReward() external {
     uint256 lastTime = lastStakedTime[msg.sender];
     require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
@@ -132,7 +132,7 @@ function claimReward() external {
     lastStakedTime[msg.sender] = block.timestamp;
     emit RewardClaimed(msg.sender, reward);
 }
-/// @notice Compound current reward into staked balance
+/// @notice Menggabungkan reward ke saldo staking
 function compoundReward() external {
     uint256 lastTime = lastStakedTime[msg.sender];
     require(block.timestamp - lastTime >= minClaimInterval, "Claim not allowed yet");
@@ -146,34 +146,34 @@ function compoundReward() external {
     lastStakedTime[msg.sender] = block.timestamp;    
     emit Compounded(msg.sender, reward);
 }
-/// @notice Internal reward calculation based on duration and amount
-/// @param user The address of the staker
-/// @param lastTime Timestamp of the last stake/claim
-/// @return reward amount in GOAT token wei
+/// @notice Perhitungan reward internal berdasarkan durasi dan jumlah
+/// @param user Alamat staker
+/// @param lastTime Waktu staking/klaim terakhir
+/// @return reward jumlah dalam satuan wei GOAT
 function calculateReward(address user, uint256 lastTime) internal view returns (uint256) {
     uint256 staked = stakingBalance[user];
     if (staked == 0) return 0;
     uint256 duration = block.timestamp - lastTime;
     return (staked * duration * rewardRate) / (rewardInterval * REWARD_PRECISION);
 }
-/// @notice Shows pending reward amount
-/// @param user The address of the staker
+/// @notice Menampilkan jumlah reward yang menunggu
+/// @param user Alamat staker
 /// @return amount pending to be claimed
 function pendingReward(address user) external view returns (uint256) {
     return calculateReward(user, lastStakedTime[user]);
 }
-/// @notice Returns the next eligible claim timestamp
-/// @param user The address of the staker
-/// @return timestamp when user can claim reward again
+/// @notice Mengembalikan timestamp klaim berikutnya
+/// @param user Alamat staker
+/// @return timestamp waktu pengguna dapat klaim reward lagi
 function nextClaimTime(address user) external view returns (uint256) {
     uint256 last = lastStakedTime[user];
     if (last == 0) return 0;
     return last + minClaimInterval;
 }
-/// @notice Updates the reward settings by the owner
-/// @param newRate New annual reward rate (scaled to 1e18)
-/// @param newInterval Duration of reward cycle in seconds
-/// @param newMinClaimTime Minimum interval before reward can be claimed
+/// @notice Memperbarui konfigurasi reward oleh pemilik
+/// @param newRate Tingkat reward tahunan baru (skala 1e18)
+/// @param newInterval Durasi siklus reward dalam detik
+/// @param newMinClaimTime Interval minimum sebelum reward dapat diklaim
 function setRewardConfig(uint256 newRate, uint256 newInterval, uint256 newMinClaimTime) external onlyOwner {
     require(newInterval > 0, "Interval must be > 0");
     emit RewardConfigChanged(rewardRate, newRate, rewardInterval, newInterval, minClaimInterval, newMinClaimTime);
@@ -181,8 +181,8 @@ function setRewardConfig(uint256 newRate, uint256 newInterval, uint256 newMinCla
     rewardInterval = newInterval;
     minClaimInterval = newMinClaimTime;    
 }
-/// @notice Returns contract owner address
-/// @return Address of contract deployer
+/// @notice Mengembalikan alamat pemilik kontrak
+/// @return Alamat pihak yang mendeploy kontrak
 function owner() external view returns (address) {
     return _owner;
 }

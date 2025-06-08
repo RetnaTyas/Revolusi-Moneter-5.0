@@ -1,43 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Ini adalah proyek [Next.js](https://nextjs.org) yang dibangun dengan [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## Memulai
 
-First, run the development server:
+Pertama jalankan server pengembangan:
 
 ```bash
 npm run dev
-# or
+# atau
 yarn dev
-# or
+# atau
 pnpm dev
-# or
+# atau
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000) dengan browser untuk melihat hasilnya.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Anda dapat mulai mengedit halaman dengan memodifikasi `app/page.tsx`. Halaman akan memperbarui otomatis saat Anda menyimpan.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Proyek ini menggunakan [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) untuk mengoptimalkan dan memuat [Geist](https://vercel.com/font) secara otomatis.
 
-## Learn More
+## Pelajari Lebih Lanjut
 
-To learn more about Next.js, take a look at the following resources:
+Untuk mempelajari Next.js lebih dalam, lihat sumber berikut:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Dokumentasi Next.js](https://nextjs.org/docs) – pelajari fitur dan API Next.js.
+- [Learn Next.js](https://nextjs.org/learn) – tutorial interaktif Next.js.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Anda dapat menengok [repositori GitHub Next.js](https://github.com/vercel/next.js); masukan dan kontribusi Anda sangat dihargai!
 
-## Deploy on Vercel
+## Deploy di Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Cara paling mudah men-deploy aplikasi Next.js adalah memakai [Platform Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Lihat [dokumentasi deploy Next.js](https://nextjs.org/docs/app/building-your-application/deploying) untuk detail lebih lanjut.
 
-This folder now contains a minimal Next.js template meant as a placeholder.
-The full web interface lives in its own repository and is not included here.
+Folder ini hanya berisi template Next.js minimal sebagai placeholder. Antarmuka web penuh berada di repositori terpisah dan tidak termasuk di sini.
 
-Clone that UI repository when available for development and build instructions.
-For full contract information and backend setup steps refer to the
-[root README](../README.md).
+Klon repositori UI tersebut (jika tersedia) untuk petunjuk pengembangan dan build. Informasi kontrak serta langkah setup backend dapat dilihat pada [README](../README.md) di root.

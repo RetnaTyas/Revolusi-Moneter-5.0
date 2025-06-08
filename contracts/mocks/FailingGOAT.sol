@@ -5,13 +5,13 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IGOAT} from "../interfaces/IGOAT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/// @title Mock GOAT token that can simulate transfer failures
+/// @title Token GOAT tiruan yang dapat mensimulasikan kegagalan transfer
 contract FailingGOAT is ERC20, IGOAT {
     bool public failTransfer;
 
     constructor() ERC20("Failing GOAT", "FGOAT") {}
 
-    /// @notice Toggle transfer failure mode
+    /// @notice Mengaktifkan atau menonaktifkan mode gagal transfer
     function setFailTransfer(bool value) external {
         failTransfer = value;
     }

@@ -1,30 +1,30 @@
-# Backend Server
+# Server Backend
 
-This folder contains a small Express server that exposes cached stats for the GOAT and MEAT token contracts. The server reads on-chain data through an RPC provider and exposes JSON endpoints used by the frontend.
+Folder ini berisi server Express sederhana yang menyajikan statistik cache untuk kontrak token GOAT dan MEAT. Server membaca data on-chain melalui penyedia RPC dan menyediakan endpoint JSON yang digunakan frontend.
 
-## Setup
+## Persiapan
 
-1. Install dependencies at the repository root:
+1. Instal dependensi di root repositori:
    ```bash
    npm install
    ```
-2. Compile the contracts to generate ABI files used by the server:
+2. Kompilasi kontrak untuk menghasilkan file ABI yang digunakan server:
    ```bash
    npx hardhat compile
    ```
-   Copy updated ABI JSONs from `artifacts/contracts/` into `backend/abi/` when you modify the contracts.
-3. Copy the environment template and set the required variables:
+   Salin ABI JSON yang diperbarui dari `artifacts/contracts/` ke `backend/abi/` ketika Anda memodifikasi kontrak.
+3. Salin template environment dan atur variabel yang diperlukan:
    ```bash
    cp .env.example .env
    ```
-   Configure `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` and `PORT` in `backend/.env`.
+   Atur `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` dan `PORT` di `backend/.env`.
 
-## Running
+## Menjalankan
 
-Start the server with:
+Jalankan server dengan:
 
 ```bash
 npm run start:server
 ```
 
-For a full overview of the project architecture and contract interactions, see the main [README](../README.md).
+Untuk gambaran lengkap arsitektur dan interaksi kontrak, lihat [README](../README.md) utama.

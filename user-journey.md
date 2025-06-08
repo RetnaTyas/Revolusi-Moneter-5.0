@@ -1,16 +1,16 @@
-# User Journey
+# Perjalanan Pengguna
 
-This document outlines a typical experience for a new participant in the GOAT/MEAT ecosystem.
+Dokumen ini menggambarkan pengalaman umum bagi peserta baru di ekosistem GOAT/MEAT.
 
-1. **Acquire MEAT**
-   * The user opens the web app, connects their wallet and sends a small amount of native token to the MEAT contract. The contract mints MEAT based on the current `DepositRate`.
-2. **Convert to GOAT**
-   * Using the swap interface they approve MEAT and call `swapMEATForGOAT` which transfers MEAT and returns GOAT based on the current rate from `RateHandler`.
-3. **Stake for Rewards**
-   * With GOAT tokens in the wallet the user stakes them to start accruing rewards. The UI shows how long until claiming is allowed (`minClaimInterval`).
-4. **Harvest**
-   * After the interval passes they may claim the reward directly or choose to compound it back into their stake, increasing the principal.
-5. **Exit**
-   * When finished they unstake to withdraw the original GOAT plus any reward and can immediately swap back to MEAT. MEAT can then be traded or held.
+1. **Mendapatkan MEAT**
+   * Pengguna membuka aplikasi web, menghubungkan dompet, lalu mengirim sejumlah kecil token native ke kontrak MEAT. Kontrak akan mencetak MEAT sesuai `DepositRate` saat ini.
+2. **Mengonversi ke GOAT**
+   * Melalui antarmuka swap, pengguna menyetujui MEAT dan memanggil `swapMEATForGOAT` yang mentransfer MEAT dan mengembalikan GOAT berdasarkan rate terkini dari `RateHandler`.
+3. **Staking untuk Reward**
+   * Dengan token GOAT di dompet, pengguna melakukan staking untuk mulai memperoleh reward. UI menampilkan hitungan mundur hingga klaim diperbolehkan (`minClaimInterval`).
+4. **Panen**
+   * Setelah interval terpenuhi, pengguna dapat mengklaim reward secara langsung atau menggabungkannya kembali ke staking guna menambah pokok.
+5. **Keluar**
+   * Ketika selesai, pengguna melakukan unstake untuk menarik GOAT asli beserta reward lalu dapat segera menukar kembali ke MEAT. MEAT tersebut bisa diperdagangkan atau disimpan.
 
-Through this cycle users interact with both contracts only via the approved functions which keeps funds secure yet flexible.
+Sepanjang siklus ini pengguna berinteraksi dengan kedua kontrak hanya melalui fungsi yang diizinkan sehingga dana tetap aman namun fleksibel.
