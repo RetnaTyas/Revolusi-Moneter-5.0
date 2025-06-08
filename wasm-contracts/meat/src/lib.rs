@@ -55,6 +55,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
         ExecuteMsg::ChangeDepositRate { new_rate } => execute_change_rate(deps, info, new_rate),
         ExecuteMsg::SwapGoatForMeat { goat_amount } => execute_swap_goat_for_meat(deps, env, info, goat_amount),
         ExecuteMsg::SwapMeatForGoat { meat_amount } => execute_swap_meat_for_goat(deps, env, info, meat_amount),
+        ExecuteMsg::RedeemForMeat { amount } => execute_redeem_for_meat(deps, info, amount),
         ExecuteMsg::SetSwapEnabled { enabled } => execute_set_swap_enabled(deps, info, enabled),
         ExecuteMsg::SetGoatAddress { goat_address } => execute_set_goat(deps, info, goat_address),
     }
@@ -203,6 +204,22 @@ fn execute_swap_meat_for_goat(deps: DepsMut, env: Env, info: MessageInfo, meat_a
         .add_attribute("user", info.sender)
         .add_attribute("meat_in", meat_amount)
         .add_attribute("goat_out", goat_amount))
+}
+
+fn execute_redeem_for_meat(deps: DepsMut, info: MessageInfo, amount: Uint128) -> StdResult<Response> {
+    if amount.is_zero() {
+        return Err(StdError::generic_err("Amount must be > 0"));
+    }
+    sub_balance(deps.storage, &info.sender, amount)?;
+    let total = TOTAL_SUPPLY.load(deps.storage)?;
+    if total < amount {
+        return Err(StdError::generic_err("Insufficient total supply"));
+    }
+    TOTAL_SUPPLY.save(deps.storage, &(total - amount))?;
+    Ok(Response::new()
+        .add_attribute("action", "MeatRedeemed")
+        .add_attribute("user", info.sender)
+        .add_attribute("amount", amount))
 }
 
 fn execute_set_swap_enabled(mut deps: DepsMut, info: MessageInfo, enabled: bool) -> StdResult<Response> {

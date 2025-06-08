@@ -18,6 +18,7 @@ pub enum ExecuteMsg {
     ChangeDepositRate { new_rate: Uint128 },
     SwapGoatForMeat { goat_amount: Uint128 },
     SwapMeatForGoat { meat_amount: Uint128 },
+    RedeemForMeat { amount: Uint128 },
     SetSwapEnabled { enabled: bool },
     SetGoatAddress { goat_address: String },
 }
