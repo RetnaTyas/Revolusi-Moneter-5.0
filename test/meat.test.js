@@ -17,6 +17,22 @@ describe("MEAT", function () {
     expect(balance).to.equal(ethers.parseEther("1000"));
   });
 
+  it("reverts when sending no native token", async function () {
+    const [owner] = await ethers.getSigners();
+
+    const GOAT = await ethers.getContractFactory("GOAT");
+    const goat = await GOAT.deploy(owner.address);
+    await goat.waitForDeployment();
+
+    const MEAT = await ethers.getContractFactory("MEAT");
+    const meat = await MEAT.deploy(goat.target);
+    await meat.waitForDeployment();
+
+    await expect(
+      owner.sendTransaction({ to: meat.target, value: 0 })
+    ).to.be.revertedWith("Must send Native Token to mint MEAT");
+  });
+
   it("should revert swapMEATForGOAT when GOAT transfer fails", async function () {
     const [owner, user] = await ethers.getSigners();
 
