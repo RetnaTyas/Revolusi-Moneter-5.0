@@ -1,5 +1,5 @@
 [package]
-name = "meat"
+name = "ratehandler"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,9 +13,6 @@ serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 cw-storage-plus = "1.1"
 cw2 = "1.1"
-
-starter = { path = "../starter" }
-ratehandler = { path = "../ratehandler" }
 
 [dev-dependencies]
 cw-multi-test = "0.16"

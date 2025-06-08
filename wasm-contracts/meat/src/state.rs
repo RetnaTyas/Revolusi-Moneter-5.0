@@ -7,6 +7,7 @@ pub const DECIMALS: u8 = 18;
 
 pub const OWNER: Item<Addr> = Item::new("owner");
 pub const GOAT_CONTRACT: Item<Addr> = Item::new("goat_contract");
+pub const RATE_HANDLER: Item<Option<Addr>> = Item::new("rate_handler");
 pub const RATE: Item<Uint128> = Item::new("rate");
 pub const SWAP_ENABLED: Item<bool> = Item::new("swap_enabled");
 
