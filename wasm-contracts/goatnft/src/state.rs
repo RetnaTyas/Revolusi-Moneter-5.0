@@ -1,7 +1,9 @@
 use cosmwasm_std::{Addr, Uint128};
 use cw_storage_plus::{Item, Map};
 
-#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize, schemars::JsonSchema)]
+#[derive(
+    Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize, schemars::JsonSchema,
+)]
 pub struct GoatData {
     pub nfc_id: String,
     pub breed: String,
@@ -17,3 +19,11 @@ pub const GOAT_VALUE: Map<u64, Uint128> = Map::new("goat_value");
 pub const GOAT_METADATA: Map<u64, GoatData> = Map::new("goat_metadata");
 pub const APPROVALS: Map<u64, Addr> = Map::new("approvals");
 
+/// Timestamp of the last weight update for each token
+pub const LAST_WEIGHT_UPDATE: Map<u64, u64> = Map::new("last_weight_update");
+
+/// Mapping from NFC id bytes to token id to ensure uniqueness
+pub const NFC_TO_TOKEN: Map<&[u8], u64> = Map::new("nfc_to_token");
+
+/// Weight update validity window (7 days)
+pub const WEIGHT_UPDATE_VALIDITY: u64 = 60 * 60 * 24 * 7;

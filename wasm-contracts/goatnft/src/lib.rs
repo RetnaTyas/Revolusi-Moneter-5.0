@@ -6,13 +6,7 @@ use cosmwasm_std::{
 use cw2::set_contract_version;
 use serde_json_wasm;
 
-use crate::msg::{
-    ExecuteMsg,
-    GoatValueResponse,
-    GoatDataResponse,
-    InstantiateMsg,
-    QueryMsg,
-};
+use crate::msg::{ExecuteMsg, GoatDataResponse, GoatValueResponse, InstantiateMsg, QueryMsg};
 use crate::state::*;
 
 pub mod msg;
@@ -42,25 +36,37 @@ fn only_owner(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
     Ok(())
 }
 
-fn handle_execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
-    match msg {
-        ExecuteMsg::Mint { to, nfc_id, breed, birth_year, weight } => {
-            execute_mint(deps, env, info, to, weight, nfc_id, breed, birth_year)
-        }
-        ExecuteMsg::Burn { token_id } => execute_burn(deps, info, token_id),
-        ExecuteMsg::Approve { spender, token_id } => execute_approve(deps, info, spender, token_id),
-        ExecuteMsg::Transfer { to, token_id } => execute_transfer(deps, info, to, token_id),
-        ExecuteMsg::TransferFrom { owner, to, token_id } => execute_transfer_from(deps, info, owner, to, token_id),
-    }
-}
-
-#[entry_point]
-pub fn execute(
+fn handle_execute(
     deps: DepsMut,
     env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> StdResult<Response> {
+    match msg {
+        ExecuteMsg::Mint {
+            to,
+            nfc_id,
+            breed,
+            birth_year,
+            weight,
+        } => execute_mint(deps, env, info, to, weight, nfc_id, breed, birth_year),
+        ExecuteMsg::Burn { token_id } => execute_burn(deps, env, info, token_id),
+        ExecuteMsg::Approve { spender, token_id } => execute_approve(deps, info, spender, token_id),
+        ExecuteMsg::Transfer { to, token_id } => execute_transfer(deps, info, to, token_id),
+        ExecuteMsg::TransferFrom {
+            owner,
+            to,
+            token_id,
+        } => execute_transfer_from(deps, info, owner, to, token_id),
+        ExecuteMsg::UpdateWeight {
+            token_id,
+            new_weight,
+        } => execute_update_weight(deps, env, info, token_id, new_weight),
+    }
+}
+
+#[entry_point]
+pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     handle_execute(deps, env, info, msg)
 }
 
@@ -78,23 +84,36 @@ fn execute_mint(
     if weight == 0 {
         return Err(StdError::generic_err("Weight must be > 0"));
     }
+    if NFC_TO_TOKEN
+        .may_load(deps.storage, nfc_id.as_bytes())?
+        .is_some()
+    {
+        return Err(StdError::generic_err("NFC ID already used"));
+    }
     let to_addr = deps.api.addr_validate(&to)?;
     let id = NEXT_ID.load(deps.storage)? + 1;
     NEXT_ID.save(deps.storage, &id)?;
     OWNER_OF.save(deps.storage, id, &to_addr)?;
     GOAT_VALUE.save(deps.storage, id, &Uint128::from(weight as u128))?;
     let data = GoatData {
-        nfc_id,
+        nfc_id: nfc_id.clone(),
         breed,
         birth_year,
         weight,
         minted_at: env.block.time.seconds(),
     };
     GOAT_METADATA.save(deps.storage, id, &data)?;
+    LAST_WEIGHT_UPDATE.save(deps.storage, id, &env.block.time.seconds())?;
+    NFC_TO_TOKEN.save(deps.storage, nfc_id.as_bytes(), &id)?;
     Ok(Response::new().add_attribute("token_id", id.to_string()))
 }
 
-fn execute_burn(deps: DepsMut, info: MessageInfo, token_id: String) -> StdResult<Response> {
+fn execute_burn(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    token_id: String,
+) -> StdResult<Response> {
     let id: u64 = token_id
         .parse()
         .map_err(|_| StdError::generic_err("invalid id"))?;
@@ -102,18 +121,30 @@ fn execute_burn(deps: DepsMut, info: MessageInfo, token_id: String) -> StdResult
     if owner != info.sender {
         let approved = APPROVALS.may_load(deps.storage, id)?;
         match approved {
-            Some(addr) if addr == info.sender => {},
+            Some(addr) if addr == info.sender => {}
             _ => return Err(StdError::generic_err("Unauthorized")),
         }
     }
+    let last_update = LAST_WEIGHT_UPDATE.load(deps.storage, id)?;
+    if env.block.time.seconds() - last_update > WEIGHT_UPDATE_VALIDITY {
+        return Err(StdError::generic_err("Weight update too old"));
+    }
+    let data = GOAT_METADATA.load(deps.storage, id)?;
     OWNER_OF.remove(deps.storage, id);
     GOAT_VALUE.remove(deps.storage, id);
     GOAT_METADATA.remove(deps.storage, id);
     APPROVALS.remove(deps.storage, id);
+    LAST_WEIGHT_UPDATE.remove(deps.storage, id);
+    NFC_TO_TOKEN.remove(deps.storage, data.nfc_id.as_bytes());
     Ok(Response::new())
 }
 
-fn execute_approve(deps: DepsMut, info: MessageInfo, spender: String, token_id: String) -> StdResult<Response> {
+fn execute_approve(
+    deps: DepsMut,
+    info: MessageInfo,
+    spender: String,
+    token_id: String,
+) -> StdResult<Response> {
     let id: u64 = token_id
         .parse()
         .map_err(|_| StdError::generic_err("invalid id"))?;
@@ -126,7 +157,12 @@ fn execute_approve(deps: DepsMut, info: MessageInfo, spender: String, token_id: 
     Ok(Response::new())
 }
 
-fn execute_transfer(deps: DepsMut, info: MessageInfo, to: String, token_id: String) -> StdResult<Response> {
+fn execute_transfer(
+    deps: DepsMut,
+    info: MessageInfo,
+    to: String,
+    token_id: String,
+) -> StdResult<Response> {
     let id: u64 = token_id
         .parse()
         .map_err(|_| StdError::generic_err("invalid id"))?;
@@ -134,7 +170,7 @@ fn execute_transfer(deps: DepsMut, info: MessageInfo, to: String, token_id: Stri
     if owner != info.sender {
         let approved = APPROVALS.may_load(deps.storage, id)?;
         match approved {
-            Some(addr) if addr == info.sender => {},
+            Some(addr) if addr == info.sender => {}
             _ => return Err(StdError::generic_err("Unauthorized")),
         }
     }
@@ -162,13 +198,38 @@ fn execute_transfer_from(
     if owner_addr != info.sender {
         let approved = APPROVALS.may_load(deps.storage, id)?;
         match approved {
-            Some(addr) if addr == info.sender => {},
+            Some(addr) if addr == info.sender => {}
             _ => return Err(StdError::generic_err("Unauthorized")),
         }
     }
     let to_addr = deps.api.addr_validate(&to)?;
     OWNER_OF.save(deps.storage, id, &to_addr)?;
     APPROVALS.remove(deps.storage, id);
+    Ok(Response::new())
+}
+
+fn execute_update_weight(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    token_id: String,
+    new_weight: u64,
+) -> StdResult<Response> {
+    if new_weight == 0 {
+        return Err(StdError::generic_err("Weight must be > 0"));
+    }
+    let id: u64 = token_id
+        .parse()
+        .map_err(|_| StdError::generic_err("invalid id"))?;
+    let owner = OWNER_OF.load(deps.storage, id)?;
+    if owner != info.sender {
+        return Err(StdError::generic_err("Not token owner"));
+    }
+    GOAT_VALUE.save(deps.storage, id, &Uint128::from(new_weight as u128))?;
+    let mut data = GOAT_METADATA.load(deps.storage, id)?;
+    data.weight = new_weight;
+    GOAT_METADATA.save(deps.storage, id, &data)?;
+    LAST_WEIGHT_UPDATE.save(deps.storage, id, &env.block.time.seconds())?;
     Ok(Response::new())
 }
 
