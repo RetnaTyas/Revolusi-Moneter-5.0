@@ -5,6 +5,7 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IGOAT } from "./interfaces/IGOAT.sol";
 import { SwapConfig } from "./SwapConfig.sol";
+import { RateHandler } from "./RateHandler.sol";
 
 /// @title MEAT Token - Monetary Exchange for Agricultural Transactions
 /// @notice Smart contract untuk mint MEAT pakai Native Token dan swap ke GOAT serta sebaliknya.
@@ -15,6 +16,7 @@ contract MEAT is ERC20 {
 
     uint256 private _rate = 100;
     bool public swapEnabled = true;
+    RateHandler public rateHandler;
 
     event DepositRateChanged(uint256 oldRate, uint256 newRate);
     event MintedWithNative(address indexed user, uint256 nativeReceived, uint256 meatMinted);
@@ -24,6 +26,7 @@ contract MEAT is ERC20 {
     event InitialSupplyMinted(address indexed to, uint256 amount);
     event MeatRedeemed(address indexed user, uint256 amount);
     event GoatAddressUpdated(address indexed oldAddress, address indexed newAddress);
+    event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -83,7 +86,8 @@ contract MEAT is ERC20 {
         require(goatAmount > 0, "Amount must be > 0");
         GOAT.transferFrom(msg.sender, address(this), goatAmount);
 
-        uint256 meatAmount = goatAmount * SwapConfig.SWAP_RATE;
+        uint256 rate = _getSwapRate();
+        uint256 meatAmount = goatAmount * rate;
         uint256 contractBalance = balanceOf(address(this));
         if (contractBalance >= meatAmount) {
             _transfer(address(this), msg.sender, meatAmount);
@@ -103,7 +107,8 @@ contract MEAT is ERC20 {
         require(meatAmount > 0, "Amount must be > 0");
         IERC20(address(this)).transferFrom(msg.sender, address(this), meatAmount);
 
-        uint256 goatAmount = meatAmount / SwapConfig.SWAP_RATE;
+        uint256 rate = _getSwapRate();
+        uint256 goatAmount = meatAmount / rate;
         uint256 goatBalance = GOAT.balanceOf(address(this));
         if (goatBalance < goatAmount) {
             GOAT.mintTo(address(this), goatAmount - goatBalance);
@@ -129,15 +134,33 @@ contract MEAT is ERC20 {
         emit GoatAddressUpdated(old, goatAddress);
     }
 
+    /// @notice Sets the rate handler contract address used for swap rates
+    /// @param rateHandlerAddress Address of the RateHandler contract
+    function setRateHandler(address rateHandlerAddress) external onlyOwner {
+        require(rateHandlerAddress != address(0), "Invalid address");
+        address old = address(rateHandler);
+        rateHandler = RateHandler(rateHandlerAddress);
+        emit RateHandlerUpdated(old, rateHandlerAddress);
+    }
+
+    function _getSwapRate() internal view returns (uint256) {
+        if (address(rateHandler) != address(0)) {
+            return rateHandler.getCurrentRate();
+        }
+        return SwapConfig.SWAP_RATE;
+    }
+
     function owner() external view returns (address) {
         return _owner;
     }
 
-    function getEquivalentMEAT(uint256 goatAmount) external pure returns (uint256) {
-        return goatAmount * SwapConfig.SWAP_RATE;
+    function getEquivalentMEAT(uint256 goatAmount) external view returns (uint256) {
+        uint256 rate = _getSwapRate();
+        return goatAmount * rate;
     }
 
-    function getEquivalentGOAT(uint256 meatAmount) external pure returns (uint256) {
-        return meatAmount / SwapConfig.SWAP_RATE;
+    function getEquivalentGOAT(uint256 meatAmount) external view returns (uint256) {
+        uint256 rate = _getSwapRate();
+        return meatAmount / rate;
     }
 }
