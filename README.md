@@ -28,7 +28,8 @@ Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
 
 - Kambing lahir → pencetakan **GoatNFT** dengan `nfcId`, `breed`, `birthYear`, dan `weight` awal.
 - `nfcId` bersifat unik; pencetakan kedua dengan ID sama akan gagal.
-- Pemilik dapat memperbarui berat melalui `updateWeight()` agar nilainya tetap valid (dibutuhkan sebelum burn).
+ - Pemilik dapat memperbarui berat melalui `updateWeight()` agar nilainya tetap valid (dibutuhkan sebelum burn).
+ - Nilai `weight` disimpan dengan satu tempat desimal menggunakan `WEIGHT_DECIMALS = 1` sehingga `425` berarti **42.5 kg**.
 - NFT (standar ERC721) bebas dipindahtangankan ke pemilik baru.
 - Ketika kambing disembelih, pemilik membakar NFT; kontrak otomatis mencetak GOAT sejumlah `weight / rate` dimana `rate` berasal dari `RateHandler`.
 - GOAT dapat diperdagangkan atau ditukar menjadi MEAT memakai fungsi swap kontrak.

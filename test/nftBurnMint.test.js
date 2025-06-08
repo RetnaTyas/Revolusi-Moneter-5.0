@@ -26,7 +26,7 @@ describe("GoatNFT burn and GOAT mint", function () {
     const nfcId = "1234";
     const breed = "Boer";
     const birthYear = 2021;
-    const weight = 70;
+    const weight = 700;
     const tx = await nft.mint(
       user.address,
       weight,
@@ -38,13 +38,13 @@ describe("GoatNFT burn and GOAT mint", function () {
     const tokenId = receipt.logs[0].args[2];
 
     // owner updates weight before burning
-    const newWeight = 80n;
+    const newWeight = 800n;
     await nft.connect(user).updateWeight(tokenId, newWeight);
 
     const stored = await nft.getGoatData(tokenId);
     expect(stored.weight).to.equal(newWeight);
 
-    const goatAmount = (newWeight * 10n ** 18n) / SWAP_RATE;
+    const goatAmount = (newWeight * 10n ** 18n) / SWAP_RATE / 10n;
     await expect(nft.connect(user).burn(tokenId))
       .to.emit(nft, "GoatBurned")
       .withArgs(tokenId, user.address, newWeight, goatAmount);
@@ -53,18 +53,32 @@ describe("GoatNFT burn and GOAT mint", function () {
     await expect(nft.ownerOf(tokenId)).to.be.reverted;
   });
 
-  it("emits WeightUpdated when updating weight", async function () {
-    const tx = await nft.mint(user.address, 50, "tag", "type", 2022);
+  it("mints 0.5 GOAT when burning weight 425", async function () {
+    const tx = await nft.mint(user.address, 425, "half", "Boer", 2021);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
 
-    await expect(nft.connect(user).updateWeight(tokenId, 55n))
+    const expected = (425n * 10n ** 18n) / SWAP_RATE / 10n;
+    // weight already fresh so just burn
+    await expect(nft.connect(user).burn(tokenId))
+      .to.emit(nft, "GoatBurned")
+      .withArgs(tokenId, user.address, 425n, expected);
+    expect(expected).to.equal(5n * 10n ** 17n);
+    expect(await goat.balanceOf(user.address)).to.equal(expected);
+  });
+
+  it("emits WeightUpdated when updating weight", async function () {
+    const tx = await nft.mint(user.address, 500, "tag", "type", 2022);
+    const receipt = await tx.wait();
+    const tokenId = receipt.logs[0].args[2];
+
+    await expect(nft.connect(user).updateWeight(tokenId, 550n))
       .to.emit(nft, "WeightUpdated")
-      .withArgs(tokenId, 55n);
+      .withArgs(tokenId, 550n);
   });
 
   it("reverts burn when weight update is stale", async function () {
-    const tx = await nft.mint(user.address, 60, "n", "b", 2020);
+    const tx = await nft.mint(user.address, 600, "n", "b", 2020);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
 
@@ -78,17 +92,17 @@ describe("GoatNFT burn and GOAT mint", function () {
   });
 
   it("reverts when minting with duplicate nfcId", async function () {
-    await nft.mint(user.address, 40, "dup", "Boer", 2022);
+    await nft.mint(user.address, 400, "dup", "Boer", 2022);
     await expect(
-      nft.mint(user.address, 50, "dup", "Boer", 2022)
+      nft.mint(user.address, 500, "dup", "Boer", 2022)
     ).to.be.revertedWith("NFC ID already used");
   });
 
   it("allows reusing nfcId after burn", async function () {
-    const tx = await nft.mint(user.address, 30, "reuse", "Boer", 2022);
+    const tx = await nft.mint(user.address, 300, "reuse", "Boer", 2022);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
     await nft.connect(user).burn(tokenId);
-    await expect(nft.mint(user.address, 35, "reuse", "Boer", 2022)).to.not.be.reverted;
+    await expect(nft.mint(user.address, 350, "reuse", "Boer", 2022)).to.not.be.reverted;
   });
 });

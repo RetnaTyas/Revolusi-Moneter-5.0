@@ -36,6 +36,8 @@ contract GoatNFT is ERC721Burnable {
 
     /// @notice Weight update validity window in seconds (7 days)
     uint256 public constant WEIGHT_UPDATE_VALIDITY = 7 days;
+    /// @notice Number of decimal places used for weight values
+    uint256 public constant WEIGHT_DECIMALS = 1;
 
     constructor(address goatTokenAddress) ERC721("Goat Identifier", "GOATNFT") {
         _owner = msg.sender;
@@ -70,6 +72,7 @@ contract GoatNFT is ERC721Burnable {
         return SwapConfig.SWAP_RATE;
     }
 
+    /// @param weight Weight value scaled by `WEIGHT_DECIMALS`
     function mint(
         address to,
         uint256 weight,
@@ -91,7 +94,7 @@ contract GoatNFT is ERC721Burnable {
 
     /// @notice Update the goat's latest weight
     /// @param tokenId ID of the NFT to update
-    /// @param newWeight New weight value in kilograms
+    /// @param newWeight New weight value scaled by `WEIGHT_DECIMALS`
     function updateWeight(uint256 tokenId, uint256 newWeight) external {
         address tokenOwner = ownerOf(tokenId);
         require(msg.sender == tokenOwner, "Not token owner");
@@ -117,7 +120,8 @@ contract GoatNFT is ERC721Burnable {
         bytes32 hash = keccak256(bytes(goatMetadata[tokenId].nfcId));
 
         uint256 rate = _getSwapRate();
-        uint256 goatAmount = (currentWeight * 1e18) / rate;
+        uint256 goatAmount =
+            (currentWeight * 1e18) / rate / (10 ** WEIGHT_DECIMALS);
 
         // Mint GOAT tokens directly to the token owner
         goatTokenContract.mint(tokenOwner, goatAmount);
