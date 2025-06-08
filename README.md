@@ -11,6 +11,7 @@ Berikut gambaran umum alur penggunaan kedua token:
 
 1. **Mint MEAT** – Kirim native token langsung ke alamat kontrak `MEAT` untuk mencetak token sesuai rasio `DepositRate`. Fungsi `receive()` otomatis memproses dana dan mengirim MEAT ke pengirim. Versi CosmWasm menggunakan pesan `mint_with_native` seperti dijelaskan pada bagian berikutnya.
 2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi diambil dari `RateHandler` yang dapat diperbarui secara dinamis, dengan fallback ke `SWAP_RATE` di `SwapConfig` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
+RateHandler dikelola pemilik dan menyimpan `dynamicRate` terkini. Pemanggilan `updateRate` menulis nilai baru serta memicu event `RateUpdated`, sedangkan `invalidateRate` menonaktifkan rate dinamis dan memicu `RateInvalidated`.
 3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
 4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
@@ -163,6 +164,7 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 ## Parameter Penting
 
 - **SWAP_RATE** – konstanta di `SwapConfig` yang menjadi fallback pada `RateHandler`. Nilai default `85` berarti 1 GOAT setara dengan 85 MEAT.
+- **dynamicRate** – nilai saat ini dari RateHandler jika masih valid. Diset lewat `updateRate` yang memancarkan event `RateUpdated`. Jika dinonaktifkan dengan `invalidateRate`, kontrak memakai `SWAP_RATE` dan event `RateInvalidated` dicatat.
 - **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
   dihitung per 1000 unit native token sehingga `100` berarti 100 MEAT untuk 1000
   unit native (0.1 MEAT per 1 unit).
@@ -181,6 +183,8 @@ Perubahan alamat penting pada kontrak GOAT dan GoatNFT dapat dipantau melalui ev
 - `NftAddressUpdated(oldAddress, newAddress)` dicatat saat alamat GoatNFT diubah.
 - `GoatAddressUpdated(oldAddress, newAddress)` dicatat ketika alamat GOAT pada kontrak MEAT diubah.
 - `GoatTokenAddressUpdated(oldAddress, newAddress)` dicatat ketika kontrak GoatNFT mengubah alamat GOAT yang dipakai untuk mint.
+- `RateUpdated(newRate, timestamp)` dicatat oleh RateHandler ketika pemilik mengatur konversi baru.
+- `RateInvalidated(timestamp)` dicatat saat pemilik menonaktifkan rate dinamis sehingga fallback ke `SWAP_RATE`.
 
 MEAT juga memunculkan event utama berikut:
 
