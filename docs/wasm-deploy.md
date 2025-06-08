@@ -14,7 +14,9 @@ functions have equivalent execute messages, but there are notable differences:
 - **starter** implements GOAT staking and NFT redemption exactly like
   `GOAT.sol`, though events become log attributes.
 - **goatnft** stores goat metadata and weight the same way as `GoatNFT.sol` with
-  minor naming changes.
+  minor naming changes. Owners can call `update_weight` to refresh a goat's
+  weight. Burning requires the last update to be within
+  `WEIGHT_UPDATE_VALIDITY` (7 days).
 
 ## Building
 

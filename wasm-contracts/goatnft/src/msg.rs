@@ -15,10 +15,26 @@ pub enum ExecuteMsg {
         birth_year: u64,
         weight: u64,
     },
-    Burn { token_id: String },
-    Approve { spender: String, token_id: String },
-    Transfer { to: String, token_id: String },
-    TransferFrom { owner: String, to: String, token_id: String },
+    Burn {
+        token_id: String,
+    },
+    Approve {
+        spender: String,
+        token_id: String,
+    },
+    Transfer {
+        to: String,
+        token_id: String,
+    },
+    TransferFrom {
+        owner: String,
+        to: String,
+        token_id: String,
+    },
+    UpdateWeight {
+        token_id: String,
+        new_weight: u64,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
