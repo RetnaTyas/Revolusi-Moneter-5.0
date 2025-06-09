@@ -22,7 +22,7 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
 4. **Mengambil Reward**
    * Setelah `minClaimInterval`, staker bisa mengambil reward atau menggabungkannya kembali ke stake. Untuk keluar sepenuhnya panggil `unstake` agar pokok dan reward diterima.
 5. **Barter Produk**
-   * GOATMEAT dapat ditukar dengan token produk lain menggunakan `RateHandler`.
+   * GOATMEAT dapat ditukar dengan token produk lain menggunakan `RateHandler` yang diakses oleh `BarterContract`.
 6. **Menebus MEAT**
    * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain. Tiap token yang ditebus mewakili **satu kilogram daging** dari mitra distribusi kami. Diagram singkat jalur burn dan redemption dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow) di README.
 

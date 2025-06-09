@@ -12,7 +12,7 @@ flowchart TD
   UserWallet -- "native token" --> MEAT
   GoatNFT -- burn --> Hook
   Hook --> MEAT
-  GOAT <--> MEAT
+  %% GOAT and MEAT no longer link addresses
   MEAT -->|withdraw| UserWallet
   RateHandler --> GOAT
   RateHandler --> MEAT
@@ -30,14 +30,11 @@ Kontrak GOAT dan MEAT dimiliki alamat yang sama. Tabel di bawah merangkum kontra
 
 | Kontrak | Deskripsi | Fungsi Kunci |
 |---------|-----------|--------------|
-| GOAT | Token ERC20 untuk staking yang dicetak oleh GoatNFTWrapper saat NFT dibungkus. | `stake`, `unstake`, `claimReward`, `compoundReward`, `emergencyUnstake`, `mintTo`, `mint`, `setMEATAddress`, `setNFTAddress` |
+| GOAT | Token ERC20 untuk staking yang dicetak oleh GoatNFTWrapper saat NFT dibungkus. | `stake`, `unstake`, `claimReward`, `compoundReward`, `emergencyUnstake`, `mintTo`, `mint` |
 | MEAT | Token ERC20 yang dicetak dengan deposit native. | `changeDepositRate`, `withdrawNative`, `setGOATAddress` |
 | GoatNFT | Identitas kambing ERC721 yang menyimpan metadata di `goatMetadata` sebagai `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Berat dapat diperbarui via `updateWeight` (memancarkan `WeightUpdated`) dan harus segar saat dibakar. Fungsi `burn` memicu `GoatNFTBurnHook` serta event `GoatBurned`. | `mint`, `updateWeight`, `burn`, `goatValue`, `goatMetadata`, `getGoatData` |
-| GoatNFTBurnHook | Kontrak hook yang mencetak `GOATMEAT` setiap kali GoatNFT dibakar. | `onBurn`, `setNFTAddress`, `setMEATAddress` |
+| GoatNFTBurnHook | Kontrak hook yang mencetak `GOATMEAT` setiap kali GoatNFT dibakar. | `onBurn` |
 | GoatNFTWrapper | Mengunci GoatNFT dan mencetak GOAT setara hingga NFT dibuka kembali dengan membakar GOAT. | `wrap`, `unwrap`, `setRateHandler` |
 | IGOAT | Antarmuka pencetakan GOAT yang digunakan GoatNFTWrapper. | `mintTo` |
 | IGoatToken | Antarmuka pencetakan GOAT yang digunakan GoatNFTWrapper dan GoatNFT. | `mint`, `burnFrom` |
 
-GOAT memancarkan `MeatAddressUpdated` dan `NftAddressUpdated` setiap kali pemilik memperbarui alamat kontrak MEAT atau GoatNFT.
-MEAT memancarkan `GoatAddressUpdated` setiap kali pemilik memperbarui alamat kontrak GOAT.
-GoatNFT memancarkan `GoatTokenAddressUpdated` setiap kali pemilik memperbarui alamat token GOAT yang dipakai untuk mint.
