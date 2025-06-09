@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("GoatNFT burn", function () {
-  let owner, user, goat, nft, swapConfig, SWAP_RATE;
+  let owner, user, goat, nft, SWAP_RATE;
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
@@ -11,9 +11,7 @@ describe("GoatNFT burn", function () {
     goat = await GOAT.deploy();
     await goat.waitForDeployment();
 
-    swapConfig = await ethers.deployContract("SwapConfig");
-    await swapConfig.waitForDeployment();
-    SWAP_RATE = await swapConfig.SWAP_RATE();
+    SWAP_RATE = 85n;
 
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
     nft = await GoatNFT.deploy();

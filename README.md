@@ -16,8 +16,9 @@ Berikut gambaran umum alur penggunaan kedua token:
 3. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
 4. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
 5. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
-6. **GoatNFTBurnHook** – Hook ini dipanggil saat NFT dibakar dan otomatis mencetak `GOATMEAT` sesuai berat yang dilaporkan untuk dipertukarkan lewat `RateHandler`.
-7. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya untuk keperluan staking. Membuka kembali NFT mengharuskan jumlah GOAT yang sama dibakar.
+6. **GoatNFTBurnHook** – Hook ini dipanggil saat NFT kambing dibakar dan otomatis mencetak `GOATMEAT` sesuai berat yang dilaporkan.
+7. **SapiNFTBurnHook** – Versi untuk sapi yang memicu pencetakan `BEEFMEAT` ketika `SapiNFT` dibakar.
+8. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya untuk keperluan staking. Membuka kembali NFT mengharuskan jumlah GOAT yang sama dibakar.
    *GOAT sepenuhnya dicetak oleh `GoatNFTWrapper`; kontrak lain tidak memiliki izin mint.*
 
 ## Burn & Redeem Flow
