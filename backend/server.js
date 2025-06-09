@@ -52,8 +52,9 @@ app.get('/stats', async (req, res) => {
 
 app.get('/api/LOD/:commodity', (req, res) => {
   const key = req.params.commodity.toUpperCase();
-  if (lodData[key]) {
-    res.json(lodData[key]);
+  const entry = lodData.find((item) => item.commodity_id === key);
+  if (entry) {
+    res.json(entry);
   } else {
     res.status(404).json({ error: 'not found' });
   }
