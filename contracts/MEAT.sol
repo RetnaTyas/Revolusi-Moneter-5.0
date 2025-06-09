@@ -2,16 +2,13 @@
 pragma solidity ^0.8.29;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IGOAT } from "./interfaces/IGOAT.sol";
-import { SwapConfig } from "./SwapConfig.sol";
 import { RateHandler } from "./RateHandler.sol";
 
-/// @title Token MEAT - Monetary Exchange for Agricultural Transactions
-/// @notice Kontrak pintar untuk mencetak MEAT menggunakan token native dan melakukan swap dengan GOAT.
-/// Dirancang sebagai revolusi moneter berbasis aset peternakan dan pertanian.
+/// @title Token MEAT - Market-Enabled Agricultural Token
+/// @notice Kontrak pintar untuk mint MEAT menggunakan native token dan PRODUCT subtype token.
+/// @dev Reasoning Path FINAL Compliant → NO awareness of GOAT token. NO swap GOAT ↔ MEAT allowed.
+
 contract MEAT is ERC20 {
-    IGOAT public GOAT;
     address private immutable _owner;
 
     // Authorized addresses allowed to mint or burn subtype balances
@@ -25,10 +22,9 @@ contract MEAT is ERC20 {
     mapping(bytes32 => uint256) public subtypeTotalSupply;
 
     uint256 private _rate = 100;
-    /// @notice Divisor untuk perhitungan jumlah MEAT yang dicetak saat menerima
-    /// token native. Nilai default 1000 berarti deposit rate dihitung per 1000
-    /// unit native token.
+    /// @notice Divisor untuk perhitungan jumlah MEAT yang dicetak saat menerima token native.
     uint256 public constant DEPOSIT_DIVISOR = 1000;
+
     RateHandler public rateHandler;
 
     event DepositRateChanged(uint256 oldRate, uint256 newRate);
@@ -36,7 +32,6 @@ contract MEAT is ERC20 {
     event NativeWithdrawn(address indexed to, uint256 amount);
     event InitialSupplyMinted(address indexed to, uint256 amount);
     event MeatRedeemed(address indexed user, uint256 amount);
-    event GoatAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
     event SubtypeMinted(address indexed to, bytes32 indexed subtype, uint256 amount);
     event SubtypeBurned(address indexed from, bytes32 indexed subtype, uint256 amount);
@@ -56,9 +51,7 @@ contract MEAT is ERC20 {
         _;
     }
 
-    constructor(address goatAddress) ERC20("Market-Enabled Agricultural Token", "MEAT") {
-        require(goatAddress != address(0), "Invalid address");
-        GOAT = IGOAT(goatAddress);
+    constructor() ERC20("Market-Enabled Agricultural Token", "MEAT") {
         _owner = msg.sender;
 
         uint256 initialSupply = 1000 * 1e18;
@@ -105,18 +98,10 @@ contract MEAT is ERC20 {
         return _rate;
     }
 
-
     function redeemForMeat(uint256 amount) external {
         require(amount > 0, "Amount must be > 0");
         _burn(msg.sender, amount);
         emit MeatRedeemed(msg.sender, amount);
-    }
-
-    function setGOATAddress(address goatAddress) external onlyOwner {
-        require(goatAddress != address(0), "Invalid address");
-        address old = address(GOAT);
-        GOAT = IGOAT(goatAddress);
-        emit GoatAddressUpdated(old, goatAddress);
     }
 
     /// @notice Menetapkan atau mencabut hak minter untuk alamat tertentu
@@ -162,8 +147,7 @@ contract MEAT is ERC20 {
         return subtypeTotalSupply[subtype];
     }
 
-    /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap
-    /// @param rateHandlerAddress Alamat kontrak RateHandler
+    /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap (dipakai di BarterContract, bukan di MEAT)
     function setRateHandler(address rateHandlerAddress) external onlyOwner {
         require(rateHandlerAddress != address(0), "Invalid address");
         address old = address(rateHandler);
@@ -171,24 +155,8 @@ contract MEAT is ERC20 {
         emit RateHandlerUpdated(old, rateHandlerAddress);
     }
 
-    function _getSwapRate() internal view returns (uint256) {
-        if (address(rateHandler) != address(0)) {
-            return rateHandler.getCurrentRate();
-        }
-        return SwapConfig.SWAP_RATE;
-    }
-
+    /// @notice Mengembalikan alamat pemilik kontrak
     function owner() external view returns (address) {
         return _owner;
-    }
-
-    function getEquivalentMEAT(uint256 goatAmount) external view returns (uint256) {
-        uint256 rate = _getSwapRate();
-        return goatAmount * rate;
-    }
-
-    function getEquivalentGOAT(uint256 meatAmount) external view returns (uint256) {
-        uint256 rate = _getSwapRate();
-        return meatAmount / rate;
     }
 }
