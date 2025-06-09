@@ -21,3 +21,51 @@ Lingkungan Hardhat menjalankan proses deployment (`scripts/deploy.js`) dan pengu
 Frontend berkomunikasi dengan kontrak yang telah dideploy menggunakan `ethers.js`, menyediakan alur untuk mencetak MEAT serta melakukan staking dan klaim reward. Frontend mengandalkan alamat deployment dan artefak ABI yang dihasilkan Hardhat.
 
 Gabungan komponen ini membentuk stack lengkap di mana pengguna berinteraksi melalui frontend, yang selanjutnya terhubung ke blockchain lewat kontrak GOAT dan MEAT.
+
+## Token Layer Separation & LOD Engine Enforcement
+
+```mermaid
+graph TD
+    subgraph LIVESTOCK_CAPITAL_LAYER ["🐐 LIVESTOCK CAPITAL LAYER"]
+        GoatNFT[GoatNFT (ERC721)<br>Physical Goat Identity] -- wrapToGOAT --> GOAT[GOAT Token (ERC20)<br>Financial Layer Only]
+        GOAT -- unwrapToNFT --> GoatNFT
+        GOAT -- staking --> RewardPool[Reward Pool / Governance]
+    end
+
+    subgraph PRODUCT_LAYER ["🥩 PRODUCT LAYER"]
+        GoatNFT -- burnForMeat --> GOATMEAT[MEAT.sol<br>subtype=GOATMEAT<br>Product Token]
+        GOATMEAT -- barter/sell/deliver --> RealEconomy[Real Economy<br>(Barter / Swap / Deliver)]
+    end
+
+    subgraph LOD_MASTER ["📚 LOD MASTER"]
+        LOD[LOD Engine<br>commodity_type=HEWAN] -->|LOD parity| GOATMEAT
+    end
+
+    subgraph FORBIDDEN_PATH ["🚫 FORBIDDEN PATH (Explicit Blocked)"]
+        GOAT -.X.-> GOATMEAT
+        GOATMEAT -.X.-> GOAT
+        RateHandler -.X.-> CrossLayerSwap[Cross Layer Swap<br>FORBIDDEN]
+    end
+```
+
+**🐐 LIVESTOCK CAPITAL LAYER**
+
+GoatNFT → wrap → GOAT token → Financial token only → untuk staking/gov/ROI dan tidak digunakan di RateHandler.
+
+GOAT token → unwrap → mengembalikan GoatNFT secara reversibel.
+
+Staking GOAT → lapisan finansial → mengalir ke Reward Pool.
+
+**🥩 PRODUCT LAYER**
+
+GoatNFT dibakar → mencetak GOATMEAT sebagai hasil penyembelihan.
+
+GOATMEAT diperdagangkan → barter, jual, atau dikirim ke ekonomi riil.
+
+**📚 LOD MASTER**
+
+LOD Engine mengawasi paritas → commodity_type=HEWAN → dipetakan ke subtype GOATMEAT.
+
+**🚫 FORBIDDEN PATH**
+
+Pertukaran langsung GOAT ↔ GOATMEAT dilarang. RateHandler hanya memperbolehkan swap PRODUCT↔PRODUCT agar nilai tetap hidup dan tidak bocor.
