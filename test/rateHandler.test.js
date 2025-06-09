@@ -1,5 +1,4 @@
 const { expect } = require("chai");
-const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { ethers } = require("hardhat");
 
 describe("RateHandler integration", function () {
@@ -15,44 +14,10 @@ describe("RateHandler integration", function () {
   });
 
 
-  it("emits RateUpdated and updates timestamp", async function () {
-    const before = await handler.lastUpdateTimestamp();
-    expect(before).to.equal(0n);
-
-    const tx = await handler.updateRate(150);
-    const receipt = await tx.wait();
-    const block = await ethers.provider.getBlock(receipt.blockNumber);
-
-    await expect(tx)
-      .to.emit(handler, "RateUpdated")
-      .withArgs(150n, BigInt(block.timestamp));
-
-    expect(await handler.lastUpdateTimestamp()).to.equal(BigInt(block.timestamp));
-  });
-
-  it("emits RateInvalidated after invalidateRate", async function () {
-    await handler.updateRate(200);
-    const tx = await handler.invalidateRate();
-    const receipt = await tx.wait();
-    const block = await ethers.provider.getBlock(receipt.blockNumber);
-
-    await expect(tx)
-      .to.emit(handler, "RateInvalidated")
-      .withArgs(BigInt(block.timestamp));
-
-    expect(await handler.dynamicRateValid()).to.be.false;
-  });
-
-  it("allows ownership transfer and restricts owner-only methods", async function () {
+  it("allows ownership transfer", async function () {
     await expect(handler.transferOwnership(user.address))
       .to.emit(handler, "OwnershipTransferred")
       .withArgs(owner.address, user.address);
-
-    await expect(handler.updateRate(300)).to.be.revertedWith("Not the owner");
-
-    await expect(handler.connect(user).updateRate(300))
-      .to.emit(handler, "RateUpdated")
-      .withArgs(300n, anyValue);
   });
 
   it("stores and reads commodity LOD per layer", async function () {

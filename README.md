@@ -170,7 +170,6 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 ## Parameter Penting
 
  - **SWAP_RATE** – konstanta di `SwapConfig` yang menjadi fallback pada `RateHandler`. Nilai default `85` dipakai menghitung jumlah GOAT atau GOATMEAT dari berat NFT.
-- **dynamicRate** – nilai saat ini dari RateHandler jika masih valid. Diset lewat `updateRate` yang memancarkan event `RateUpdated`. Jika dinonaktifkan dengan `invalidateRate`, kontrak memakai `SWAP_RATE` dan event `RateInvalidated` dicatat.
 - **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
   dihitung per `DEPOSIT_DIVISOR` (1000) unit native token sehingga `100` berarti
   100 MEAT untuk 1000 unit native (0.1 MEAT per 1 unit).
@@ -208,8 +207,6 @@ di [docs/lod-governance.md](docs/lod-governance.md).
 ## Events
 
 -Perubahan konfigurasi penting pada kontrak dapat dipantau melalui event berikut:
-- `RateUpdated(newRate, timestamp)` dicatat oleh RateHandler ketika pemilik mengatur konversi baru.
-- `RateInvalidated(timestamp)` dicatat saat pemilik menonaktifkan rate dinamis sehingga fallback ke `SWAP_RATE`.
 - `OwnershipTransferred(oldOwner, newOwner)` dicatat ketika kepemilikan RateHandler dialihkan ke alamat baru.
 
 MEAT juga memunculkan event utama berikut:

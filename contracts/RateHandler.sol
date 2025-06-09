@@ -1,21 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.29;
 
-import {SwapConfig} from "./SwapConfig.sol";
+/// @title RateHandler - LOD-based Barter Rate Handler (Reasoning Path FINAL PURE CLEAN)
+/// @notice Computes PRODUCT↔PRODUCT swap parity based purely on LOD values.
+/// @dev No fallback, no deprecated mappings. LOD parity is fully transparent and governed.
 
 contract RateHandler {
     address private _owner;
-
-    uint256 public dynamicRate;
-    uint256 public lastUpdateTimestamp;
-    bool public dynamicRateValid;
-
-    struct CommodityLOD {
-        uint256 lodPerDay;
-        uint256 lastSet;
-    }
-
-    mapping(bytes32 => CommodityLOD) public commodityLOD;
 
     struct CommodityRepresentation {
         address nftAddress;
@@ -37,8 +28,6 @@ contract RateHandler {
 
     mapping(bytes32 => CommodityRepresentation) public commodityRegistry;
 
-    event RateUpdated(uint256 newRate, uint256 timestamp);
-    event RateInvalidated(uint256 timestamp);
     event OwnershipTransferred(address indexed oldOwner, address indexed newOwner);
 
     modifier onlyOwner() {
@@ -48,14 +37,9 @@ contract RateHandler {
 
     constructor() {
         _owner = msg.sender;
-        dynamicRateValid = false;
     }
 
-    function setCommodityLOD(bytes32 commodity, uint256 lodPerDay) external onlyOwner {
-        require(commodity != bytes32(0), "Invalid commodity");
-        commodityLOD[commodity] = CommodityLOD(lodPerDay, block.timestamp);
-    }
-
+    /// @notice Register or update CommodityRepresentation.
     function setCommodityRepresentation(bytes32 commodityId, CommodityRepresentation calldata data) public onlyOwner {
         CommodityRepresentation storage c = commodityRegistry[commodityId];
         c.nftAddress = data.nftAddress;
@@ -75,12 +59,7 @@ contract RateHandler {
         c.cycle_time_days = data.cycle_time_days;
     }
 
-    /// @notice [DEPRECATED] Use getLODPerDay(bytes32 commodityId, string layer)
-    /// @dev Kept for governance audit compatibility only.
-    function getLODPerDay(bytes32 commodity) public view returns (uint256) {
-        return commodityLOD[commodity].lodPerDay;
-    }
-
+    /// @notice Get LOD per layer for given commodity.
     function getLODPerDay(bytes32 commodityId, string memory layer) public view returns (uint256) {
         CommodityRepresentation storage cr = commodityRegistry[commodityId];
         bytes32 l = keccak256(bytes(layer));
@@ -95,9 +74,7 @@ contract RateHandler {
         }
     }
 
-
-    /// @notice Compute barter rate between two commodities
-    /// @dev Only PRODUCT↔PRODUCT swaps are allowed and enforced.
+    /// @notice Compute PRODUCT↔PRODUCT barter rate → PURE LOD parity.
     function computeBarterRate(
         bytes32 fromCommodity,
         string memory fromLayer,
@@ -124,19 +101,7 @@ contract RateHandler {
         return rate;
     }
 
-    function updateRate(uint256 newRate) external onlyOwner {
-        require(newRate > 0, "Rate must be > 0");
-        dynamicRate = newRate;
-        lastUpdateTimestamp = block.timestamp;
-        dynamicRateValid = true;
-        emit RateUpdated(newRate, block.timestamp);
-    }
-
-    function invalidateRate() external onlyOwner {
-        dynamicRateValid = false;
-        emit RateInvalidated(block.timestamp);
-    }
-
+    /// @notice Transfer ownership.
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "Invalid address");
         address old = _owner;
@@ -144,15 +109,9 @@ contract RateHandler {
         emit OwnershipTransferred(old, newOwner);
     }
 
-    function getCurrentRate() public view returns (uint256) {
-        if (dynamicRateValid) {
-            return dynamicRate;
-        } else {
-            return SwapConfig.SWAP_RATE;
-        }
-    }
-
+    /// @notice Return current owner.
     function owner() external view returns (address) {
         return _owner;
     }
 }
+
