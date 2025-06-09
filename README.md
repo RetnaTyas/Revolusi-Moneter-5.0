@@ -240,6 +240,8 @@ npx hardhat compile
 Setelah itu eksekusi seluruh test dengan:
 
 ```bash
+npm test
+# atau
 npx hardhat test
 ```
 

@@ -13,6 +13,7 @@
     "ethers": "^6.12.2"
   },
   "scripts": {
-    "start:server": "node backend/server.js"
+    "start:server": "node backend/server.js",
+    "test": "hardhat test"
   }
 }
