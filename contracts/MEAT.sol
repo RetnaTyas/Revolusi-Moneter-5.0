@@ -15,6 +15,10 @@ contract MEAT is ERC20 {
     address private immutable _owner;
 
     uint256 private _rate = 100;
+    /// @notice Divisor untuk perhitungan jumlah MEAT yang dicetak saat menerima
+    /// token native. Nilai default 1000 berarti deposit rate dihitung per 1000
+    /// unit native token.
+    uint256 public constant DEPOSIT_DIVISOR = 1000;
     bool public swapEnabled = true;
     RateHandler public rateHandler;
 
@@ -47,7 +51,7 @@ contract MEAT is ERC20 {
     /// @notice Menerima token native dan mencetak MEAT sesuai rate
     receive() external payable {
         require(msg.value != 0, "Must send Native Token to mint MEAT");
-        uint256 meatAmount = (msg.value * _rate) / 1e3;
+        uint256 meatAmount = (msg.value * _rate) / DEPOSIT_DIVISOR;
         require(meatAmount != 0, "Mint amount too low");
 
         uint256 contractBalance = balanceOf(address(this));
