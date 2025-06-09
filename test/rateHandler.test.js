@@ -136,7 +136,7 @@ describe("RateHandler integration", function () {
     ).to.equal(4n);
   });
 
-  it("computes barter rate between layers", async function () {
+  it("computes barter rate for PRODUCT to PRODUCT", async function () {
     const wheat = ethers.encodeBytes32String("WHEAT");
     const rice = ethers.encodeBytes32String("RICE");
     await handler.setCommodityRepresentation(wheat, {
@@ -176,11 +176,11 @@ describe("RateHandler integration", function () {
 
     const rate = await handler[
       "computeBarterRate(bytes32,string,bytes32,string)"
-    ](wheat, "NFT", rice, "PRODUCT");
-    expect(rate).to.equal((2n * 10n ** 18n) / 10n);
+    ](wheat, "PRODUCT", rice, "PRODUCT");
+    expect(rate).to.equal((4n * 10n ** 18n) / 10n);
   });
 
-  it("computes barter rates across layer combinations", async function () {
+  it("reverts when layers are not PRODUCT", async function () {
     const barley = ethers.encodeBytes32String("BARLEY");
     await handler.setCommodityRepresentation(barley, {
       nftAddress: ethers.ZeroAddress,
@@ -200,24 +200,22 @@ describe("RateHandler integration", function () {
       cycle_time_days: 1,
     });
 
-    const rateNV = await handler[
-      "computeBarterRate(bytes32,string,bytes32,string)"
-    ](barley, "NFT", barley, "VIRTUAL");
-    expect(rateNV).to.equal((2n * 10n ** 18n) / 4n);
+    await expect(
+      handler["computeBarterRate(bytes32,string,bytes32,string)"](
+        barley,
+        "NFT",
+        barley,
+        "VIRTUAL"
+      )
+    ).to.be.revertedWith("FROM layer must be PRODUCT");
 
-    const rateVP = await handler[
-      "computeBarterRate(bytes32,string,bytes32,string)"
-    ](barley, "VIRTUAL", barley, "PRODUCT");
-    expect(rateVP).to.equal((4n * 10n ** 18n) / 8n);
-
-    const ratePP = await handler[
-      "computeBarterRate(bytes32,string,bytes32,string)"
-    ](barley, "PRODUCT", barley, "PRODUCT");
-    expect(ratePP).to.equal(10n ** 18n);
-
-    const rateNN = await handler[
-      "computeBarterRate(bytes32,string,bytes32,string)"
-    ](barley, "NFT", barley, "NFT");
-    expect(rateNN).to.equal(10n ** 18n);
+    await expect(
+      handler["computeBarterRate(bytes32,string,bytes32,string)"](
+        barley,
+        "PRODUCT",
+        barley,
+        "VIRTUAL"
+      )
+    ).to.be.revertedWith("TO layer must be PRODUCT");
   });
 });
