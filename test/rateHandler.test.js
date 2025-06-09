@@ -105,19 +105,63 @@ describe("RateHandler integration", function () {
       .withArgs(300n, anyValue);
   });
 
-  it("stores and reads commodity LOD", async function () {
+  it("stores and reads commodity LOD per layer", async function () {
     const wheat = ethers.encodeBytes32String("WHEAT");
-    await handler.setCommodityLOD(wheat, 2);
-    expect(await handler.getLODPerDay(wheat)).to.equal(2n);
+    const data = {
+      nftAddress: ethers.ZeroAddress,
+      tokenVirtualAddress: ethers.ZeroAddress,
+      tokenProductAddress: ethers.ZeroAddress,
+      tokenProductSubtype: ethers.encodeBytes32String("WHEATMEAT"),
+      isNftActive: true,
+      isTokenVirtualActive: true,
+      isTokenProductActive: true,
+      lodPerDayNft: 2,
+      lodPerDayVirtual: 3,
+      lodPerDayProduct: 4,
+    };
+    await handler.setCommodityRepresentation(wheat, data);
+    expect(
+      await handler["getLODPerDay(bytes32,string)"](wheat, "NFT")
+    ).to.equal(2n);
+    expect(
+      await handler["getLODPerDay(bytes32,string)"](wheat, "VIRTUAL")
+    ).to.equal(3n);
+    expect(
+      await handler["getLODPerDay(bytes32,string)"](wheat, "PRODUCT")
+    ).to.equal(4n);
   });
 
-  it("computes barter rate with LOD multiplier", async function () {
+  it("computes barter rate between layers", async function () {
     const wheat = ethers.encodeBytes32String("WHEAT");
-    await handler.setCommodityLOD(wheat, 2);
-    await handler.updateRate(100);
-    await ethers.provider.send("evm_increaseTime", [3 * 24 * 60 * 60]);
-    await ethers.provider.send("evm_mine", []);
-    const rate = await handler.computeBarterRate(wheat);
-    expect(rate).to.equal(106n); // 100 + 2*3
+    const rice = ethers.encodeBytes32String("RICE");
+    await handler.setCommodityRepresentation(wheat, {
+      nftAddress: ethers.ZeroAddress,
+      tokenVirtualAddress: ethers.ZeroAddress,
+      tokenProductAddress: ethers.ZeroAddress,
+      tokenProductSubtype: ethers.encodeBytes32String("WHEATMEAT"),
+      isNftActive: true,
+      isTokenVirtualActive: true,
+      isTokenProductActive: true,
+      lodPerDayNft: 2,
+      lodPerDayVirtual: 3,
+      lodPerDayProduct: 4,
+    });
+    await handler.setCommodityRepresentation(rice, {
+      nftAddress: ethers.ZeroAddress,
+      tokenVirtualAddress: ethers.ZeroAddress,
+      tokenProductAddress: ethers.ZeroAddress,
+      tokenProductSubtype: ethers.encodeBytes32String("RICEMEAT"),
+      isNftActive: true,
+      isTokenVirtualActive: true,
+      isTokenProductActive: true,
+      lodPerDayNft: 1,
+      lodPerDayVirtual: 5,
+      lodPerDayProduct: 10,
+    });
+
+    const rate = await handler[
+      "computeBarterRate(bytes32,string,bytes32,string)"
+    ](wheat, "NFT", rice, "PRODUCT");
+    expect(rate).to.equal((2n * 10n ** 18n) / 10n);
   });
 });

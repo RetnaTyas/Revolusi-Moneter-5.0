@@ -17,6 +17,21 @@ contract RateHandler {
 
     mapping(bytes32 => CommodityLOD) public commodityLOD;
 
+    struct CommodityRepresentation {
+        address nftAddress;
+        address tokenVirtualAddress;
+        address tokenProductAddress;
+        bytes32 tokenProductSubtype;
+        bool isNftActive;
+        bool isTokenVirtualActive;
+        bool isTokenProductActive;
+        uint256 lodPerDayNft;
+        uint256 lodPerDayVirtual;
+        uint256 lodPerDayProduct;
+    }
+
+    mapping(bytes32 => CommodityRepresentation) public commodityRegistry;
+
     event RateUpdated(uint256 newRate, uint256 timestamp);
     event RateInvalidated(uint256 timestamp);
     event OwnershipTransferred(address indexed oldOwner, address indexed newOwner);
@@ -36,8 +51,25 @@ contract RateHandler {
         commodityLOD[commodity] = CommodityLOD(lodPerDay, block.timestamp);
     }
 
+    function setCommodityRepresentation(bytes32 commodityId, CommodityRepresentation memory data) public onlyOwner {
+        commodityRegistry[commodityId] = data;
+    }
+
     function getLODPerDay(bytes32 commodity) public view returns (uint256) {
         return commodityLOD[commodity].lodPerDay;
+    }
+
+    function getLODPerDay(bytes32 commodityId, string memory layer) public view returns (uint256) {
+        CommodityRepresentation memory cr = commodityRegistry[commodityId];
+        if (keccak256(bytes(layer)) == keccak256("NFT")) {
+            return cr.lodPerDayNft;
+        } else if (keccak256(bytes(layer)) == keccak256("VIRTUAL")) {
+            return cr.lodPerDayVirtual;
+        } else if (keccak256(bytes(layer)) == keccak256("PRODUCT")) {
+            return cr.lodPerDayProduct;
+        } else {
+            revert("Invalid layer");
+        }
     }
 
     function computeBarterRate(bytes32 commodity) public view returns (uint256) {
@@ -46,6 +78,22 @@ contract RateHandler {
         if (lod == 0) return base;
         uint256 daysPassed = (block.timestamp - lastUpdateTimestamp) / 1 days;
         return base + (lod * daysPassed);
+    }
+
+    function computeBarterRate(
+        bytes32 fromCommodity,
+        string memory fromLayer,
+        bytes32 toCommodity,
+        string memory toLayer
+    ) public view returns (uint256) {
+        uint256 fromLOD = getLODPerDay(fromCommodity, fromLayer);
+        uint256 toLOD = getLODPerDay(toCommodity, toLayer);
+
+        require(fromLOD > 0, "Invalid FROM LOD");
+        require(toLOD > 0, "Invalid TO LOD");
+
+        uint256 rate = (fromLOD * 1e18) / toLOD;
+        return rate;
     }
 
     function updateRate(uint256 newRate) external onlyOwner {
