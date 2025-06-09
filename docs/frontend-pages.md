@@ -28,8 +28,8 @@ Dokumen ini merangkum halaman-halaman utama yang akan ada pada UI penuh dan hubu
   - `unstake()` – menarik pokok beserta reward setelah `minClaimInterval`.
 
 ## `/burn`
-*Gambaran*: membakar `GoatNFT` untuk menebus nilai beratnya menjadi token GOAT.
+*Gambaran*: membakar `GoatNFT` untuk mencetak `GOATMEAT` berdasarkan berat ternak.
 - **Input Pengguna**: `tokenId` NFT yang akan dibakar.
-- **Panggilan Kontrak**: `burn(tokenId)` pada `GoatNFT` yang secara internal mencetak GOAT setara.
+- **Panggilan Kontrak**: `burn(tokenId)` pada `GoatNFT` yang memicu `GoatNFTBurnHook`.
 
-Halaman-halaman ini mengikuti alur yang diuji di `test/` seperti `stakingSwap.test.js` dan `nftBurnMint.test.js`, memastikan aksi UI sesuai dengan perilaku on-chain.
+Halaman-halaman ini mengikuti alur yang diuji di `test/` seperti `wrapper.test.js`, `goatMeatHook.test.js`, dan `nftBurnMint.test.js`, memastikan aksi UI sesuai dengan perilaku on-chain.

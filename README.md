@@ -15,8 +15,8 @@ Berikut gambaran umum alur penggunaan kedua token:
 3. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
 4. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
 5. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
-6. **GoatNFTBurnHook** – Hook ini dipanggil saat NFT dibakar dan otomatis mencetak `GOATMEAT` sesuai berat yang dilaporkan.
-7. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya. Untuk membuka kembali, jumlah GOAT yang sama harus dibakar.
+6. **GoatNFTBurnHook** – Hook ini dipanggil saat NFT dibakar dan otomatis mencetak `GOATMEAT` sesuai berat yang dilaporkan untuk dipertukarkan lewat `RateHandler`.
+7. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya untuk keperluan staking. Membuka kembali NFT mengharuskan jumlah GOAT yang sama dibakar.
 
 ## Burn & Redeem Flow
 
@@ -29,19 +29,22 @@ Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
  - Pemilik dapat memperbarui berat melalui `updateWeight()` agar nilainya tetap valid (dibutuhkan sebelum burn).
  - Nilai `weight` disimpan dengan satu tempat desimal menggunakan `WEIGHT_DECIMALS = 1` sehingga `425` berarti **42.5 kg**.
 - NFT (standar ERC721) bebas dipindahtangankan ke pemilik baru.
-- Ketika kambing disembelih, pemilik membakar NFT; kontrak otomatis mencetak GOAT sejumlah `weight / rate` dimana `rate` berasal dari `RateHandler`.
- - GOAT dapat diperdagangkan atau langsung di-stake untuk memperoleh reward.
- - MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
+- Untuk memperoleh GOAT sebelum penyembelihan, pemilik mengunci NFT melalui `GoatNFTWrapper` yang mencetak GOAT berdasarkan berat terakhir.
+- Ketika kambing disembelih, pemilik membakar NFT; `GoatNFTBurnHook` mencetak `GOATMEAT` sejumlah `weight / rate` dari `RateHandler`.
+- GOAT digunakan untuk staking sementara GOATMEAT dipertukarkan antar produk melalui `RateHandler`.
+- MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
 
 ```mermaid
 flowchart LR
-  GoatNFT -- "burn" --> GOAT
-  GOAT -- "redeemForMeat" --> RealMeat["Real Meat"]
+  GoatNFT -- "wrap" --> GOAT
+  GoatNFT -- "burn" --> GOATMEAT
+  GOAT --> Staking
+  GOATMEAT -- "RateHandler" --> ProductToken["Other Meat Tokens"]
 ```
 
-- Membakar `GoatNFT` otomatis mencetak GOAT sejumlah `weight / rate`.
-- Hook `GoatNFTBurnHook` turut mencetak GOATMEAT berdasarkan bobot ternak.
-- GOAT dapat diperdagangkan atau digunakan dalam ekosistem.
+- Membungkus `GoatNFT` mencetak GOAT yang bisa langsung di-stake.
+- Membakar `GoatNFT` menghasilkan GOATMEAT sesuai bobot ternak.
+- GOATMEAT dapat dipertukarkan dengan token produk lain melalui `RateHandler`.
 - Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
 
 ## What is GoatNFT?
@@ -166,7 +169,7 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 
 ## Parameter Penting
 
-- **SWAP_RATE** – konstanta di `SwapConfig` yang menjadi fallback pada `RateHandler`. Nilai default `85` berarti 1 GOAT setara dengan 85 MEAT.
+ - **SWAP_RATE** – konstanta di `SwapConfig` yang menjadi fallback pada `RateHandler`. Nilai default `85` dipakai menghitung jumlah GOAT atau GOATMEAT dari berat NFT.
 - **dynamicRate** – nilai saat ini dari RateHandler jika masih valid. Diset lewat `updateRate` yang memancarkan event `RateUpdated`. Jika dinonaktifkan dengan `invalidateRate`, kontrak memakai `SWAP_RATE` dan event `RateInvalidated` dicatat.
 - **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
   dihitung per `DEPOSIT_DIVISOR` (1000) unit native token sehingga `100` berarti
@@ -326,8 +329,9 @@ saldo token pengguna.
 
 ## 🧠 Perubahan Terakhir
 
-Commit *Simplify MEAT swap allowance logic (#12)* awalnya merombak mekanisme swap.
-Kini fungsi swap telah dihapus sehingga perubahan tersebut tidak lagi berlaku.
+Mekanisme tukar langsung GOAT↔MEAT digantikan alur baru:
+- `GoatNFTWrapper` mencetak GOAT untuk staking dengan mengunci NFT.
+- `GoatNFTBurnHook` mencetak GOATMEAT saat NFT dibakar. Token GOATMEAT dapat dibarter lewat `RateHandler`.
 
 ## 🧪 Testing
 
