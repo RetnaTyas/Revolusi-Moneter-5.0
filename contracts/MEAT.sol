@@ -29,19 +29,15 @@ contract MEAT is ERC20 {
     /// token native. Nilai default 1000 berarti deposit rate dihitung per 1000
     /// unit native token.
     uint256 public constant DEPOSIT_DIVISOR = 1000;
-    bool public swapEnabled = true;
     RateHandler public rateHandler;
 
     event DepositRateChanged(uint256 oldRate, uint256 newRate);
     event MintedWithNative(address indexed user, uint256 nativeReceived, uint256 meatMinted);
     event NativeWithdrawn(address indexed to, uint256 amount);
-    event SwappedGOATForMEAT(address indexed user, uint256 goatIn, uint256 meatOut);
-    event SwappedMEATForGOAT(address indexed user, uint256 meatIn, uint256 goatOut);
     event InitialSupplyMinted(address indexed to, uint256 amount);
     event MeatRedeemed(address indexed user, uint256 amount);
     event GoatAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
-    event SwapEnabledUpdated(bool status);
     event SubtypeMinted(address indexed to, bytes32 indexed subtype, uint256 amount);
     event SubtypeBurned(address indexed from, bytes32 indexed subtype, uint256 amount);
 
@@ -114,11 +110,6 @@ contract MEAT is ERC20 {
         require(amount > 0, "Amount must be > 0");
         _burn(msg.sender, amount);
         emit MeatRedeemed(msg.sender, amount);
-    }
-
-    function setSwapEnabled(bool status) external onlyOwner {
-        swapEnabled = status;
-        emit SwapEnabledUpdated(status);
     }
 
     function setGOATAddress(address goatAddress) external onlyOwner {
