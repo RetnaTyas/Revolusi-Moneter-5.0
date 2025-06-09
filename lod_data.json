@@ -1,9 +1,6 @@
 [
   {
     "commodity_id": "KAMBING",
-    "lod_per_day_nft": 44.52,
-    "lod_per_day_virtual": 44.52,
-    "lod_per_day_product": 44.52,
     "parameters": {
       "protein_g_per_kg": 270,
       "fat_g_per_kg": 200,
@@ -12,13 +9,13 @@
       "cycle_time_days": 365,
       "market_price_usd_per_kg": 8.5,
       "bias_factor": 1.0
-    }
+    },
+    "lod_per_day_nft": 44.38,
+    "lod_per_day_virtual": 44.38,
+    "lod_per_day_product": 44.38
   },
   {
     "commodity_id": "ITIK",
-    "lod_per_day_nft": 22.8,
-    "lod_per_day_virtual": 22.8,
-    "lod_per_day_product": 22.8,
     "parameters": {
       "protein_g_per_kg": 240,
       "fat_g_per_kg": 160,
@@ -27,13 +24,13 @@
       "cycle_time_days": 50,
       "market_price_usd_per_kg": 3.5,
       "bias_factor": 0.85
-    }
+    },
+    "lod_per_day_nft": 17.34,
+    "lod_per_day_virtual": 17.34,
+    "lod_per_day_product": 17.34
   },
   {
     "commodity_id": "AYAM",
-    "lod_per_day_nft": 24.76,
-    "lod_per_day_virtual": 24.76,
-    "lod_per_day_product": 24.76,
     "parameters": {
       "protein_g_per_kg": 270,
       "fat_g_per_kg": 90,
@@ -42,13 +39,13 @@
       "cycle_time_days": 42,
       "market_price_usd_per_kg": 2.25,
       "bias_factor": 0.75
-    }
+    },
+    "lod_per_day_nft": 13.5,
+    "lod_per_day_virtual": 13.5,
+    "lod_per_day_product": 13.5
   },
   {
     "commodity_id": "PADI",
-    "lod_per_day_nft": 7.0,
-    "lod_per_day_virtual": 7.0,
-    "lod_per_day_product": 7.0,
     "parameters": {
       "protein_g_per_kg": 60,
       "fat_g_per_kg": 5,
@@ -57,13 +54,13 @@
       "cycle_time_days": 120,
       "market_price_usd_per_kg": 1.1,
       "bias_factor": 1.0
-    }
+    },
+    "lod_per_day_nft": 1.25,
+    "lod_per_day_virtual": 1.25,
+    "lod_per_day_product": 1.25
   },
   {
     "commodity_id": "SAPI",
-    "lod_per_day_nft": 273.08,
-    "lod_per_day_virtual": 273.08,
-    "lod_per_day_product": 273.08,
     "parameters": {
       "protein_g_per_kg": 250,
       "fat_g_per_kg": 180,
@@ -72,13 +69,13 @@
       "cycle_time_days": 730,
       "market_price_usd_per_kg": 7.0,
       "bias_factor": 1.1
-    }
+    },
+    "lod_per_day_nft": 281.29,
+    "lod_per_day_virtual": 281.29,
+    "lod_per_day_product": 281.29
   },
   {
     "commodity_id": "TELUR_AYAM",
-    "lod_per_day_nft": 361.64,
-    "lod_per_day_virtual": 361.64,
-    "lod_per_day_product": 361.64,
     "parameters": {
       "protein_g_per_kg": 120,
       "fat_g_per_kg": 100,
@@ -87,13 +84,13 @@
       "cycle_time_days": 365,
       "market_price_usd_per_kg": 1.5,
       "bias_factor": 0.9
-    }
+    },
+    "lod_per_day_nft": 229.68,
+    "lod_per_day_virtual": 229.68,
+    "lod_per_day_product": 229.68
   },
   {
     "commodity_id": "SUSU_SAPI",
-    "lod_per_day_nft": 6008.20,
-    "lod_per_day_virtual": 6008.20,
-    "lod_per_day_product": 6008.20,
     "parameters": {
       "protein_g_per_kg": 33,
       "fat_g_per_kg": 36,
@@ -102,13 +99,13 @@
       "cycle_time_days": 305,
       "market_price_usd_per_kg": 0.5,
       "bias_factor": 1.0
-    }
+    },
+    "lod_per_day_nft": 2392.13,
+    "lod_per_day_virtual": 2392.13,
+    "lod_per_day_product": 2392.13
   },
   {
     "commodity_id": "JAGUNG",
-    "lod_per_day_nft": 12.75,
-    "lod_per_day_virtual": 12.75,
-    "lod_per_day_product": 12.75,
     "parameters": {
       "protein_g_per_kg": 90,
       "fat_g_per_kg": 45,
@@ -117,13 +114,13 @@
       "cycle_time_days": 100,
       "market_price_usd_per_kg": 0.9,
       "bias_factor": 1.0
-    }
+    },
+    "lod_per_day_nft": 5.74,
+    "lod_per_day_virtual": 5.74,
+    "lod_per_day_product": 5.74
   },
   {
     "commodity_id": "KACANG_TANAH",
-    "lod_per_day_nft": 23.07,
-    "lod_per_day_virtual": 23.07,
-    "lod_per_day_product": 23.07,
     "parameters": {
       "protein_g_per_kg": 250,
       "fat_g_per_kg": 490,
@@ -132,13 +129,13 @@
       "cycle_time_days": 110,
       "market_price_usd_per_kg": 1.8,
       "bias_factor": 1.0
-    }
+    },
+    "lod_per_day_nft": 26.13,
+    "lod_per_day_virtual": 26.13,
+    "lod_per_day_product": 26.13
   },
   {
     "commodity_id": "MADU",
-    "lod_per_day_nft": 56.94,
-    "lod_per_day_virtual": 56.94,
-    "lod_per_day_product": 56.94,
     "parameters": {
       "protein_g_per_kg": 5,
       "fat_g_per_kg": 0,
@@ -147,6 +144,9 @@
       "cycle_time_days": 180,
       "market_price_usd_per_kg": 10.0,
       "bias_factor": 1.2
-    }
+    },
+    "lod_per_day_nft": 1.67,
+    "lod_per_day_virtual": 1.67,
+    "lod_per_day_product": 1.67
   }
 ]
