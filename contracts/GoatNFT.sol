@@ -6,6 +6,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IGoatToken} from "./interfaces/IGoatToken.sol";
 import {SwapConfig} from "./SwapConfig.sol";
 import {RateHandler} from "./RateHandler.sol";
+import {GoatNFTBurnHook} from "./GoatNFTBurnHook.sol";
 
 /// @title GoatNFT - identitas kambing dalam bentuk token
 /// @notice Setiap NFT menyimpan nilai berat yang dapat ditebus menjadi token GOAT
@@ -33,6 +34,7 @@ contract GoatNFT is ERC721Burnable {
     address private immutable _owner;
     IGoatToken public goatTokenContract;
     RateHandler public rateHandler;
+    GoatNFTBurnHook public burnHook;
 
     /// @notice Jangka waktu validitas pembaruan berat dalam detik (7 hari)
     uint256 public constant WEIGHT_UPDATE_VALIDITY = 7 days;
@@ -64,6 +66,13 @@ contract GoatNFT is ERC721Burnable {
         address old = address(rateHandler);
         rateHandler = RateHandler(rateHandlerAddress);
         emit RateHandlerUpdated(old, rateHandlerAddress);
+    }
+
+    /// @notice Mengatur kontrak hook yang dipanggil saat NFT dibakar
+    function setBurnHook(address hookAddress) external onlyOwner {
+        address old = address(burnHook);
+        burnHook = GoatNFTBurnHook(hookAddress);
+        emit BurnHookUpdated(old, hookAddress);
     }
 
     function _getSwapRate() internal view returns (uint256) {
@@ -127,6 +136,10 @@ contract GoatNFT is ERC721Burnable {
         // Mencetak token GOAT langsung ke pemilik NFT
         goatTokenContract.mint(tokenOwner, goatAmount);
 
+        if (address(burnHook) != address(0)) {
+            burnHook.onBurn(tokenOwner, currentWeight);
+        }
+
         emit GoatBurned(tokenId, tokenOwner, currentWeight, goatAmount);
 
         super.burn(tokenId);
@@ -147,6 +160,7 @@ contract GoatNFT is ERC721Burnable {
     /// @notice Dipancarkan ketika alamat kontrak token GOAT berubah
     event GoatTokenAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
+    event BurnHookUpdated(address indexed oldAddress, address indexed newAddress);
     /// @notice Dipancarkan ketika NFT dibakar dan token GOAT otomatis dicetak
     event GoatBurned(uint256 indexed tokenId, address indexed user, uint256 weight, uint256 goatAmount);
     /// @notice Dipancarkan ketika berat kambing diperbarui
