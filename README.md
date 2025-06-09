@@ -155,9 +155,9 @@ pesan mengikuti fungsi di Solidity namun ada beberapa perbedaan tak terelakkan:
  - **MEAT**: Pada `MEAT.sol` pengguna cukup mengirim native token dan fungsi
    `receive()` otomatis mencetak token. CosmWasm tidak menyediakan mekanisme
    auto‑mint saat menerima dana tanpa pesan sehingga pengguna **harus** memanggil
-   `mint_with_native` sambil menyertakan koin. Versi CosmWasm juga menyediakan
-   pesan `redeem_for_meat` serta mendukung penggunaan paket `ratehandler` untuk
-   pembaruan rasio dinamis ketika implementasinya siap.
+   `mint_with_native` sambil menyertakan koin. Versi CosmWasm hanya menyediakan
+   pesan `redeem_for_meat` dan tidak memiliki fitur swap GOAT↔MEAT maupun
+   konfigurasi `ratehandler`.
 - **GOAT**: Kontrak `starter` mereplikasi logika staking, klaim, kompaun dan
   pembakaran NFT. Event Solidity diterjemahkan menjadi atribut di response
   CosmWasm, sedangkan cara perhitungan reward sama persis.

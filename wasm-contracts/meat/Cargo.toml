@@ -15,7 +15,6 @@ cw-storage-plus = "1.1"
 cw2 = "1.1"
 
 starter = { path = "../starter" }
-ratehandler = { path = "../ratehandler" }
 
 [dev-dependencies]
 cw-multi-test = "0.16"

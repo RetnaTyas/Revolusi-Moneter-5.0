@@ -30,23 +30,11 @@ pub enum ExecuteMsg {
     ChangeDepositRate {
         new_rate: Uint128,
     },
-    SwapGoatForMeat {
-        goat_amount: Uint128,
-    },
-    SwapMeatForGoat {
-        meat_amount: Uint128,
-    },
     RedeemForMeat {
         amount: Uint128,
     },
-    SetSwapEnabled {
-        enabled: bool,
-    },
     SetGoatAddress {
         goat_address: String,
-    },
-    SetRateHandler {
-        addr: String,
     },
 }
 
@@ -57,10 +45,7 @@ pub enum QueryMsg {
     Allowance { owner: String, spender: String },
     TokenInfo {},
     DepositRate {},
-    SwapEnabled {},
     Owner {},
-    EquivalentMeat { goat_amount: Uint128 },
-    EquivalentGoat { meat_amount: Uint128 },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -86,12 +71,3 @@ pub struct RateResponse {
     pub rate: Uint128,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct EnabledResponse {
-    pub enabled: bool,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct EquivalentResponse {
-    pub amount: Uint128,
-}
