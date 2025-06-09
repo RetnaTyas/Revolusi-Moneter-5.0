@@ -3,6 +3,10 @@ const NodeCache = require('node-cache');
 const { ethers } = require('ethers');
 require('dotenv').config();
 
+// Server only exposes basic stats and LOD data.
+// Swap-related endpoints were removed when GOAT↔MEAT
+// conversions were dropped from the contracts.
+
 const goatAbi = require('./abi/GOAT.json').abi;
 const meatAbi = require('./abi/MEAT.json').abi;
 
