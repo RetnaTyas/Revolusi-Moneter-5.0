@@ -42,3 +42,16 @@ rate = (lodFrom * 1e18) / lodTo
 ```
 
 Nilai dikalikan `1e18` agar presisi tetap terjaga pada operasi desimal.
+
+## Memperbarui Data LOD
+
+Untuk menyesuaikan LOD atau menambah komoditas baru:
+
+1. Edit daftar komoditas di [compute_lod.py](../compute_lod.py) sesuai kebutuhan.
+2. Jalankan perintah berikut di root repositori untuk menghasilkan ulang `lod_data.json`:
+
+   ```bash
+   python3 compute_lod.py
+   ```
+
+File `lod_data.json` kemudian dapat dimuat ke on-chain melalui `setCommodityRepresentation`.

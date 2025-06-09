@@ -183,8 +183,8 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
   reward harian pengguna.
 - **minClaimInterval** – interval minimum pengguna dapat mengklaim atau
   meng-unstake dengan reward. Default-nya `7 days`.
-- **LOD** – Level of Decay per komoditas. Nilai awal dihasilkan oleh skrip
-  `compute_lod.py` dan tersimpan di `lod_data.json`. Data tersebut dapat
+ - **LOD** – Level of Decay per komoditas. Nilai awal dihasilkan oleh skrip
+   [`compute_lod.py`](compute_lod.py) dan tersimpan di `lod_data.json`. Data tersebut dapat
   diperbarui on-chain lewat `setCommodityRepresentation` pada `RateHandler`.
   Setiap komoditas menyimpan `lodPerDay` untuk layer `NFT`, `VIRTUAL`, dan
   `PRODUCT`. Rasio barter antar layer dihitung dengan
