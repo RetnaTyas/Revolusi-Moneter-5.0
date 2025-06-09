@@ -104,4 +104,20 @@ describe("RateHandler integration", function () {
       .to.emit(handler, "RateUpdated")
       .withArgs(300n, anyValue);
   });
+
+  it("stores and reads commodity LOD", async function () {
+    const wheat = ethers.encodeBytes32String("WHEAT");
+    await handler.setCommodityLOD(wheat, 2);
+    expect(await handler.getLODPerDay(wheat)).to.equal(2n);
+  });
+
+  it("computes barter rate with LOD multiplier", async function () {
+    const wheat = ethers.encodeBytes32String("WHEAT");
+    await handler.setCommodityLOD(wheat, 2);
+    await handler.updateRate(100);
+    await ethers.provider.send("evm_increaseTime", [3 * 24 * 60 * 60]);
+    await ethers.provider.send("evm_mine", []);
+    const rate = await handler.computeBarterRate(wheat);
+    expect(rate).to.equal(106n); // 100 + 2*3
+  });
 });

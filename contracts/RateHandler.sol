@@ -10,6 +10,13 @@ contract RateHandler {
     uint256 public lastUpdateTimestamp;
     bool public dynamicRateValid;
 
+    struct CommodityLOD {
+        uint256 lodPerDay;
+        uint256 lastSet;
+    }
+
+    mapping(bytes32 => CommodityLOD) public commodityLOD;
+
     event RateUpdated(uint256 newRate, uint256 timestamp);
     event RateInvalidated(uint256 timestamp);
     event OwnershipTransferred(address indexed oldOwner, address indexed newOwner);
@@ -22,6 +29,23 @@ contract RateHandler {
     constructor() {
         _owner = msg.sender;
         dynamicRateValid = false;
+    }
+
+    function setCommodityLOD(bytes32 commodity, uint256 lodPerDay) external onlyOwner {
+        require(commodity != bytes32(0), "Invalid commodity");
+        commodityLOD[commodity] = CommodityLOD(lodPerDay, block.timestamp);
+    }
+
+    function getLODPerDay(bytes32 commodity) public view returns (uint256) {
+        return commodityLOD[commodity].lodPerDay;
+    }
+
+    function computeBarterRate(bytes32 commodity) public view returns (uint256) {
+        uint256 base = getCurrentRate();
+        uint256 lod = commodityLOD[commodity].lodPerDay;
+        if (lod == 0) return base;
+        uint256 daysPassed = (block.timestamp - lastUpdateTimestamp) / 1 days;
+        return base + (lod * daysPassed);
     }
 
     function updateRate(uint256 newRate) external onlyOwner {
