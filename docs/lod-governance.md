@@ -1,20 +1,20 @@
 # Level of Decay (LOD)
 
-`LOD` menentukan penurunan nilai barter komoditas setiap hari. File `lod_data.json` di root menyimpan master data awal yang dapat diperbarui melalui fungsi `setCommodityRepresentation` pada `RateHandler`.
+`LOD` menentukan penurunan nilai barter komoditas setiap hari. File `lod_data.json` di root menyimpan master data yang dihasilkan oleh skrip `compute_lod.py`. Nilai pada berkas ini dapat diperbarui maupun dimuat on-chain melalui fungsi `setCommodityRepresentation` pada `RateHandler`.
 
 ```json
 [
   {
     "commodity_id": "KAMBING",
-    "lod_per_day_nft": 44.52,
-    "lod_per_day_virtual": 44.52,
-    "lod_per_day_product": 44.52
+    "lod_per_day_nft": 44.38,
+    "lod_per_day_virtual": 44.38,
+    "lod_per_day_product": 44.38
   },
   {
     "commodity_id": "ITIK",
-    "lod_per_day_nft": 22.8,
-    "lod_per_day_virtual": 22.8,
-    "lod_per_day_product": 22.8
+    "lod_per_day_nft": 17.34,
+    "lod_per_day_virtual": 17.34,
+    "lod_per_day_product": 17.34
   }
   ...
 ]
@@ -28,7 +28,14 @@ Fungsi `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` mengh
 
 ## Formula
 
-Rasio barter antar layer dihitung berdasarkan perbandingan LOD:
+Rasio barter antar layer dihitung berdasarkan perbandingan LOD. Nilai LOD sendiri dihasilkan oleh skrip `compute_lod.py` menggunakan rumus:
+
+```
+life_support_density = (protein_g_per_kg * 4 + fat_g_per_kg * 9) * micronutrient_index
+lod_per_day = life_support_density * (yield_per_cycle_kg / cycle_time_days) / 4 * bias_factor
+```
+
+Rasio barter antar layer kemudian dihitung dengan membandingkan LOD:
 
 ```
 rate = (lodFrom * 1e18) / lodTo
