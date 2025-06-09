@@ -14,6 +14,8 @@ Setiap komoditas direpresentasikan sebagai:
 
 LOD per hari untuk tiap layer disimpan on-chain.
 
+Lihat diagram *Canonical Reasoning Path* pada [architecture.md](../architecture.md#token-layer-separation--lod-engine-enforcement) bagian 4 untuk pemahaman menyeluruh mengenai pemisahan layer dan aturan swap.
+
 ---
 
 ## 🛠️ Governance Workflow

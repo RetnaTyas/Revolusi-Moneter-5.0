@@ -27,3 +27,31 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
    * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain. Tiap token yang ditebus mewakili **satu kilogram daging** dari mitra distribusi kami. Diagram singkat jalur burn dan redemption dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow) di README.
 
 Siklus ini memastikan setiap tahap partisipasi didukung oleh fungsi kontrak yang eksplisit dan alur token yang transparan.
+
+## Architecture Diagram
+
+```mermaid
+graph TD
+    subgraph LIVESTOCK_CAPITAL_LAYER ["🐐 LIVESTOCK CAPITAL LAYER"]
+        GoatNFT[GoatNFT (ERC721)<br>Physical Goat Identity] -- wrapToGOAT --> GOAT[GOAT Token (ERC20)<br>Financial Layer Only]
+        GOAT -- unwrapToNFT --> GoatNFT
+        GOAT -- staking --> RewardPool[Reward Pool / Governance]
+    end
+
+    subgraph PRODUCT_LAYER ["🥩 PRODUCT LAYER"]
+        GoatNFT -- burnForMeat --> GOATMEAT[MEAT.sol<br>subtype=GOATMEAT<br>Product Token]
+        GOATMEAT -- barter/sell/deliver --> RealEconomy[Real Economy<br>(Barter / Swap / Deliver)]
+    end
+
+    subgraph LOD_MASTER ["📚 LOD MASTER"]
+        LOD[LOD Engine<br>commodity_type=HEWAN] -->|LOD parity| GOATMEAT
+    end
+
+    subgraph FORBIDDEN_PATH ["🚫 FORBIDDEN PATH (Explicit Blocked)"]
+        GOAT -.X.-> GOATMEAT
+        GOATMEAT -.X.-> GOAT
+        RateHandler -.X.-> CrossLayerSwap[Cross Layer Swap<br>FORBIDDEN]
+    end
+```
+
+Diagram di atas menunjukkan pemisahan lapisan token dan jalur pertukaran yang diizinkan.
