@@ -14,6 +14,16 @@ contract MEAT is ERC20 {
     IGOAT public GOAT;
     address private immutable _owner;
 
+    // Authorized addresses allowed to mint or burn subtype balances
+    mapping(address => bool) public isMinter;
+    mapping(address => bool) public isBurner;
+
+    // Balance per user per subtype
+    mapping(address => mapping(bytes32 => uint256)) public subtypeBalances;
+
+    // Total supply per subtype
+    mapping(bytes32 => uint256) public subtypeTotalSupply;
+
     uint256 private _rate = 100;
     /// @notice Divisor untuk perhitungan jumlah MEAT yang dicetak saat menerima
     /// token native. Nilai default 1000 berarti deposit rate dihitung per 1000
@@ -32,9 +42,21 @@ contract MEAT is ERC20 {
     event GoatAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
     event SwapEnabledUpdated(bool status);
+    event SubtypeMinted(address indexed to, bytes32 indexed subtype, uint256 amount);
+    event SubtypeBurned(address indexed from, bytes32 indexed subtype, uint256 amount);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
+        _;
+    }
+
+    modifier onlyMinter() {
+        require(isMinter[msg.sender], "Not minter");
+        _;
+    }
+
+    modifier onlyBurner() {
+        require(isBurner[msg.sender], "Not burner");
         _;
     }
 
@@ -139,6 +161,49 @@ contract MEAT is ERC20 {
         address old = address(GOAT);
         GOAT = IGOAT(goatAddress);
         emit GoatAddressUpdated(old, goatAddress);
+    }
+
+    /// @notice Menetapkan atau mencabut hak minter untuk alamat tertentu
+    function setMinter(address account, bool status) external onlyOwner {
+        isMinter[account] = status;
+    }
+
+    /// @notice Menetapkan atau mencabut hak burner untuk alamat tertentu
+    function setBurner(address account, bool status) external onlyOwner {
+        isBurner[account] = status;
+    }
+
+    function mintSubtype(address to, bytes32 subtype, uint256 amount) public onlyMinter {
+        require(subtype != bytes32(0), "Invalid subtype");
+        require(amount > 0, "Invalid amount");
+
+        subtypeBalances[to][subtype] += amount;
+        subtypeTotalSupply[subtype] += amount;
+
+        _mint(to, amount);
+
+        emit SubtypeMinted(to, subtype, amount);
+    }
+
+    function burnSubtype(address from, bytes32 subtype, uint256 amount) public onlyBurner {
+        require(subtype != bytes32(0), "Invalid subtype");
+        require(amount > 0, "Invalid amount");
+        require(subtypeBalances[from][subtype] >= amount, "Insufficient subtype balance");
+
+        subtypeBalances[from][subtype] -= amount;
+        subtypeTotalSupply[subtype] -= amount;
+
+        _burn(from, amount);
+
+        emit SubtypeBurned(from, subtype, amount);
+    }
+
+    function getBalanceOfSubtype(address user, bytes32 subtype) public view returns (uint256) {
+        return subtypeBalances[user][subtype];
+    }
+
+    function getTotalSupplyOfSubtype(bytes32 subtype) public view returns (uint256) {
+        return subtypeTotalSupply[subtype];
     }
 
     /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap
