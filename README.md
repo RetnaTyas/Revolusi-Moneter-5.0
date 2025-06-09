@@ -331,7 +331,7 @@ saldo token pengguna.
 
 ## 🧠 Perubahan Terakhir
 
-Mekanisme tukar langsung GOAT↔MEAT digantikan alur baru:
+Mekanisme lama digantikan alur baru:
 - `GoatNFTWrapper` mencetak GOAT untuk staking dengan mengunci NFT.
 - `GoatNFTBurnHook` mencetak GOATMEAT saat NFT dibakar. Token GOATMEAT dapat dibarter lewat `RateHandler`.
 
