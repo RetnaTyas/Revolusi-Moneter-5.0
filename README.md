@@ -10,6 +10,7 @@ Repositori ini berisi dua token ERC20:
 Berikut gambaran umum alur penggunaan kedua token:
 
 1. **Mint MEAT** – Kirim native token langsung ke alamat kontrak `MEAT` untuk mencetak token sesuai rasio `DepositRate`. Fungsi `receive()` otomatis memproses dana dan mengirim MEAT ke pengirim. Versi CosmWasm menggunakan pesan `mint_with_native` seperti dijelaskan pada bagian berikutnya.
+   *MEAT hanya dapat dicetak lewat deposit token native; tidak ada penghubung alamat dengan kontrak lain.*
 2. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
 3. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
@@ -17,6 +18,7 @@ Berikut gambaran umum alur penggunaan kedua token:
 5. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
 6. **GoatNFTBurnHook** – Hook ini dipanggil saat NFT dibakar dan otomatis mencetak `GOATMEAT` sesuai berat yang dilaporkan untuk dipertukarkan lewat `RateHandler`.
 7. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya untuk keperluan staking. Membuka kembali NFT mengharuskan jumlah GOAT yang sama dibakar.
+   *GOAT sepenuhnya dicetak oleh `GoatNFTWrapper`; kontrak lain tidak memiliki izin mint.*
 
 ## Burn & Redeem Flow
 
@@ -82,14 +84,12 @@ Semua peristiwa tersebut tercatat on-chain sehingga pasokan GOAT dan MEAT selalu
 3. Deploy the contracts with your preferred Hardhat network configuration. A simple script might look like:
    ```javascript
    const GOAT = await ethers.getContractFactory('GOAT');
-   const goat = await GOAT.deploy(ethers.ZeroAddress);
+   const goat = await GOAT.deploy();
    await goat.waitForDeployment();
 
    const MEAT = await ethers.getContractFactory('MEAT');
-   const meat = await MEAT.deploy(goat.target);
+   const meat = await MEAT.deploy();
    await meat.waitForDeployment();
-
-   await goat.setMEATAddress(meat.target);
 
    console.log('GOAT deployed to:', goat.target);
    console.log('MEAT deployed to:', meat.target);
@@ -207,13 +207,7 @@ di [docs/lod-governance.md](docs/lod-governance.md).
 
 ## Events
 
-Perubahan alamat penting pada kontrak GOAT dan GoatNFT dapat dipantau melalui event berikut:
-
-- `MeatAddressUpdated(oldAddress, newAddress)` dicatat ketika pemilik mengganti
-  alamat kontrak MEAT.
-- `NftAddressUpdated(oldAddress, newAddress)` dicatat saat alamat GoatNFT diubah.
-- `GoatAddressUpdated(oldAddress, newAddress)` dicatat ketika alamat GOAT pada kontrak MEAT diubah.
-- `GoatTokenAddressUpdated(oldAddress, newAddress)` dicatat ketika kontrak GoatNFT mengubah alamat GOAT yang dipakai untuk mint.
+-Perubahan konfigurasi penting pada kontrak dapat dipantau melalui event berikut:
 - `RateUpdated(newRate, timestamp)` dicatat oleh RateHandler ketika pemilik mengatur konversi baru.
 - `RateInvalidated(timestamp)` dicatat saat pemilik menonaktifkan rate dinamis sehingga fallback ke `SWAP_RATE`.
 - `OwnershipTransferred(oldOwner, newOwner)` dicatat ketika kepemilikan RateHandler dialihkan ke alamat baru.
@@ -284,7 +278,7 @@ Setelah itu edit `frontend/.env.local` dan isi `NEXT_PUBLIC_GOAT_ADDRESS` serta 
 Struktur dan hubungan antar kontrak:
 - `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan fungsi staking, klaim, kompaun, serta konfigurasi reward. Token hanya dicetak melalui `GoatNFTWrapper` saat NFT dibungkus.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
-  untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Pengaturan `set_rate_handler` menghubungkan kontrak RateHandler guna mendukung rasio dinamis.
+  untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterContract`.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
