@@ -176,8 +176,8 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 - **SWAP_RATE** – konstanta di `SwapConfig` yang menjadi fallback pada `RateHandler`. Nilai default `85` berarti 1 GOAT setara dengan 85 MEAT.
 - **dynamicRate** – nilai saat ini dari RateHandler jika masih valid. Diset lewat `updateRate` yang memancarkan event `RateUpdated`. Jika dinonaktifkan dengan `invalidateRate`, kontrak memakai `SWAP_RATE` dan event `RateInvalidated` dicatat.
 - **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
-  dihitung per 1000 unit native token sehingga `100` berarti 100 MEAT untuk 1000
-  unit native (0.1 MEAT per 1 unit).
+  dihitung per `DEPOSIT_DIVISOR` (1000) unit native token sehingga `100` berarti
+  100 MEAT untuk 1000 unit native (0.1 MEAT per 1 unit).
 - **rewardRate** – tingkat imbal hasil tahunan di kontrak GOAT (dalam skala
   `1e18`). Nilai ini dikombinasikan dengan `rewardInterval` untuk menghitung
   reward harian pengguna.
