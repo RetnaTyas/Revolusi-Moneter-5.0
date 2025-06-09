@@ -183,6 +183,10 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
   reward harian pengguna.
 - **minClaimInterval** – interval minimum pengguna dapat mengklaim atau
   meng-unstake dengan reward. Default-nya `7 days`.
+- **LOD** – Level of Decay per komoditas. Nilai awal tersimpan di `lod_data.json`
+  dan dapat diperbarui on-chain lewat `setCommodityLOD` pada `RateHandler`.
+  Barter rate akhir dihitung dengan formula `currentRate + (lodPerDay *
+  daysSinceUpdate)`.
 
 ## Events
 
@@ -387,6 +391,7 @@ Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
 - [Integration Bridge](integration-bridge.md)
 - [CosmWasm Deployment](docs/wasm-deploy.md)
 - [Frontend Pages](docs/frontend-pages.md)
+- [LOD Governance](docs/lod-governance.md)
 
 ---
 

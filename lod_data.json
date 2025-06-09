@@ -1,0 +1,5 @@
+{
+  "GOAT_MEAT": { "lodPerDay": 5 },
+  "RAW_MILK": { "lodPerDay": 10 },
+  "WHEAT": { "lodPerDay": 1 }
+}

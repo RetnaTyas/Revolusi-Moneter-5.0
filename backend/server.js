@@ -9,6 +9,8 @@ const meatAbi = require('./abi/MEAT.json').abi;
 const app = express();
 const cache = new NodeCache({ stdTTL: 60 });
 
+const lodData = require('../lod_data.json');
+
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL || 'http://localhost:8545');
 const goatAddress = process.env.GOAT_ADDRESS;
 const meatAddress = process.env.MEAT_ADDRESS;
@@ -45,6 +47,15 @@ app.get('/stats', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'failed' });
+  }
+});
+
+app.get('/api/LOD/:commodity', (req, res) => {
+  const key = req.params.commodity.toUpperCase();
+  if (lodData[key]) {
+    res.json(lodData[key]);
+  } else {
+    res.status(404).json({ error: 'not found' });
   }
 });
 
