@@ -27,43 +27,6 @@ describe("RateHandler integration", function () {
     await handler.waitForDeployment();
   });
 
-  it("uses dynamic rate when valid", async function () {
-    await meat.setRateHandler(handler.target);
-    await nft.setRateHandler(handler.target);
-
-    await handler.updateRate(100);
-
-    const tx = await nft.mint(user.address, 500, "id", "breed", 2022);
-    const receipt = await tx.wait();
-    const tokenId = receipt.logs[0].args[2];
-    await nft.connect(user).updateWeight(tokenId, 600);
-
-    const expectedGoat = (600n * 10n ** 18n) / 100n / 10n;
-    await expect(nft.connect(user).burn(tokenId))
-      .to.emit(nft, "GoatBurned")
-      .withArgs(tokenId, user.address, 600n, expectedGoat);
-
-    await goat.connect(user).approve(meat.target, expectedGoat);
-    await meat.connect(user).swapGOATForMEAT(expectedGoat);
-    const expectedMeat = expectedGoat * 100n;
-    expect(await meat.balanceOf(user.address)).to.equal(expectedMeat);
-  });
-
-  it("falls back to SwapConfig when invalid", async function () {
-    await meat.setRateHandler(handler.target);
-    await handler.updateRate(200);
-    await handler.invalidateRate();
-
-    const amount = ethers.parseEther("10");
-    await meat.transfer(user.address, amount);
-    await meat.connect(user).approve(meat.target, amount);
-
-    const fallbackRate = 85n;
-    const goatOut = amount / fallbackRate;
-    await expect(meat.connect(user).swapMEATForGOAT(amount))
-      .to.emit(meat, "SwappedMEATForGOAT")
-      .withArgs(user.address, amount, goatOut);
-  });
 
   it("emits RateUpdated and updates timestamp", async function () {
     const before = await handler.lastUpdateTimestamp();

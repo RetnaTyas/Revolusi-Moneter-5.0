@@ -3,9 +3,9 @@
 Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direktori `wasm-contracts/`:
 
 - `starter` – token GOAT dengan logika staking
-- `meat` – token MEAT yang mendukung swap dan pencetakan menggunakan native token. Menyediakan `redeem_for_meat` dan dapat menautkan kontrak `ratehandler` untuk rasio dinamis
+- `meat` – token MEAT yang mendukung pencetakan menggunakan native token. Menyediakan `redeem_for_meat` dan dapat menautkan kontrak `ratehandler` untuk rasio dinamis
 - `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
-- `ratehandler` – utilitas kecil yang menyimpan rasio swap terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
+- `ratehandler` – utilitas kecil yang menyimpan rasio konversi terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
 
 Paket-paket ini mencerminkan kontrak Solidity di `contracts/`. Sebagian besar fungsi memiliki pesan execute yang setara, namun terdapat beberapa perbedaan penting:
 

@@ -109,41 +109,6 @@ contract MEAT is ERC20 {
         return _rate;
     }
 
-    function swapGOATForMEAT(uint256 goatAmount) external {
-        require(swapEnabled, "Swap disabled");
-        require(goatAmount > 0, "Amount must be > 0");
-        GOAT.transferFrom(msg.sender, address(this), goatAmount);
-
-        uint256 rate = _getSwapRate();
-        uint256 meatAmount = goatAmount * rate;
-        uint256 contractBalance = balanceOf(address(this));
-        if (contractBalance >= meatAmount) {
-            _transfer(address(this), msg.sender, meatAmount);
-        } else {
-            if (contractBalance > 0) {
-                _transfer(address(this), msg.sender, contractBalance);
-            }
-            uint256 remaining = meatAmount - contractBalance;
-            _mint(msg.sender, remaining);
-        }
-
-        emit SwappedGOATForMEAT(msg.sender, goatAmount, meatAmount);
-    }
-
-    function swapMEATForGOAT(uint256 meatAmount) external {
-        require(swapEnabled, "Swap disabled");
-        require(meatAmount > 0, "Amount must be > 0");
-        IERC20(address(this)).transferFrom(msg.sender, address(this), meatAmount);
-
-        uint256 rate = _getSwapRate();
-        uint256 goatAmount = meatAmount / rate;
-        uint256 goatBalance = GOAT.balanceOf(address(this));
-        if (goatBalance < goatAmount) {
-            GOAT.mintTo(address(this), goatAmount - goatBalance);
-        }
-        GOAT.transfer(msg.sender, goatAmount);
-        emit SwappedMEATForGOAT(msg.sender, meatAmount, goatAmount);
-    }
 
     function redeemForMeat(uint256 amount) external {
         require(amount > 0, "Amount must be > 0");
