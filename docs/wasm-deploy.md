@@ -3,7 +3,7 @@
 Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direktori `wasm-contracts/`:
 
 - `starter` – token GOAT dengan logika staking
-- `meat` – token MEAT yang mendukung pencetakan menggunakan native token. Menyediakan `redeem_for_meat` dan dapat menautkan kontrak `ratehandler` untuk rasio dinamis
+- `meat` – token MEAT yang mendukung pencetakan menggunakan native token. Menyediakan `redeem_for_meat`. Rasio barter dikelola `BarterContract` melalui `RateHandler`.
 - `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
 - `ratehandler` – utilitas kecil yang menyimpan rasio konversi terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
 
@@ -54,7 +54,7 @@ wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
-Instansiasi `meat`, `goatnft` dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan alamatnya dapat ditautkan ke MEAT menggunakan pesan `set_rate_handler` setelah deployment.
+Instansiasi `meat`, `goatnft`, dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan akan dikonfigurasi di `BarterContract` untuk menentukan rasio barter.
 
 ### Mencetak MEAT
 
