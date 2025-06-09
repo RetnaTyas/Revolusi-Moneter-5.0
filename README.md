@@ -410,6 +410,7 @@ Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
 - [CosmWasm Deployment](docs/wasm-deploy.md)
 - [Frontend Pages](docs/frontend-pages.md)
 - [LOD Governance](docs/lod-governance.md)
+- [Governance Pipeline](docs/governance-lod-engine.md)
 
 ---
 
