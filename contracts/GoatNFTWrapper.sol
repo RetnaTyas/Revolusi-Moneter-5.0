@@ -41,7 +41,7 @@ contract GoatNFTWrapper is ERC721Holder {
     }
 
     function _getRate() internal pure returns (uint256) {
-        return SwapConfig.SWAP_RATE;
+        return SwapConfig.GOAT_WRAP_RATE;
     }
 
     function wrap(uint256 tokenId) external {

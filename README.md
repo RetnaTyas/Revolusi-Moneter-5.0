@@ -170,7 +170,8 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 
 ## Parameter Penting
 
- - **SWAP_RATE** – konstanta di `SwapConfig` yang menjadi fallback pada `RateHandler`. Nilai default `85` dipakai menghitung jumlah GOAT atau GOATMEAT dari berat NFT.
+ - **GOAT_WRAP_RATE** – konstanta di `SwapConfig` yang dipakai `GoatNFTWrapper` untuk menghitung jumlah GOAT dari berat NFT. Nilai default `85`.
+ - **SAPI_WRAP_RATE** – konstanta di `SwapConfig` yang digunakan `SapiNFTWrapper` untuk menentukan jumlah token virtual sapi dari berat NFT. Nilai default `595`.
 - **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
   dihitung per `DEPOSIT_DIVISOR` (1000) unit native token sehingga `100` berarti
   100 MEAT untuk 1000 unit native (0.1 MEAT per 1 unit).
