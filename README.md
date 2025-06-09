@@ -2,7 +2,7 @@
 
 Repositori ini berisi dua token ERC20:
 
-- **GOAT** (Guardian of Agricultural Trade) mendukung proses staking dan penggabungan imbalan. Kontrak MEAT yang ditunjuk dapat mencetak token GOAT baru sementara pemegang token dapat melakukan staking guna memperoleh imbal hasil tahunan yang tinggi.
+- **GOAT** (Guardian of Agricultural Trade) mendukung proses staking. Token GOAT dicetak saat `GoatNFT` dikunci melalui `GoatNFTWrapper`. Pemegang dapat melakukan staking guna memperoleh imbal hasil tahunan tinggi.
 - **MEAT** (Market-Enabled Agricultural Token) memungkinkan pengguna mencetak token dengan mata uang native dan menjadi gerbang utama bagi ekosistem.
 
 ## Cara Kerja Token
@@ -282,9 +282,7 @@ Setelah itu edit `frontend/.env.local` dan isi `NEXT_PUBLIC_GOAT_ADDRESS` serta 
 ## 🧱 Struktur Kontrak
 
 Struktur dan hubungan antar kontrak:
-- `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan
-  fungsi staking, klaim, kompaun, serta konfigurasi reward. Hanya kontrak `MEAT`
-  yang dapat mencetak GOAT melalui `mintTo`. Versi CosmWasm memakai pesan `burn_and_mint` untuk menebus GoatNFT dan menyediakan `emergency_unstake`.
+- `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan fungsi staking, klaim, kompaun, serta konfigurasi reward. Token hanya dicetak melalui `GoatNFTWrapper` saat NFT dibungkus.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
   untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Pengaturan `set_rate_handler` menghubungkan kontrak RateHandler guna mendukung rasio dinamis.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
@@ -292,8 +290,7 @@ Struktur dan hubungan antar kontrak:
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
   Pemilik dapat memperbarui berat melalui `updateWeight` (memancarkan `WeightUpdated`); berat terakhir harus
   masih valid (<=7 hari) saat dibakar. Fungsi `burn` kini hanya memicu `GoatNFTBurnHook` untuk mencetak `GOATMEAT`. Event `GoatBurned` tetap dipancarkan sebagai catatan berat dan rasio. Data dapat dibaca ulang melalui `getGoatData` dan dihapus setelah `burn`.
-- `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo`
-  untuk dipanggil MEAT saat membutuhkan GOAT baru. `IGoatToken` dipakai GoatNFT agar kontrak GOAT dapat mencetak token saat NFT dibakar.
+- `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo` untuk dipanggil `GoatNFTWrapper` saat mencetak GOAT baru. `IGoatToken` dipakai oleh wrapper dan NFT untuk berinteraksi dengan kontrak GOAT.
 - `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test
   guna mensimulasikan kegagalan `transfer`.
 - `emergencyUnstake` memungkinkan penarikan token yang di-stake tanpa reward kapan saja.

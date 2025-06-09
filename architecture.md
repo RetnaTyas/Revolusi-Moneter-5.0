@@ -4,13 +4,13 @@ Proyek ini berpusat pada dua kontrak ERC20—**GOAT** dan **MEAT**—yang didepl
 
 ## Lapisan On-Chain
 
-* **GOAT (`contracts/GOAT.sol`)** – menyediakan staking dengan reward berbasis waktu, memungkinkan kontrak MEAT mencetak suplai baru, dan menawarkan kontrol pemilik seperti pengaturan reward serta alamat MEAT.
+* **GOAT (`contracts/GOAT.sol`)** – menyediakan staking dengan reward berbasis waktu dan kontrol konfigurasi. Suplai GOAT dicetak melalui `GoatNFTWrapper`.
 * **MEAT (`contracts/MEAT.sol`)** – mencetak token saat menerima mata uang native (menggunakan `DepositRate` per 1000 unit), mengendalikan deposit rate, serta dapat menarik saldo native yang terkumpul.
 * **GoatNFT (`contracts/GoatNFT.sol`)** – menyimpan detail kambing on-chain dalam `goatMetadata` sebagai `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Setiap `nfcId` dipetakan ke token ID sehingga duplikasi ditolak saat mint. Pemilik dapat memanggil `updateWeight` untuk memperbarui berat (menerbitkan `WeightUpdated`). `burn` mensyaratkan pembaruan berat dalam 7 hari terakhir, memicu `GoatNFTBurnHook` dan `GoatBurned` sambil menghapus pemetaan NFC.
 * **GoatNFTBurnHook (`contracts/GoatNFTBurnHook.sol`)** – dipanggil oleh `GoatNFT` saat token dibakar untuk mencetak `GOATMEAT` berdasarkan bobot.
 * **GoatNFTWrapper (`contracts/GoatNFTWrapper.sol`)** – kontrak pembungkus yang mengunci GoatNFT dan mencetak GOAT setara. NFT dapat diambil kembali setelah jumlah GOAT yang sama dibakar.
 * **RateHandler (`contracts/RateHandler.sol`)** – menyimpan `dynamicRate` yang dipakai MEAT dan GoatNFT. Pemilik dapat menetapkan nilai baru melalui `updateRate` (memicu event `RateUpdated`) atau menonaktifkan rate dengan `invalidateRate` sehingga kontrak kembali menggunakan `SWAP_RATE` dari `SwapConfig` serta memancarkan `RateInvalidated`. Kepemilikan dapat dialihkan lewat `transferOwnership`.
-* **Interface dan mock** – `IGOAT` mendefinisikan hook pencetakan yang digunakan MEAT, sedangkan `FailingGOAT` membantu pengujian dengan mensimulasikan kegagalan transfer.
+* **Interface dan mock** – `IGOAT` mendefinisikan fungsi `mintTo` untuk dipanggil `GoatNFTWrapper`, sedangkan `FailingGOAT` membantu pengujian dengan mensimulasikan kegagalan transfer.
 
 ## Backend
 

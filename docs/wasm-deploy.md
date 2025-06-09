@@ -76,6 +76,7 @@ wasmd tx wasm execute <nft_address> '{"burn":{"token_id":1}}' \
   --from wallet --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
+Catatan: pesan `burn_and_mint` pada versi terdahulu telah dihapus. Proses burn hanya mencetak `GOATMEAT`. GOAT diperoleh dengan membungkus NFT melalui `GoatNFTWrapper`.
 
 ## Contoh Query
 
