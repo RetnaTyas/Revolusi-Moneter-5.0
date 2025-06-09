@@ -9,9 +9,9 @@ Dokumen ini merangkum halaman-halaman utama yang akan ada pada UI penuh dan hubu
 - **Panggilan Kontrak**: tidak ada dari sisi pengguna; statistik berasal dari backend.
 
 ## `/goat`
-*Gambaran*: menampilkan saldo GOAT pengguna dan opsi menukar MEAT ke GOAT.
-- **Input Pengguna**: jumlah MEAT untuk ditukar.
-- **Panggilan Kontrak**: `swapMEATForGOAT` pada `MEAT.sol` setelah approval jumlah.
+*Gambaran*: menampilkan saldo GOAT pengguna.
+- **Input Pengguna**: tidak ada aksi khusus.
+- **Panggilan Kontrak**: hanya pembacaan saldo dari `GOAT.sol`.
 
 ## `/stake`
 *Gambaran*: antarmuka staking GOAT dan melihat reward yang menunggu.

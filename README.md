@@ -3,28 +3,18 @@
 Repositori ini berisi dua token ERC20:
 
 - **GOAT** (Guardian of Agricultural Trade) mendukung proses staking dan penggabungan imbalan. Kontrak MEAT yang ditunjuk dapat mencetak token GOAT baru sementara pemegang token dapat melakukan staking guna memperoleh imbal hasil tahunan yang tinggi.
-- **MEAT** (Market-Enabled Agricultural Token) memungkinkan pengguna mencetak token dengan mata uang native dan menukar ke ataupun dari GOAT sehingga menjadi gerbang utama bagi ekosistem.
+- **MEAT** (Market-Enabled Agricultural Token) memungkinkan pengguna mencetak token dengan mata uang native dan menjadi gerbang utama bagi ekosistem.
 
 ## Cara Kerja Token
 
 Berikut gambaran umum alur penggunaan kedua token:
 
 1. **Mint MEAT** – Kirim native token langsung ke alamat kontrak `MEAT` untuk mencetak token sesuai rasio `DepositRate`. Fungsi `receive()` otomatis memproses dana dan mengirim MEAT ke pengirim. Versi CosmWasm menggunakan pesan `mint_with_native` seperti dijelaskan pada bagian berikutnya.
-2. **Swap MEAT ⇄ GOAT** – Fitur swap aktif jika `swapEnabled` bernilai `true`. Rasio konversi diperoleh dari `RateHandler` yang bisa diperbarui oleh Oracle melalui `updateRate`. Bila `dynamicRateValid` `false` (contohnya setelah `invalidateRate`), kontrak otomatis memakai `SWAP_RATE` dari `SwapConfig` (default `85`). Fungsi `swapMEATForGOAT` menukar MEAT yang dimiliki pengguna menjadi GOAT, sedangkan `swapGOATForMEAT` melakukan sebaliknya.
-RateHandler mencatat pembaruan melalui event `RateUpdated` dan `RateInvalidated` untuk audit. Alur singkatnya:
-```mermaid
-sequenceDiagram
-  participant Oracle
-  participant RateHandler
-  participant Contracts as MEAT/GOAT
-  Oracle->>RateHandler: updateRate
-  RateHandler->>Contracts: getRate
-```
-3. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
+2. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
-4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
-5. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
-6. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
+3. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
+4. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
+5. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
 
 ## Burn & Redeem Flow
 
@@ -38,18 +28,17 @@ Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
  - Nilai `weight` disimpan dengan satu tempat desimal menggunakan `WEIGHT_DECIMALS = 1` sehingga `425` berarti **42.5 kg**.
 - NFT (standar ERC721) bebas dipindahtangankan ke pemilik baru.
 - Ketika kambing disembelih, pemilik membakar NFT; kontrak otomatis mencetak GOAT sejumlah `weight / rate` dimana `rate` berasal dari `RateHandler`.
-- GOAT dapat diperdagangkan atau ditukar menjadi MEAT memakai fungsi swap kontrak.
-- MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
+ - GOAT dapat diperdagangkan atau langsung di-stake untuk memperoleh reward.
+ - MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
 
 ```mermaid
 flowchart LR
   GoatNFT -- "burn" --> GOAT
-  GOAT -- "rate" --> MEAT
-  MEAT -- "redeemForMeat" --> RealMeat["Real Meat"]
+  GOAT -- "redeemForMeat" --> RealMeat["Real Meat"]
 ```
 
 - Membakar `GoatNFT` otomatis mencetak GOAT sejumlah `weight / rate`.
-- GOAT dapat ditukar dengan MEAT atau sebaliknya menggunakan rate yang sama dari `RateHandler`.
+- GOAT dapat diperdagangkan atau digunakan dalam ekosistem.
 - Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
 
 ## What is GoatNFT?
@@ -69,7 +58,7 @@ GoatNFT bukan sekadar NFT koleksi. Token ini berfungsi sebagai **identitas digit
 Alurnya ringkas sebagai berikut:
 
 ```
-Goat lahir → mint GoatNFT → update berat → transfer bila dijual → burn saat disembelih → mint GOAT → swap ke MEAT → tebus daging fisik
+Goat lahir → mint GoatNFT → update berat → transfer bila dijual → burn saat disembelih → mint GOAT → tebus daging fisik
 ```
 
 Semua peristiwa tersebut tercatat on-chain sehingga pasokan GOAT dan MEAT selalu dapat diaudit. Dengan desain ini, nilai digital senantiasa terhubung ke komoditas nyata.
@@ -169,7 +158,7 @@ pesan mengikuti fungsi di Solidity namun ada beberapa perbedaan tak terelakkan:
   hanya terletak pada penamaan pesan. Kontrak ini tetap mendukung `update_weight`
   dan memeriksa kesegaran data berat seperti implementasi Solidity.
 
-Secara umum kedua implementasi mempertahankan rasio reward dan swap yang sama
+Secara umum kedua implementasi mempertahankan rasio reward yang sama
 agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 
 ## Parameter Penting
@@ -226,8 +215,6 @@ MEAT juga memunculkan event utama berikut:
 - `MintedWithNative(user, nativeReceived, meatMinted)` dicatat ketika kontrak
   menerima native token dan mencetak MEAT. Pada versi CosmWasm event ini
   dipicu saat `mint_with_native` dipanggil.
-- `SwapEnabledUpdated(status)` dicatat ketika pemilik mengubah status swap
-  MEAT dan GOAT.
 - `SubtypeMinted(to, subtype, amount)` dicatat ketika minter terotorisasi
   mencetak MEAT untuk subtype tertentu.
 - `SubtypeBurned(from, subtype, amount)` dicatat ketika burner terotorisasi
@@ -291,7 +278,7 @@ Struktur dan hubungan antar kontrak:
   fungsi staking, klaim, kompaun, serta konfigurasi reward. Hanya kontrak `MEAT`
   yang dapat mencetak GOAT melalui `mintTo`. Versi CosmWasm memakai pesan `burn_and_mint` untuk menebus GoatNFT dan menyediakan `emergency_unstake`.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
-  untuk mint, memungkinkan penukaran MEAT ↔ GOAT, dan mengontrol fitur swap. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Pengaturan `set_rate_handler` menghubungkan kontrak RateHandler guna mendukung rasio dinamis.
+  untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Pengaturan `set_rate_handler` menghubungkan kontrak RateHandler guna mendukung rasio dinamis.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
@@ -310,11 +297,9 @@ Struktur dan hubungan antar kontrak:
 nft.burn(tokenId);
 
 Alur panggilan eksternal–internal secara ringkas:
-1. `swapMEATForGOAT` memanggil `transferFrom` MEAT dan `mintTo` GOAT jika saldo
-   tidak mencukupi.
-2. `stake` mentransfer GOAT ke kontrak lalu mencatat waktu. Perhitungan reward
+1. `stake` mentransfer GOAT ke kontrak lalu mencatat waktu. Perhitungan reward
    dilakukan fungsi internal `calculateReward`.
-3. `claimReward`, `compoundReward`, dan `unstake` kini memuat `lastStakedTime`
+2. `claimReward`, `compoundReward`, dan `unstake` kini memuat `lastStakedTime`
    ke variabel lokal lalu meneruskannya ke `calculateReward` sebelum mentransfer
    atau mencetak token ke pengguna.
 
@@ -338,24 +323,16 @@ saldo token pengguna.
 
 ## 🧠 Perubahan Terakhir
 
-Commit *Simplify MEAT swap allowance logic (#12)* merombak mekanisme swap:
-
-- Penghapusan pemeriksaan allowance manual di fungsi-fungsi swap MEAT.
-- Mengandalkan revert bawaan `transferFrom`/`transfer` bila allowance kurang.
-- Mock `FailingGOAT` diperbarui agar dapat mensimulasikan kegagalan transfer.
-- Test `meat.test.js` menyesuaikan dengan perilaku revert baru.
-
-Perubahan ini menyederhanakan kode dan memastikan kegagalan transfer terdeteksi
-otomatis.
+Commit *Simplify MEAT swap allowance logic (#12)* awalnya merombak mekanisme swap.
+Kini fungsi swap telah dihapus sehingga perubahan tersebut tidak lagi berlaku.
 
 ## 🧪 Testing
 
 Cakupan unit test meliputi:
 
 - Deployment GOAT dan MEAT beserta kepemilikan serta suplai awal.
-- Proses staking, klaim, unstake, dan swap (`stakingSwap.test.js`).
+- Proses staking, klaim, dan unstake.
 - Pengujian interval klaim (`claim.test.js`).
-- Simulasi kegagalan transfer pada swap (`meat.test.js`).
 
 Untuk kontrak CosmWasm, jalankan skrip build berikut terlebih dahulu:
 

@@ -11,20 +11,18 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
 1. **Mencetak MEAT**
    * Pengguna mengirim mata uang native ke kontrak MEAT. Fungsi `receive()` mencetak MEAT ke pengirim berdasarkan `DepositRate`, dihitung per 1000 unit (default `100`, artinya 100 MEAT per 1000 native).
    * Kontrak memancarkan `MintedWithNative(user, nativeReceived, meatMinted)` yang mencatat siapa mencetak dan berapa jumlah token native diterima.
-2. **Swap**
-   * MEAT dapat ditukar ke GOAT dan sebaliknya melalui kontrak MEAT saat `swapEnabled` bernilai true. Rasio konversi berasal dari `RateHandler` dengan fallback ke `SWAP_RATE`.
-3. **GoatNFT**
+2. **GoatNFT**
    * [GoatNFT](contracts/GoatNFT.sol) mewakili kambing hidup dan menyimpan beratnya di `goatValue`.
    * Pemilik dapat memperbarui berat kapan saja (event `WeightUpdated`). Berat memakai satu desimal (`WEIGHT_DECIMALS = 1`) sehingga `425` berarti **42.5 kg**.
    * Sebelum membakar NFT, berat harus diperbarui dalam tujuh hari terakhir. Fungsi `burn` otomatis mencetak GOAT dan memancarkan `GoatBurned`.
-4. **Staking GOAT**
+3. **Staking GOAT**
    * Pemegang GOAT melakukan staking di `GOAT.sol` yang mencatat saldo dan timestamp. Reward terakumulasi secara linier berdasarkan `rewardRate` dan `rewardInterval`.
    * Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil. Klaim terlebih dahulu jika ingin menambah stake.
-5. **Mengambil Reward**
+4. **Mengambil Reward**
    * Setelah `minClaimInterval`, staker bisa mengambil reward atau menggabungkannya kembali ke stake. Untuk keluar sepenuhnya panggil `unstake` agar pokok dan reward diterima.
-6. **Kembali ke MEAT**
+5. **Kembali ke MEAT**
    * GOAT yang tidak di-stake dapat ditukar kembali ke MEAT yang lalu dapat ditarik dari ekosistem atau digunakan lagi.
-7. **Menebus MEAT**
+6. **Menebus MEAT**
    * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain. Tiap token yang ditebus mewakili **satu kilogram daging** dari mitra distribusi kami. Diagram singkat jalur burn dan redemption dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow) di README.
 
 Siklus ini memastikan setiap tahap partisipasi didukung oleh fungsi kontrak yang eksplisit dan alur token yang transparan.
