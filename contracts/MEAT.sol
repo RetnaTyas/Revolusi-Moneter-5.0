@@ -35,6 +35,7 @@ contract MEAT is ERC20 {
     }
 
     constructor(address goatAddress) ERC20("Market-Enabled Agricultural Token", "MEAT") {
+        require(goatAddress != address(0), "Invalid address");
         GOAT = IGOAT(goatAddress);
         _owner = msg.sender;
 

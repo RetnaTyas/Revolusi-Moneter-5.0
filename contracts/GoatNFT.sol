@@ -40,6 +40,7 @@ contract GoatNFT is ERC721Burnable {
     uint256 public constant WEIGHT_DECIMALS = 1;
 
     constructor(address goatTokenAddress) ERC721("Goat Identifier", "GOATNFT") {
+        require(goatTokenAddress != address(0), "Invalid address");
         _owner = msg.sender;
         goatTokenContract = IGoatToken(goatTokenAddress);
     }
