@@ -1,8 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  const [deployer] = await hre.ethers.getSigners();
-
+  // No constructor arguments are required for any contract
   const GOAT = await hre.ethers.getContractFactory("GOAT");
   const goat = await GOAT.deploy();
   await goat.waitForDeployment();
@@ -11,6 +10,7 @@ async function main() {
   const meat = await MEAT.deploy();
   await meat.waitForDeployment();
 
+  // setMEATAddress is no longer needed since the contracts are decoupled
   console.log(`GOAT deployed to: ${goat.target}`);
   console.log(`MEAT deployed to: ${meat.target}`);
 }
