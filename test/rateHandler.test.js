@@ -3,24 +3,11 @@ const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { ethers } = require("hardhat");
 
 describe("RateHandler integration", function () {
-  let owner, user, goat, meat, nft, handler;
+  let owner, user, handler;
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
 
-    const GOAT = await ethers.getContractFactory("GOAT");
-    goat = await GOAT.deploy(owner.address);
-    await goat.waitForDeployment();
-
-    const MEAT = await ethers.getContractFactory("MEAT");
-    meat = await MEAT.deploy(goat.target);
-    await meat.waitForDeployment();
-    await goat.setMEATAddress(meat.target);
-
-    const GoatNFT = await ethers.getContractFactory("GoatNFT");
-    nft = await GoatNFT.deploy(goat.target);
-    await nft.waitForDeployment();
-    await goat.setNFTAddress(nft.target);
 
     const RateHandler = await ethers.getContractFactory("RateHandler");
     handler = await RateHandler.deploy();

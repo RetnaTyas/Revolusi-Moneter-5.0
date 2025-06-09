@@ -2,17 +2,13 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("MEAT subtype functions", function () {
-  let owner, minter, burner, user, goat, meat;
+  let owner, minter, burner, user, meat;
 
   beforeEach(async function () {
     [owner, minter, burner, user] = await ethers.getSigners();
 
-    const GOAT = await ethers.getContractFactory("GOAT");
-    goat = await GOAT.deploy(owner.address);
-    await goat.waitForDeployment();
-
     const MEAT = await ethers.getContractFactory("MEAT");
-    meat = await MEAT.deploy(goat.target);
+    meat = await MEAT.deploy();
     await meat.waitForDeployment();
 
     await meat.setMinter(minter.address, true);
