@@ -28,6 +28,11 @@ contract RateHandler {
         uint256 lodPerDayNft;
         uint256 lodPerDayVirtual;
         uint256 lodPerDayProduct;
+        uint256 protein_g_per_kg;
+        uint256 fat_g_per_kg;
+        uint256 micronutrient_index_x1000;
+        uint256 yield_per_cycle_kg;
+        uint256 cycle_time_days;
     }
 
     mapping(bytes32 => CommodityRepresentation) public commodityRegistry;
@@ -51,8 +56,23 @@ contract RateHandler {
         commodityLOD[commodity] = CommodityLOD(lodPerDay, block.timestamp);
     }
 
-    function setCommodityRepresentation(bytes32 commodityId, CommodityRepresentation memory data) public onlyOwner {
-        commodityRegistry[commodityId] = data;
+    function setCommodityRepresentation(bytes32 commodityId, CommodityRepresentation calldata data) public onlyOwner {
+        CommodityRepresentation storage c = commodityRegistry[commodityId];
+        c.nftAddress = data.nftAddress;
+        c.tokenVirtualAddress = data.tokenVirtualAddress;
+        c.tokenProductAddress = data.tokenProductAddress;
+        c.tokenProductSubtype = data.tokenProductSubtype;
+        c.isNftActive = data.isNftActive;
+        c.isTokenVirtualActive = data.isTokenVirtualActive;
+        c.isTokenProductActive = data.isTokenProductActive;
+        c.lodPerDayNft = data.lodPerDayNft;
+        c.lodPerDayVirtual = data.lodPerDayVirtual;
+        c.lodPerDayProduct = data.lodPerDayProduct;
+        c.protein_g_per_kg = data.protein_g_per_kg;
+        c.fat_g_per_kg = data.fat_g_per_kg;
+        c.micronutrient_index_x1000 = data.micronutrient_index_x1000;
+        c.yield_per_cycle_kg = data.yield_per_cycle_kg;
+        c.cycle_time_days = data.cycle_time_days;
     }
 
     function getLODPerDay(bytes32 commodity) public view returns (uint256) {
@@ -60,12 +80,13 @@ contract RateHandler {
     }
 
     function getLODPerDay(bytes32 commodityId, string memory layer) public view returns (uint256) {
-        CommodityRepresentation memory cr = commodityRegistry[commodityId];
-        if (keccak256(bytes(layer)) == keccak256("NFT")) {
+        CommodityRepresentation storage cr = commodityRegistry[commodityId];
+        bytes32 l = keccak256(bytes(layer));
+        if (l == keccak256("NFT")) {
             return cr.lodPerDayNft;
-        } else if (keccak256(bytes(layer)) == keccak256("VIRTUAL")) {
+        } else if (l == keccak256("VIRTUAL")) {
             return cr.lodPerDayVirtual;
-        } else if (keccak256(bytes(layer)) == keccak256("PRODUCT")) {
+        } else if (l == keccak256("PRODUCT")) {
             return cr.lodPerDayProduct;
         } else {
             revert("Invalid layer");
