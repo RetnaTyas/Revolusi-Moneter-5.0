@@ -20,7 +20,17 @@
 ]
 ```
 
-Pemilik kontrak dapat memanggil `setCommodityRepresentation(bytes32 commodityId, CommodityRepresentation data)` untuk mendaftarkan komoditas beserta representasinya (NFT, token virtual, dan token produk). Struktur ini juga menyimpan `lodPerDay` untuk setiap layer.
+Pemilik kontrak dapat memanggil `setCommodityRepresentation(bytes32 commodityId, CommodityRepresentation data)` untuk mendaftarkan komoditas beserta representasinya (NFT, token virtual, dan token produk). Struktur `CommodityRepresentation` menyimpan:
+
+- alamat NFT
+- alamat token virtual
+- alamat token produk
+- subtype produk (bytes32)
+- status aktif masing-masing layer
+- nilai `lodPerDay` untuk setiap layer
+- parameter transparan: `protein_g_per_kg`, `fat_g_per_kg`, `micronutrient_index_x1000`, `yield_per_cycle_kg`, `cycle_time_days`
+
+Semua data dihasilkan pipeline `compute_lod.py` dan dirangkum dalam `lod_data.json`.
 
 LOD per layer dapat dibaca melalui `getLODPerDay(bytes32 commodityId, string layer)` dimana `layer` adalah `"NFT"`, `"VIRTUAL"`, atau `"PRODUCT"`.
 
@@ -55,3 +65,14 @@ Untuk menyesuaikan LOD atau menambah komoditas baru:
    ```
 
 File `lod_data.json` kemudian dapat dimuat ke on-chain melalui `setCommodityRepresentation`.
+
+### Contoh Hardhat Script
+
+Skrip `scripts/updateCommodityRepresentation.js` menyiapkan transaksi governance
+untuk mendorong data dari `lod_data.json` ke `RateHandler`.
+
+```bash
+npx hardhat run scripts/updateCommodityRepresentation.js --network yourNetwork
+```
+
+Sesuaikan alamat kontrak dan parameter pada skrip dengan data hasil pipeline.

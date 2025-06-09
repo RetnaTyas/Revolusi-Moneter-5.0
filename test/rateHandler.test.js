@@ -118,6 +118,11 @@ describe("RateHandler integration", function () {
       lodPerDayNft: 2,
       lodPerDayVirtual: 3,
       lodPerDayProduct: 4,
+      protein_g_per_kg: 1,
+      fat_g_per_kg: 1,
+      micronutrient_index_x1000: 1,
+      yield_per_cycle_kg: 1,
+      cycle_time_days: 1,
     };
     await handler.setCommodityRepresentation(wheat, data);
     expect(
@@ -145,6 +150,11 @@ describe("RateHandler integration", function () {
       lodPerDayNft: 2,
       lodPerDayVirtual: 3,
       lodPerDayProduct: 4,
+      protein_g_per_kg: 1,
+      fat_g_per_kg: 1,
+      micronutrient_index_x1000: 1,
+      yield_per_cycle_kg: 1,
+      cycle_time_days: 1,
     });
     await handler.setCommodityRepresentation(rice, {
       nftAddress: ethers.ZeroAddress,
@@ -157,11 +167,57 @@ describe("RateHandler integration", function () {
       lodPerDayNft: 1,
       lodPerDayVirtual: 5,
       lodPerDayProduct: 10,
+      protein_g_per_kg: 1,
+      fat_g_per_kg: 1,
+      micronutrient_index_x1000: 1,
+      yield_per_cycle_kg: 1,
+      cycle_time_days: 1,
     });
 
     const rate = await handler[
       "computeBarterRate(bytes32,string,bytes32,string)"
     ](wheat, "NFT", rice, "PRODUCT");
     expect(rate).to.equal((2n * 10n ** 18n) / 10n);
+  });
+
+  it("computes barter rates across layer combinations", async function () {
+    const barley = ethers.encodeBytes32String("BARLEY");
+    await handler.setCommodityRepresentation(barley, {
+      nftAddress: ethers.ZeroAddress,
+      tokenVirtualAddress: ethers.ZeroAddress,
+      tokenProductAddress: ethers.ZeroAddress,
+      tokenProductSubtype: ethers.encodeBytes32String("BARLEYPROD"),
+      isNftActive: true,
+      isTokenVirtualActive: true,
+      isTokenProductActive: true,
+      lodPerDayNft: 2,
+      lodPerDayVirtual: 4,
+      lodPerDayProduct: 8,
+      protein_g_per_kg: 1,
+      fat_g_per_kg: 1,
+      micronutrient_index_x1000: 1,
+      yield_per_cycle_kg: 1,
+      cycle_time_days: 1,
+    });
+
+    const rateNV = await handler[
+      "computeBarterRate(bytes32,string,bytes32,string)"
+    ](barley, "NFT", barley, "VIRTUAL");
+    expect(rateNV).to.equal((2n * 10n ** 18n) / 4n);
+
+    const rateVP = await handler[
+      "computeBarterRate(bytes32,string,bytes32,string)"
+    ](barley, "VIRTUAL", barley, "PRODUCT");
+    expect(rateVP).to.equal((4n * 10n ** 18n) / 8n);
+
+    const ratePP = await handler[
+      "computeBarterRate(bytes32,string,bytes32,string)"
+    ](barley, "PRODUCT", barley, "PRODUCT");
+    expect(ratePP).to.equal(10n ** 18n);
+
+    const rateNN = await handler[
+      "computeBarterRate(bytes32,string,bytes32,string)"
+    ](barley, "NFT", barley, "NFT");
+    expect(rateNN).to.equal(10n ** 18n);
   });
 });
