@@ -98,4 +98,18 @@ describe("Setter address validation", function () {
       .to.emit(nft, "GoatTokenAddressUpdated")
       .withArgs(goat.target, newGoat.target);
   });
+
+  it("reverts when deploying MEAT with zero goat address", async function () {
+    const MEAT = await ethers.getContractFactory("MEAT");
+    await expect(MEAT.deploy(ethers.ZeroAddress)).to.be.revertedWith(
+      "Invalid address"
+    );
+  });
+
+  it("reverts when deploying GoatNFT with zero goat token address", async function () {
+    const GoatNFT = await ethers.getContractFactory("GoatNFT");
+    await expect(GoatNFT.deploy(ethers.ZeroAddress)).to.be.revertedWith(
+      "Invalid address"
+    );
+  });
 });
