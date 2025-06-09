@@ -3,7 +3,7 @@
 Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direktori `wasm-contracts/`:
 
 - `starter` – token GOAT dengan logika staking
-- `meat` – token MEAT yang mendukung pencetakan menggunakan native token. Menyediakan `redeem_for_meat`. Rasio barter dikelola `BarterContract` melalui `RateHandler`.
+- `meat` – token MEAT yang mendukung pencetakan menggunakan native token dan perintah `redeem_for_meat`. Fitur swap GOAT↔MEAT dan konfigurasi `ratehandler` tidak disertakan.
 - `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
 - `ratehandler` – utilitas kecil yang menyimpan rasio konversi terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
 - `goatnftwrapper` – membungkus GoatNFT untuk mencetak GOAT, NFT dikunci hingga pengguna melakukan `unwrap`
