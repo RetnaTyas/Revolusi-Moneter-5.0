@@ -24,6 +24,7 @@ sequenceDiagram
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
 4. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
 5. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
+6. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
 
 ## Burn & Redeem Flow
 
@@ -226,6 +227,10 @@ MEAT juga memunculkan event utama berikut:
   dipicu saat `mint_with_native` dipanggil.
 - `SwapEnabledUpdated(status)` dicatat ketika pemilik mengubah status swap
   MEAT dan GOAT.
+- `SubtypeMinted(to, subtype, amount)` dicatat ketika minter terotorisasi
+  mencetak MEAT untuk subtype tertentu.
+- `SubtypeBurned(from, subtype, amount)` dicatat ketika burner terotorisasi
+  membakar MEAT subtype.
 
 ## Running Tests
 
