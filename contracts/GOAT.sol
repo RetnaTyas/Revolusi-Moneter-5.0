@@ -73,6 +73,14 @@ function mint(address to, uint256 amount) external {
     require(msg.sender == nftContract, "Unauthorized mint");
     _mint(to, amount);
 }
+
+/// @notice Membakar token dari alamat tertentu
+/// @param from Sumber token
+/// @param amount Jumlah GOAT yang dibakar
+function burnFrom(address from, uint256 amount) external {
+    require(msg.sender == nftContract, "Unauthorized burn");
+    _burn(from, amount);
+}
 /// @notice Stake token GOAT untuk memperoleh reward
 /// @param amount Jumlah GOAT yang di-stake
 function stake(uint256 amount) external {

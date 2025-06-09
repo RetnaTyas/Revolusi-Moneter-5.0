@@ -35,8 +35,9 @@ Kontrak MEAT bergantung pada GOAT untuk mencetak token baru. Keduanya memiliki p
 | MEAT | Token ERC20 yang dicetak dengan deposit native. | `changeDepositRate`, `withdrawNative`, `setGOATAddress` |
 | GoatNFT | Identitas kambing ERC721 yang bisa ditebus menjadi GOAT. Metadata disimpan on-chain di `goatMetadata` sebagai `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Berat dapat diperbarui via `updateWeight` (memancarkan `WeightUpdated`) dan harus segar saat dibakar. Pembakaran otomatis mencetak GOAT dan memancarkan `GoatBurned`. | `mint`, `updateWeight`, `burn`, `goatValue`, `goatMetadata`, `getGoatData` |
 | GoatNFTBurnHook | Kontrak hook yang mencetak `GOATMEAT` setiap kali GoatNFT dibakar. | `onBurn`, `setNFTAddress`, `setMEATAddress` |
+| GoatNFTWrapper | Mengunci GoatNFT dan mencetak GOAT setara hingga NFT dibuka kembali dengan membakar GOAT. | `wrap`, `unwrap`, `setRateHandler` |
 | IGOAT | Antarmuka pencetakan GOAT yang digunakan MEAT. | `mintTo` |
-| IGoatToken | Antarmuka pencetakan GOAT yang digunakan GoatNFT. | `mint` |
+| IGoatToken | Antarmuka pencetakan GOAT yang digunakan GoatNFT. | `mint`, `burnFrom` |
 
 GOAT memancarkan `MeatAddressUpdated` dan `NftAddressUpdated` setiap kali pemilik memperbarui alamat kontrak MEAT atau GoatNFT.
 MEAT memancarkan `GoatAddressUpdated` setiap kali pemilik memperbarui alamat kontrak GOAT.

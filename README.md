@@ -16,6 +16,7 @@ Berikut gambaran umum alur penggunaan kedua token:
 4. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
 5. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
 6. **GoatNFTBurnHook** – Hook ini dipanggil saat NFT dibakar dan otomatis mencetak `GOATMEAT` sesuai berat yang dilaporkan.
+7. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya. Untuk membuka kembali, jumlah GOAT yang sama harus dibakar.
 
 ## Burn & Redeem Flow
 
