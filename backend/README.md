@@ -30,7 +30,7 @@ npm run start:server
 Endpoint tambahan disediakan untuk mengakses data LOD per komoditas:
 
 ```bash
-curl http://localhost:3001/api/LOD/GOAT_MEAT
+curl http://localhost:3001/api/LOD/KAMBING
 ```
 
 Untuk gambaran lengkap arsitektur dan interaksi kontrak, lihat [README](../README.md) utama.
