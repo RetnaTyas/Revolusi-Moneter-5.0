@@ -34,7 +34,7 @@ Semua data dihasilkan pipeline `compute_lod.py` dan dirangkum dalam `lod_data.js
 
 LOD per layer dapat dibaca melalui `getLODPerDay(bytes32 commodityId, string layer)` dimana `layer` adalah `"NFT"`, `"VIRTUAL"`, atau `"PRODUCT"`.
 
-Fungsi `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` menghitung rasio barter berbasis LOD antar dua representasi.
+Fungsi `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` menghitung rasio barter berbasis LOD antar dua representasi. Sejak v1.1, kedua `layer` harus bernilai `"PRODUCT"`.
 
 ## Formula
 

@@ -107,6 +107,16 @@ contract RateHandler {
         bytes32 toCommodity,
         string memory toLayer
     ) public view returns (uint256) {
+        bytes32 productHash = keccak256("PRODUCT");
+        require(
+            keccak256(bytes(fromLayer)) == productHash,
+            "FROM layer must be PRODUCT"
+        );
+        require(
+            keccak256(bytes(toLayer)) == productHash,
+            "TO layer must be PRODUCT"
+        );
+
         uint256 fromLOD = getLODPerDay(fromCommodity, fromLayer);
         uint256 toLOD = getLODPerDay(toCommodity, toLayer);
 

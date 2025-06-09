@@ -192,7 +192,8 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
   `fat_g_per_kg`, `micronutrient_index_x1000`, `yield_per_cycle_kg`, dan
   `cycle_time_days`. Rasio barter antar layer dihitung dengan
   `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` yang
-  mengembalikan `(lodFrom * 1e18) / lodTo`.
+  mengembalikan `(lodFrom * 1e18) / lodTo`. Mulai versi 1.1 hanya kombinasi
+  `PRODUCT`↔`PRODUCT` yang diizinkan.
 
 ### Memperbarui Data LOD
 
