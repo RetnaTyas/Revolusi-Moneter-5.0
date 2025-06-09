@@ -32,9 +32,9 @@ Pemilik kontrak dapat memanggil `setCommodityRepresentation(bytes32 commodityId,
 
 Semua data dihasilkan pipeline `compute_lod.py` dan dirangkum dalam `lod_data.json`.
 
-LOD per layer dapat dibaca melalui `getLODPerDay(bytes32 commodityId, string layer)` dimana `layer` adalah `"NFT"`, `"VIRTUAL"`, atau `"PRODUCT"`.
+LOD per layer dapat dibaca melalui `getLODPerDay(bytes32 commodityId, string layer)` dimana `layer` adalah `"NFT"`, `"VIRTUAL"`, atau `"PRODUCT"`. Versi lama `getLODPerDay(bytes32)` dipertahankan hanya untuk audit governance.
 
-Fungsi `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` menghitung rasio barter berbasis LOD antar dua representasi. Sejak v1.1, kedua `layer` harus bernilai `"PRODUCT"`.
+Fungsi `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` menghitung rasio barter berbasis LOD antar dua representasi. Sejak v1.1, kedua `layer` harus bernilai `"PRODUCT"` dan fungsi versi singkat telah dihapus.
 
 ## Formula
 

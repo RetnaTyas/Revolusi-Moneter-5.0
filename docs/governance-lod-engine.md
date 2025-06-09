@@ -77,7 +77,8 @@ npx hardhat test test/RateHandler.test.js
 Semua test harus lulus:
 
 - `getLODPerDay` bekerja untuk tiap layer.
-- `computeBarterRate` benar sesuai rasio LOD.
+  Fungsi versi lama dengan satu argumen dipertahankan hanya untuk audit.
+- `computeBarterRate` benar sesuai rasio LOD (hanya `PRODUCT↔PRODUCT`, versi singkat dihapus).
 - Layer tidak valid harus revert.
 
 ### 6⃣ Commit `lod_data.json`
