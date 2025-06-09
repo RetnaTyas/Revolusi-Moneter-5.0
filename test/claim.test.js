@@ -7,10 +7,11 @@ describe("GOAT claim timing", function () {
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
     const GOAT = await ethers.getContractFactory("GOAT");
-    goat = await GOAT.deploy(owner.address);
+    goat = await GOAT.deploy();
     await goat.waitForDeployment();
     const amount = ethers.parseEther("10");
-    await goat.mintTo(user.address, amount);
+    await goat.setWrapperContract(user.address);
+    await goat.connect(user).mint(user.address, amount);
   });
 
   it("reverts when claiming too early", async function () {

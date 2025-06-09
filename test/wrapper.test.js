@@ -8,18 +8,18 @@ describe("GoatNFTWrapper", function () {
     [owner, user] = await ethers.getSigners();
 
     const GOAT = await ethers.getContractFactory("GOAT");
-    goat = await GOAT.deploy(owner.address);
+    goat = await GOAT.deploy();
     await goat.waitForDeployment();
 
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
-    nft = await GoatNFT.deploy(goat.target);
+    nft = await GoatNFT.deploy();
     await nft.waitForDeployment();
 
     const Wrapper = await ethers.getContractFactory("GoatNFTWrapper");
     wrapper = await Wrapper.deploy(nft.target, goat.target);
     await wrapper.waitForDeployment();
 
-    await goat.setNFTAddress(wrapper.target);
+    await goat.setWrapperContract(wrapper.target);
 
     const swapConfig = await ethers.deployContract("SwapConfig");
     await swapConfig.waitForDeployment();

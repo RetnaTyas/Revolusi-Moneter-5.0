@@ -8,7 +8,7 @@ describe("GoatNFT burn", function () {
     [owner, user] = await ethers.getSigners();
 
     const GOAT = await ethers.getContractFactory("GOAT");
-    goat = await GOAT.deploy(owner.address);
+    goat = await GOAT.deploy();
     await goat.waitForDeployment();
 
     swapConfig = await ethers.deployContract("SwapConfig");
@@ -16,10 +16,8 @@ describe("GoatNFT burn", function () {
     SWAP_RATE = await swapConfig.SWAP_RATE();
 
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
-    nft = await GoatNFT.deploy(goat.target);
+    nft = await GoatNFT.deploy();
     await nft.waitForDeployment();
-
-    await goat.setNFTAddress(nft.target);
   });
 
   it("burns NFT without minting GOAT", async function () {
@@ -44,10 +42,9 @@ describe("GoatNFT burn", function () {
     const stored = await nft.getGoatData(tokenId);
     expect(stored.weight).to.equal(newWeight);
 
-    const goatAmount = (newWeight * 10n ** 18n) / SWAP_RATE / 10n;
     await expect(nft.connect(user).burn(tokenId))
       .to.emit(nft, "GoatBurned")
-      .withArgs(tokenId, user.address, newWeight, goatAmount);
+      .withArgs(tokenId, user.address, newWeight);
 
     expect(await goat.balanceOf(user.address)).to.equal(0n);
     await expect(nft.ownerOf(tokenId)).to.be.reverted;
@@ -58,12 +55,10 @@ describe("GoatNFT burn", function () {
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
 
-    const expected = (425n * 10n ** 18n) / SWAP_RATE / 10n;
     // weight already fresh so just burn
     await expect(nft.connect(user).burn(tokenId))
       .to.emit(nft, "GoatBurned")
-      .withArgs(tokenId, user.address, 425n, expected);
-    expect(expected).to.equal(5n * 10n ** 17n);
+      .withArgs(tokenId, user.address, 425n);
     expect(await goat.balanceOf(user.address)).to.equal(0n);
   });
 

@@ -2,30 +2,23 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("GoatNFTBurnHook", function () {
-  let owner, user, goat, meat, nft, hook;
+  let owner, user, meat, nft, hook;
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
 
-    const GOAT = await ethers.getContractFactory("GOAT");
-    goat = await GOAT.deploy(owner.address);
-    await goat.waitForDeployment();
-
     const MEAT = await ethers.getContractFactory("MEAT");
-    meat = await MEAT.deploy(goat.target);
+    meat = await MEAT.deploy();
     await meat.waitForDeployment();
     await meat.setMinter(owner.address, true);
 
     const GoatNFT = await ethers.getContractFactory("GoatNFT");
-    nft = await GoatNFT.deploy(goat.target);
+    nft = await GoatNFT.deploy();
     await nft.waitForDeployment();
 
     const Hook = await ethers.getContractFactory("GoatNFTBurnHook");
     hook = await Hook.deploy(nft.target, meat.target);
     await hook.waitForDeployment();
-
-    await goat.setNFTAddress(nft.target);
-    await goat.setMEATAddress(meat.target);
 
     await meat.setMinter(hook.target, true);
     await nft.setBurnHook(hook.target);

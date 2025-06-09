@@ -4,12 +4,8 @@ const { ethers } = require("hardhat");
 describe("MEAT", function () {
   it("should deploy and mint initial supply", async function () {
     const [owner] = await ethers.getSigners();
-    const GOAT = await ethers.getContractFactory("GOAT");
-    const goat = await GOAT.deploy(owner.address);
-    await goat.waitForDeployment();
-
     const MEAT = await ethers.getContractFactory("MEAT");
-    const meat = await MEAT.deploy(goat.target);
+    const meat = await MEAT.deploy();
     await meat.waitForDeployment();
 
     expect(await meat.owner()).to.equal(owner.address);
@@ -20,12 +16,8 @@ describe("MEAT", function () {
   it("reverts when sending no native token", async function () {
     const [owner] = await ethers.getSigners();
 
-    const GOAT = await ethers.getContractFactory("GOAT");
-    const goat = await GOAT.deploy(owner.address);
-    await goat.waitForDeployment();
-
     const MEAT = await ethers.getContractFactory("MEAT");
-    const meat = await MEAT.deploy(goat.target);
+    const meat = await MEAT.deploy();
     await meat.waitForDeployment();
 
     await expect(
@@ -37,12 +29,8 @@ describe("MEAT", function () {
   it("should burn tokens on redeem", async function () {
     const [owner, user] = await ethers.getSigners();
 
-    const GOAT = await ethers.getContractFactory("GOAT");
-    const goat = await GOAT.deploy(owner.address);
-    await goat.waitForDeployment();
-
     const MEAT = await ethers.getContractFactory("MEAT");
-    const meat = await MEAT.deploy(goat.target);
+    const meat = await MEAT.deploy();
     await meat.waitForDeployment();
 
     const amount = ethers.parseEther("50");
