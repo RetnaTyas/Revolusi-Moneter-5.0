@@ -5,7 +5,6 @@ import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Hol
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IGoatNFT} from "./interfaces/IGoatNFT.sol";
 import {IGoatToken} from "./interfaces/IGoatToken.sol";
-import {RateHandler} from "./RateHandler.sol";
 import {SwapConfig} from "./SwapConfig.sol";
 
 /// @title GoatNFTWrapper
@@ -14,7 +13,6 @@ contract GoatNFTWrapper is ERC721Holder {
     IERC721 public immutable goatNFT;
     IGoatNFT public immutable goatValueFeed;
     IGoatToken public goatToken;
-    RateHandler public rateHandler;
     address private immutable _owner;
 
     uint256 public constant WEIGHT_DECIMALS = 1;
@@ -28,7 +26,6 @@ contract GoatNFTWrapper is ERC721Holder {
 
     event Wrapped(address indexed user, uint256 indexed tokenId, uint256 goatAmount);
     event Unwrapped(address indexed user, uint256 indexed tokenId, uint256 goatAmount);
-    event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -43,16 +40,7 @@ contract GoatNFTWrapper is ERC721Holder {
         _owner = msg.sender;
     }
 
-    function setRateHandler(address handler) external onlyOwner {
-        address old = address(rateHandler);
-        rateHandler = RateHandler(handler);
-        emit RateHandlerUpdated(old, handler);
-    }
-
-    function _getRate() internal view returns (uint256) {
-        if (address(rateHandler) != address(0)) {
-            return rateHandler.getCurrentRate();
-        }
+    function _getRate() internal pure returns (uint256) {
         return SwapConfig.SWAP_RATE;
     }
 
