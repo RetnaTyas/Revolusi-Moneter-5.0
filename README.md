@@ -394,7 +394,7 @@ Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
 - [System Architecture](architecture.md)
 - [Frontend Flow](frontend-flow.md)
 - [User Journey](user-journey.md)
-- [GOAT & MEAT Lifecycle](goat-meat-lifecycle.md)
+- [GOAT & MEAT Lifecycle](docs/goat-meat-lifecycle.md)
 - [Contract Map](contract-map.md)
 - [Integration Bridge](integration-bridge.md)
 - [CosmWasm Deployment](docs/wasm-deploy.md)
