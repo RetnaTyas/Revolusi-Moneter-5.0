@@ -133,8 +133,8 @@ contract GoatNFT is ERC721Burnable {
         uint256 goatAmount =
             (currentWeight * 1e18) / rate / (10 ** WEIGHT_DECIMALS);
 
-        // Mencetak token GOAT langsung ke pemilik NFT
-        goatTokenContract.mint(tokenOwner, goatAmount);
+        // GOAT token minting removed; burn hook handles GOATMEAT minting only
+        // goatTokenContract.mint(tokenOwner, goatAmount);
 
         if (address(burnHook) != address(0)) {
             burnHook.onBurn(tokenOwner, currentWeight);

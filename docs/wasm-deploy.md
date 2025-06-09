@@ -69,18 +69,10 @@ wasmd tx wasm execute <meat_address> '{"mint_with_native":{}}' \
 
 Mengirim koin tanpa pesan ini **tidak** akan mencetak token; koin hanya tersimpan di kontrak sampai ditarik pemilik.
 
-Setelah `goatnft` dideploy, setiap pemilik NFT harus memberi approval pada kontrak GOAT sebelum token dapat dibakar. Contoh approval:
+Setelah `goatnft` dideploy, pemilik dapat langsung memanggil `burn` pada kontrak NFT untuk menandai penyembelihan. Fungsi ini akan memicu `GoatNFTBurnHook` yang mencetak `GOATMEAT` sesuai berat terakhir.
 
 ```bash
-wasmd tx wasm execute <nft_address> '{"approve":{"spender":"<goat_addr>","token_id":"1"}}' \
-  --from wallet --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
-  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
-```
-
-Jika sudah di-approve, tebus nilai NFT dengan memanggil `burn_and_mint` pada kontrak GOAT:
-
-```bash
-wasmd tx wasm execute <goat_address> '{"burn_and_mint":{"token_id":1}}' \
+wasmd tx wasm execute <nft_address> '{"burn":{"token_id":1}}' \
   --from wallet --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```

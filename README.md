@@ -56,7 +56,7 @@ GoatNFT bukan sekadar NFT koleksi. Token ini berfungsi sebagai **identitas digit
 - **Birth Certificate** – GoatNFT dicetak saat kambing lahir atau didaftarkan.
 - **Living Ledger** – Berat terakhir selalu di-update agar valuasi mengikuti kondisi riil.
 - **Ownership Record** – Mengikuti standar ERC721 sehingga kepemilikan dapat dipindahtangankan.
-- **Slaughter Certificate** – NFT wajib dibakar ketika kambing disembelih; pembakaran ini otomatis mencetak token GOAT berdasarkan berat terakhir.
+- **Slaughter Certificate** – NFT wajib dibakar ketika kambing disembelih; pembakaran ini memicu `GoatNFTBurnHook` untuk mencetak `GOATMEAT` sesuai berat terakhir.
 - **Fraud Prevention** – Proses burn menghapus NFT selamanya sehingga tidak ada klaim ganda.
 
 ### Lifecycle Tokenization
@@ -64,7 +64,7 @@ GoatNFT bukan sekadar NFT koleksi. Token ini berfungsi sebagai **identitas digit
 Alurnya ringkas sebagai berikut:
 
 ```
-Goat lahir → mint GoatNFT → update berat → transfer bila dijual → burn saat disembelih → mint GOAT → tebus daging fisik
+Goat lahir → mint GoatNFT → update berat → transfer bila dijual → burn saat disembelih → mint GOATMEAT → tebus daging fisik
 ```
 
 Semua peristiwa tersebut tercatat on-chain sehingga pasokan GOAT dan MEAT selalu dapat diaudit. Dengan desain ini, nilai digital senantiasa terhubung ke komoditas nyata.
@@ -291,7 +291,7 @@ Struktur dan hubungan antar kontrak:
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
   Pemilik dapat memperbarui berat melalui `updateWeight` (memancarkan `WeightUpdated`); berat terakhir harus
-  masih valid (<=7 hari) saat dibakar. Fungsi `burn` kini memanggil kontrak GOAT untuk mencetak token otomatis dan memancarkan event `GoatBurned` berisi jumlah GOAT yang dicetak. Data dapat dibaca ulang melalui `getGoatData` dan dihapus setelah `burn`.
+  masih valid (<=7 hari) saat dibakar. Fungsi `burn` kini hanya memicu `GoatNFTBurnHook` untuk mencetak `GOATMEAT`. Event `GoatBurned` tetap dipancarkan sebagai catatan berat dan rasio. Data dapat dibaca ulang melalui `getGoatData` dan dihapus setelah `burn`.
 - `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo`
   untuk dipanggil MEAT saat membutuhkan GOAT baru. `IGoatToken` dipakai GoatNFT agar kontrak GOAT dapat mencetak token saat NFT dibakar.
 - `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test

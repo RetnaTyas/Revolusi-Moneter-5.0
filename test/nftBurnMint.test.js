@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("GoatNFT burn and GOAT mint", function () {
+describe("GoatNFT burn", function () {
   let owner, user, goat, nft, swapConfig, SWAP_RATE;
 
   beforeEach(async function () {
@@ -22,7 +22,7 @@ describe("GoatNFT burn and GOAT mint", function () {
     await goat.setNFTAddress(nft.target);
   });
 
-  it("burns NFT and mints GOAT", async function () {
+  it("burns NFT without minting GOAT", async function () {
     const nfcId = "1234";
     const breed = "Boer";
     const birthYear = 2021;
@@ -49,11 +49,11 @@ describe("GoatNFT burn and GOAT mint", function () {
       .to.emit(nft, "GoatBurned")
       .withArgs(tokenId, user.address, newWeight, goatAmount);
 
-    expect(await goat.balanceOf(user.address)).to.equal(goatAmount);
+    expect(await goat.balanceOf(user.address)).to.equal(0n);
     await expect(nft.ownerOf(tokenId)).to.be.reverted;
   });
 
-  it("mints 0.5 GOAT when burning weight 425", async function () {
+  it("emits GoatBurned event for weight 425 without minting", async function () {
     const tx = await nft.mint(user.address, 425, "half", "Boer", 2021);
     const receipt = await tx.wait();
     const tokenId = receipt.logs[0].args[2];
@@ -64,7 +64,7 @@ describe("GoatNFT burn and GOAT mint", function () {
       .to.emit(nft, "GoatBurned")
       .withArgs(tokenId, user.address, 425n, expected);
     expect(expected).to.equal(5n * 10n ** 17n);
-    expect(await goat.balanceOf(user.address)).to.equal(expected);
+    expect(await goat.balanceOf(user.address)).to.equal(0n);
   });
 
   it("emits WeightUpdated when updating weight", async function () {
