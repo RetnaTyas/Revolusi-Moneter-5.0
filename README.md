@@ -191,6 +191,19 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
   `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` yang
   mengembalikan `(lodFrom * 1e18) / lodTo`.
 
+### Memperbarui Data LOD
+
+Apabila parameter komoditas pada `compute_lod.py` diubah, jalankan ulang skrip
+tersebut dengan:
+
+```bash
+python3 compute_lod.py
+```
+
+File `lod_data.json` yang dihasilkan sebaiknya ikut dikomit agar perubahan LOD
+dapat ditinjau secara transparan. Detail tata kelola LOD selengkapnya tersedia
+di [docs/lod-governance.md](docs/lod-governance.md).
+
 ## Events
 
 Perubahan alamat penting pada kontrak GOAT dan GoatNFT dapat dipantau melalui event berikut:
