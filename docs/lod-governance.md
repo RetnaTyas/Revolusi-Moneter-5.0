@@ -76,3 +76,5 @@ npx hardhat run scripts/updateCommodityRepresentation.js --network yourNetwork
 ```
 
 Sesuaikan alamat kontrak dan parameter pada skrip dengan data hasil pipeline.
+
+Untuk panduan end-to-end mengenai proses governance, lihat [governance-lod-engine.md](governance-lod-engine.md).
