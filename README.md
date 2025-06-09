@@ -188,7 +188,9 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
   `cycle_time_days`. Rasio barter antar layer dihitung dengan
   `computeBarterRate(fromCommodity, fromLayer, toCommodity, toLayer)` yang
   mengembalikan `(lodFrom * 1e18) / lodTo`. Mulai versi 1.1 hanya kombinasi
-  `PRODUCT`↔`PRODUCT` yang diizinkan.
+  `PRODUCT`↔`PRODUCT` yang diizinkan dan jalur lama `computeBarterRate(bytes32)`
+  telah dihapus. Fungsi `getLODPerDay(bytes32)` tetap ada untuk audit namun
+  tidak dipakai dalam logika swap.
 
 ### Memperbarui Data LOD
 

@@ -75,6 +75,8 @@ contract RateHandler {
         c.cycle_time_days = data.cycle_time_days;
     }
 
+    /// @notice [DEPRECATED] Use getLODPerDay(bytes32 commodityId, string layer)
+    /// @dev Kept for governance audit compatibility only.
     function getLODPerDay(bytes32 commodity) public view returns (uint256) {
         return commodityLOD[commodity].lodPerDay;
     }
@@ -93,14 +95,9 @@ contract RateHandler {
         }
     }
 
-    function computeBarterRate(bytes32 commodity) public view returns (uint256) {
-        uint256 base = getCurrentRate();
-        uint256 lod = commodityLOD[commodity].lodPerDay;
-        if (lod == 0) return base;
-        uint256 daysPassed = (block.timestamp - lastUpdateTimestamp) / 1 days;
-        return base + (lod * daysPassed);
-    }
 
+    /// @notice Compute barter rate between two commodities
+    /// @dev Only PRODUCT↔PRODUCT swaps are allowed and enforced.
     function computeBarterRate(
         bytes32 fromCommodity,
         string memory fromLayer,
