@@ -6,6 +6,8 @@ Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direk
 - `meat` – token MEAT yang mendukung pencetakan menggunakan native token. Menyediakan `redeem_for_meat`. Rasio barter dikelola `BarterContract` melalui `RateHandler`.
 - `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
 - `ratehandler` – utilitas kecil yang menyimpan rasio konversi terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
+- `goatnftwrapper` – membungkus GoatNFT untuk mencetak GOAT, NFT dikunci hingga pengguna melakukan `unwrap`
+- `goatnftburnhook` – hook sederhana yang dipanggil saat NFT dibakar dan mencatat jumlah GOATMEAT yang seharusnya dicetak
 
 Paket-paket ini mencerminkan kontrak Solidity di `contracts/`. Sebagian besar fungsi memiliki pesan execute yang setara, namun terdapat beberapa perbedaan penting:
 
@@ -54,7 +56,20 @@ wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
-Instansiasi `meat`, `goatnft`, dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan akan dikonfigurasi di `BarterContract` untuk menentukan rasio barter.
+Instansiasi `meat`, `goatnft`, dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan akan dikonfigurasi di `BarterContract` untuk menentukan rasio barter. Setelah itu deploy `goatnftwrapper` dan `goatnftburnhook` dengan parameter alamat kontrak terkait:
+```bash
+# contoh instansiasi goatnftwrapper
+wasmd tx wasm instantiate <code_id_wrapper> '{"nft_contract":"<nft_addr>","goat_contract":"<goat_addr>"}' \
+  --from wallet --label "wrapper" \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+
+# contoh instansiasi burn hook
+wasmd tx wasm instantiate <code_id_hook> '{"nft_contract":"<nft_addr>"}' \
+  --from wallet --label "burnhook" \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+```
 
 ### Mencetak MEAT
 
