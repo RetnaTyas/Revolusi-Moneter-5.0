@@ -21,9 +21,7 @@ describe("GoatNFTWrapper", function () {
 
     await goat.setWrapperContract(wrapper.target);
 
-    const swapConfig = await ethers.deployContract("SwapConfig");
-    await swapConfig.waitForDeployment();
-    swapRate = await swapConfig.SWAP_RATE();
+    swapRate = 85n;
   });
 
   it("wraps NFT and mints GOAT", async function () {
