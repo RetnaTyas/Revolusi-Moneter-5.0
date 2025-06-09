@@ -10,6 +10,7 @@ Proyek ini berpusat pada dua kontrak ERC20—**GOAT** dan **MEAT**—yang didepl
 * **GoatNFTBurnHook (`contracts/GoatNFTBurnHook.sol`)** – dipanggil oleh `GoatNFT` saat token dibakar untuk mencetak `GOATMEAT` berdasarkan bobot.
 * **GoatNFTWrapper (`contracts/GoatNFTWrapper.sol`)** – kontrak pembungkus yang mengunci GoatNFT dan mencetak GOAT setara. NFT dapat diambil kembali setelah jumlah GOAT yang sama dibakar.
 * **RateHandler (`contracts/RateHandler.sol`)** – menyimpan `dynamicRate` sebagai kurs barter. Komponen ini hanya dipakai `BarterContract` untuk pertukaran PRODUCT↔PRODUCT. Pemilik dapat menetapkan nilai baru melalui `updateRate` atau menonaktifkannya dengan `invalidateRate` agar kembali menggunakan `SWAP_RATE` dari `SwapConfig`.
+* **BarterContract (`contracts/BarterContract.sol`)** – kontrak swap yang membakar subtype MEAT asal lalu mencetak subtype tujuan berdasarkan rasio yang dihitung `RateHandler`.
 * **Interface dan mock** – `IGOAT` mendefinisikan fungsi `mintTo` untuk dipanggil `GoatNFTWrapper`, sedangkan `FailingGOAT` membantu pengujian dengan mensimulasikan kegagalan transfer.
 
 ## Backend

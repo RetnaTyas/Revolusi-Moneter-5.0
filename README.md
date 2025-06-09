@@ -279,6 +279,7 @@ Struktur dan hubungan antar kontrak:
 - `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan fungsi staking, klaim, kompaun, serta konfigurasi reward. Token hanya dicetak melalui `GoatNFTWrapper` saat NFT dibungkus.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
   untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterContract`.
+- `BarterContract` (`contracts/BarterContract.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT berdasarkan parity LOD dari `RateHandler`.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
