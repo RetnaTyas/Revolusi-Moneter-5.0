@@ -314,7 +314,7 @@ Struktur dan hubungan antar kontrak:
   untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterEngine`.
 - `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
 -   Pengguna harus men-*approve* `BarterEngine` agar kontrak dapat membakar subtype miliknya.
-- `RedeemEngine` (`contracts/RedeemEngine.sol`) memproses penebusan MEAT dan memverifikasi lineage melalui `balanceOfSubtypeWithLineage()` sebelum distribusi.
+- `RedeemEngine` (`contracts/RedeemEngine.sol`) memproses penebusan MEAT dan memverifikasi lineage melalui `balanceOfSubtypeWithLineage()`. Tiap subtype memiliki `RedeemConfig` yang berisi berat (gram) per token dan status aktif.
 -   Sebelum menebus, berikan *approval* ke `RedeemEngine` untuk jumlah yang akan dibakar.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
@@ -443,11 +443,19 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 contract RedeemEngine is Ownable {
     MEAT public immutable meat;
 
+    struct RedeemConfig {
+        uint256 gramsPerTokenUnit;
+        bool isActive;
+    }
+
+    mapping(bytes32 => RedeemConfig) public redeemConfigs;
+
     event RedeemExecuted(
         address indexed user,
         bytes32 indexed subtype,
         uint256 lineageID,
-        uint256 amount
+        uint256 amount,
+        uint256 grams
     );
 
     constructor(address meatAddress) Ownable(msg.sender) {
@@ -455,14 +463,26 @@ contract RedeemEngine is Ownable {
         meat = MEAT(payable(meatAddress));
     }
 
+    function setRedeemConfig(bytes32 subtype, uint256 gramsPerTokenUnit, bool active) external onlyOwner {
+        require(subtype != bytes32(0), "Invalid subtype");
+        RedeemConfig storage cfg = redeemConfigs[subtype];
+        cfg.gramsPerTokenUnit = gramsPerTokenUnit;
+        cfg.isActive = active;
+    }
+
     function redeem(bytes32 subtype, uint256 amount) external {
         require(amount > 0, "Invalid amount");
+        RedeemConfig storage cfg = redeemConfigs[subtype];
+        require(cfg.isActive, "Redeem inactive");
+
         (uint256 balance, uint256 lineageID) =
             meat.balanceOfSubtypeWithLineage(msg.sender, subtype);
         require(balance >= amount, "Insufficient balance");
         require(lineageID != 0, "Lineage not set");
         meat.burnSubtype(msg.sender, subtype, amount);
-        emit RedeemExecuted(msg.sender, subtype, lineageID, amount);
+
+        uint256 grams = (amount * cfg.gramsPerTokenUnit) / 1e18;
+        emit RedeemExecuted(msg.sender, subtype, lineageID, amount, grams);
     }
 }
 ```
