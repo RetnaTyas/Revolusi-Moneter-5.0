@@ -237,6 +237,7 @@ Seluruh pengujian Hardhat berada di direktori `test/`. Jalankan dengan perintah 
 ```bash
 npm install
 ```
+Pastikan perintah di atas dijalankan sebelum mengeksekusi Hardhat test.
 
 Jika folder `artifacts/` belum berisi kontrak terkompilasi, jalankan:
 
