@@ -25,6 +25,7 @@ Lihat diagram *Canonical Reasoning Path* pada [architecture.md](../architecture.
 File: `lod_data_base.json`
 
 - Tambahkan atau ubah entri komoditas.
+- **Jangan mengedit `compute_lod.py`;** semua perubahan data dilakukan di file ini.
 - Setiap komoditas menyimpan parameter berikut:
   - `protein_g_per_kg`
   - `fat_g_per_kg`
