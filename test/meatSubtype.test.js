@@ -31,6 +31,8 @@ describe("MEAT subtype functions", function () {
     expect(await meat.getTotalSupplyOfSubtype(subtype)).to.equal(amount);
     expect(await meat.balanceOf(user.address)).to.equal(amount);
 
+    await meat.connect(user).approve(burner.address, amount);
+
     await expect(
       meat.connect(burner).burnSubtype(user.address, subtype, amount)
     )

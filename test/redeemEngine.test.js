@@ -27,6 +27,8 @@ describe("RedeemEngine", function () {
   it("redeems MEAT with lineage check", async function () {
     const redeemAmount = ethers.parseEther("2");
 
+    await meat.connect(user).approve(engine.target, redeemAmount);
+
     await expect(engine.connect(user).redeem(SUBTYPE, redeemAmount))
       .to.emit(engine, "RedeemExecuted")
       .withArgs(user.address, SUBTYPE, 7, redeemAmount);

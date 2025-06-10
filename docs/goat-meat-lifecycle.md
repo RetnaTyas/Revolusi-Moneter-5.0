@@ -24,9 +24,11 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
    * Setelah `minClaimInterval`, staker bisa mengambil reward atau menggabungkannya kembali ke stake. Untuk keluar sepenuhnya panggil `unstake` agar pokok dan reward diterima.
 5. **Barter Produk**
    * GOATMEAT dapat ditukar dengan token produk lain menggunakan `RateHandler` yang diakses oleh `BarterEngine`.
+   * Sebelum barter, pengguna harus memberikan *approval* kepada `BarterEngine` untuk jumlah subtype yang akan dibakar.
    * Subtype seperti `GOATMEAT` harus di-encode ke `bytes32` misal `ethers.encodeBytes32String("GOATMEAT")`.
 6. **Menebus MEAT**
    * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain. Tiap token yang ditebus mewakili **satu kilogram daging** dari mitra distribusi kami. Diagram singkat jalur burn dan redemption dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow) di README.
+   * Pengguna harus men-*approve* `RedeemEngine` sebelum memanggil `redeem`.
 
 Siklus ini memastikan setiap tahap partisipasi didukung oleh fungsi kontrak yang eksplisit dan alur token yang transparan.
 

@@ -146,6 +146,10 @@ contract MEAT is ERC20 {
         s.balance -= amount;
         subtypeTotalSupply[subtype] -= amount;
 
+        if (msg.sender != from) {
+            _spendAllowance(from, msg.sender, amount);
+        }
+
         _burn(from, amount);
 
         emit SubtypeBurned(from, subtype, amount);
