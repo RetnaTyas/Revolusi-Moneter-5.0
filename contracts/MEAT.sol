@@ -41,6 +41,8 @@ contract MEAT is ERC20 {
     event SubtypeMinted(address indexed to, bytes32 indexed subtype, uint256 amount);
     event SubtypeBurned(address indexed from, bytes32 indexed subtype, uint256 amount);
     event SubtypeLineageUpdated(address indexed user, bytes32 indexed subtype, uint256 lineageID);
+    event MinterUpdated(address indexed account, bool status);
+    event BurnerUpdated(address indexed account, bool status);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -113,11 +115,13 @@ contract MEAT is ERC20 {
     /// @notice Menetapkan atau mencabut hak minter untuk alamat tertentu
     function setMinter(address account, bool status) external onlyOwner {
         isMinter[account] = status;
+        emit MinterUpdated(account, status);
     }
 
     /// @notice Menetapkan atau mencabut hak burner untuk alamat tertentu
     function setBurner(address account, bool status) external onlyOwner {
         isBurner[account] = status;
+        emit BurnerUpdated(account, status);
     }
 
     function mintSubtype(address to, bytes32 subtype, uint256 amount) public onlyMinter {
