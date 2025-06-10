@@ -4,10 +4,10 @@ pragma solidity ^0.8.29;
 import { RateHandler } from "./RateHandler.sol";
 import { MEAT } from "./MEAT.sol";
 
-/// @title BarterContract v1
+/// @title BarterEngine v1
 /// @notice Enables PRODUCT↔PRODUCT swap based on RateHandler LOD parity.
 /// @dev Fully Reasoning Path FINAL Compliant. NO cross-layer swap allowed.
-contract BarterContract {
+contract BarterEngine {
     address private immutable _owner;
     RateHandler public rateHandler;
     MEAT public meatToken;
