@@ -50,4 +50,16 @@ describe("MEAT subtype functions", function () {
       meat.connect(burner).burnSubtype(user.address, subtype, 1)
     ).to.be.revertedWith("Insufficient subtype balance");
   });
+
+  it("returns balance and lineage", async function () {
+    const subtype = ethers.encodeBytes32String("GOATMEAT");
+    const amount = ethers.parseEther("5");
+
+    await meat.connect(minter).mintSubtype(user.address, subtype, amount);
+    await meat.setSubtypeLineage(user.address, subtype, 42);
+
+    const result = await meat.balanceOfSubtypeWithLineage(user.address, subtype);
+    expect(result[0]).to.equal(amount);
+    expect(result[1]).to.equal(42n);
+  });
 });

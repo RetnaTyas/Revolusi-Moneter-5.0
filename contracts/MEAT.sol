@@ -15,8 +15,13 @@ contract MEAT is ERC20 {
     mapping(address => bool) public isMinter;
     mapping(address => bool) public isBurner;
 
-    // Balance per user per subtype
-    mapping(address => mapping(bytes32 => uint256)) public subtypeBalances;
+    struct SubtypeBalance {
+        uint256 balance;
+        uint256 lineageID;
+    }
+
+    // Balance per user per subtype with lineage info
+    mapping(address => mapping(bytes32 => SubtypeBalance)) public subtypeBalances;
 
     // Total supply per subtype
     mapping(bytes32 => uint256) public subtypeTotalSupply;
@@ -35,6 +40,7 @@ contract MEAT is ERC20 {
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
     event SubtypeMinted(address indexed to, bytes32 indexed subtype, uint256 amount);
     event SubtypeBurned(address indexed from, bytes32 indexed subtype, uint256 amount);
+    event SubtypeLineageUpdated(address indexed user, bytes32 indexed subtype, uint256 lineageID);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -118,7 +124,8 @@ contract MEAT is ERC20 {
         require(subtype != bytes32(0), "Invalid subtype");
         require(amount > 0, "Invalid amount");
 
-        subtypeBalances[to][subtype] += amount;
+        SubtypeBalance storage s = subtypeBalances[to][subtype];
+        s.balance += amount;
         subtypeTotalSupply[subtype] += amount;
 
         _mint(to, amount);
@@ -129,9 +136,10 @@ contract MEAT is ERC20 {
     function burnSubtype(address from, bytes32 subtype, uint256 amount) public onlyBurner {
         require(subtype != bytes32(0), "Invalid subtype");
         require(amount > 0, "Invalid amount");
-        require(subtypeBalances[from][subtype] >= amount, "Insufficient subtype balance");
+        SubtypeBalance storage s = subtypeBalances[from][subtype];
+        require(s.balance >= amount, "Insufficient subtype balance");
 
-        subtypeBalances[from][subtype] -= amount;
+        s.balance -= amount;
         subtypeTotalSupply[subtype] -= amount;
 
         _burn(from, amount);
@@ -140,11 +148,22 @@ contract MEAT is ERC20 {
     }
 
     function getBalanceOfSubtype(address user, bytes32 subtype) public view returns (uint256) {
-        return subtypeBalances[user][subtype];
+        return subtypeBalances[user][subtype].balance;
     }
 
     function getTotalSupplyOfSubtype(bytes32 subtype) public view returns (uint256) {
         return subtypeTotalSupply[subtype];
+    }
+
+    function setSubtypeLineage(address user, bytes32 subtype, uint256 lineageID) external onlyOwner {
+        SubtypeBalance storage s = subtypeBalances[user][subtype];
+        s.lineageID = lineageID;
+        emit SubtypeLineageUpdated(user, subtype, lineageID);
+    }
+
+    function balanceOfSubtypeWithLineage(address user, bytes32 subtype) external view returns (uint256 balance, uint256 lineageID) {
+        SubtypeBalance storage s = subtypeBalances[user][subtype];
+        return (s.balance, s.lineageID);
     }
 
     /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap (dipakai di BarterContract, bukan di MEAT)
