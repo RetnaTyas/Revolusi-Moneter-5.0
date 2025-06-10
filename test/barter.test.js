@@ -88,4 +88,44 @@ describe("BarterEngine", function () {
     await expect(barter.connect(user).barterProductToProduct(SUBTYPE_A, SUBTYPE_B, fromAmount))
       .to.be.revertedWith("Invalid lineage");
   });
+
+  it("owner() returns deployer", async function () {
+    expect(await barter.owner()).to.equal(owner.address);
+  });
+
+  it("setRateHandler onlyOwner and updates", async function () {
+    const RateHandler = await ethers.getContractFactory("RateHandler");
+    const newHandler = await RateHandler.deploy();
+    await newHandler.waitForDeployment();
+
+    await expect(barter.connect(user).setRateHandler(newHandler.target))
+      .to.be.revertedWith("Not the owner");
+
+    await barter.setRateHandler(newHandler.target);
+    expect(await barter.rateHandler()).to.equal(newHandler.target);
+  });
+
+  it("setMEAT onlyOwner and updates", async function () {
+    const MEAT = await ethers.getContractFactory("MEAT");
+    const newMeat = await MEAT.deploy();
+    await newMeat.waitForDeployment();
+
+    await expect(barter.connect(user).setMEAT(newMeat.target)).to.be.revertedWith(
+      "Not the owner"
+    );
+
+    await barter.setMEAT(newMeat.target);
+    expect(await barter.meatToken()).to.equal(newMeat.target);
+  });
+
+  it("getCurrentBarterRate matches handler", async function () {
+    const rate = await handler.computeBarterRate(
+      SUBTYPE_A,
+      "PRODUCT",
+      SUBTYPE_B,
+      "PRODUCT"
+    );
+    const current = await barter.getCurrentBarterRate(SUBTYPE_A, SUBTYPE_B);
+    expect(current).to.equal(rate);
+  });
 });
