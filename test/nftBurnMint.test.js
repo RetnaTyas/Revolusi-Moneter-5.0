@@ -98,4 +98,31 @@ describe("GoatNFT burn", function () {
     await nft.connect(user).burn(tokenId);
     await expect(nft.mint(user.address, 350, "reuse", "Boer", 2022)).to.not.be.reverted;
   });
+
+  it("reverts updateWeight when caller not owner", async function () {
+    const tx = await nft.mint(user.address, 400, "owner", "breed", 2022);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await expect(nft.updateWeight(tokenId, 450n)).to.be.revertedWith(
+      "Not token owner"
+    );
+  });
+
+  it("reverts burn when caller not owner", async function () {
+    const tx = await nft.mint(user.address, 550, "ownr", "breed", 2022);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await nft.connect(user).updateWeight(tokenId, 560n);
+    await expect(nft.burn(tokenId)).to.be.revertedWith("Not owner");
+  });
+
+  it("getGoatData cleared after burn", async function () {
+    const tx = await nft.mint(user.address, 600, "clr", "Boer", 2022);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await nft.connect(user).updateWeight(tokenId, 610n);
+    await nft.connect(user).burn(tokenId);
+    const data = await nft.getGoatData(tokenId);
+    expect(data.weight).to.equal(0n);
+    expect(data.birthYear).to.equal(0n);
+    expect(data.nfcId).to.equal("");
+    expect(data.breed).to.equal("");
+  });
 });

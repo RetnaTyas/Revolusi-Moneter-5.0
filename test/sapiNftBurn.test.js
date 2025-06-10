@@ -38,4 +38,31 @@ describe("SapiNFT burn", function () {
       "Weight update too old"
     );
   });
+
+  it("reverts updateWeight when caller not owner", async function () {
+    const tx = await nft.mint(user.address, 700, "id1", "Brahman", 2021);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await expect(nft.updateWeight(tokenId, 710n)).to.be.revertedWith(
+      "Not token owner"
+    );
+  });
+
+  it("reverts burn when caller not owner", async function () {
+    const tx = await nft.mint(user.address, 650, "id2", "Brahman", 2021);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await nft.connect(user).updateWeight(tokenId, 655n);
+    await expect(nft.burn(tokenId)).to.be.revertedWith("Not owner");
+  });
+
+  it("getSapiData cleared after burn", async function () {
+    const tx = await nft.mint(user.address, 900, "id3", "Brahman", 2021);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await nft.connect(user).updateWeight(tokenId, 905n);
+    await nft.connect(user).burn(tokenId);
+    const data = await nft.getSapiData(tokenId);
+    expect(data.weight).to.equal(0n);
+    expect(data.birthYear).to.equal(0n);
+    expect(data.nfcId).to.equal("");
+    expect(data.breed).to.equal("");
+  });
 });
