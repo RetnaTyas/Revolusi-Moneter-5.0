@@ -50,7 +50,8 @@ flowchart LR
 - Membungkus `GoatNFT` mencetak GOAT yang bisa langsung di-stake.
 - Membakar `GoatNFT` menghasilkan GOATMEAT sesuai bobot ternak.
 - GOATMEAT dapat dipertukarkan dengan token produk lain melalui `RateHandler`.
-- Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
+- Pengguna harus memberikan *approval* pada `BarterEngine` sebelum menukar subtype melalui `barterProductToProduct`.
+- Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**. Sebelum memanggil `redeem`, berikan *approval* kepada `RedeemEngine` untuk jumlah yang akan dibakar.
 
 ### MEAT.sol — Subtype & Lineage Tracking
 
@@ -309,7 +310,9 @@ Struktur dan hubungan antar kontrak:
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
   untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterEngine`.
 - `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
+-   Pengguna harus men-*approve* `BarterEngine` agar kontrak dapat membakar subtype miliknya.
 - `RedeemEngine` (`contracts/RedeemEngine.sol`) memproses penebusan MEAT dan memverifikasi lineage melalui `balanceOfSubtypeWithLineage()` sebelum distribusi.
+-   Sebelum menebus, berikan *approval* ke `RedeemEngine` untuk jumlah yang akan dibakar.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
