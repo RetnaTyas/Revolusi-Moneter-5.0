@@ -254,26 +254,27 @@ MEAT juga memunculkan event utama berikut:
 
 ## Running Tests
 
-Seluruh pengujian Hardhat berada di direktori `test/`. Jalankan dengan perintah berikut:
+Semua pengujian Hardhat berada di direktori `test/`. Pastikan Anda menggunakan **Node.js v18** agar kompatibel dengan Hardhat.
 
-```bash
-npm install
-```
-Pastikan perintah di atas dijalankan sebelum mengeksekusi Hardhat test.
+1. **Install dependencies** – jalankan ini sebelum perintah `npx hardhat` apa pun:
 
-Jika folder `artifacts/` belum berisi kontrak terkompilasi, jalankan:
+   ```bash
+   npm install
+   ```
 
-```bash
-npx hardhat compile
-```
+2. **Compile** kontrak jika folder `artifacts/` masih kosong:
 
-Setelah itu eksekusi seluruh test dengan:
+   ```bash
+   npx hardhat compile
+   ```
 
-```bash
-npm test
-# atau
-npx hardhat test
-```
+3. **Jalankan seluruh test**:
+
+   ```bash
+   npm test
+   # atau
+   npx hardhat test
+   ```
 
 
 ## Backend Server
