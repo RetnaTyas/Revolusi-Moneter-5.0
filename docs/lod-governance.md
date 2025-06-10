@@ -1,6 +1,6 @@
 # Level of Decay (LOD)
 
-`LOD` menentukan penurunan nilai barter komoditas setiap hari. File `lod_data.json` di root menyimpan master data yang dihasilkan oleh skrip `compute_lod.py`. Nilai pada berkas ini dapat diperbarui maupun dimuat on-chain melalui fungsi `setCommodityRepresentation` pada `RateHandler`.
+`LOD` menentukan penurunan nilai barter komoditas setiap hari. Data dasar tersimpan pada `lod_data_base.json` dan diolah oleh skrip `compute_lod.py` menjadi `lod_data.json`. Nilai pada berkas keluaran tersebut dapat dimuat on-chain melalui fungsi `setCommodityRepresentation` pada `RateHandler`.
 
 ```json
 [
@@ -57,7 +57,8 @@ Nilai dikalikan `1e18` agar presisi tetap terjaga pada operasi desimal.
 
 Untuk menyesuaikan LOD atau menambah komoditas baru:
 
-1. Edit daftar komoditas di [lod_data_base.json](../lod_data_base.json) sesuai kebutuhan.
+1. Perbarui daftar komoditas di [lod_data_base.json](../lod_data_base.json).
+   Tidak perlu mengubah skrip `compute_lod.py`.
 2. Jalankan perintah berikut di root repositori untuk menghasilkan ulang `lod_data.json`:
 
    ```bash
