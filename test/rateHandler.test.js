@@ -13,11 +13,16 @@ describe("RateHandler integration", function () {
     await handler.waitForDeployment();
   });
 
+  it("assigns deployer as owner", async function () {
+    expect(await handler.owner()).to.equal(owner.address);
+  });
+
 
   it("allows ownership transfer", async function () {
     await expect(handler.transferOwnership(user.address))
       .to.emit(handler, "OwnershipTransferred")
       .withArgs(owner.address, user.address);
+    expect(await handler.owner()).to.equal(user.address);
   });
 
   it("stores and reads commodity LOD per layer", async function () {
