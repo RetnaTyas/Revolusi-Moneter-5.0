@@ -8,6 +8,7 @@ import { RateHandler } from "./RateHandler.sol";
 /// @notice Kontrak pintar untuk mint MEAT menggunakan native token dan PRODUCT subtype token.
 /// @dev Reasoning Path FINAL Compliant → NO awareness of GOAT token. NO swap GOAT ↔ MEAT allowed.
 
+/// @dev Subtype parameters expect bytes32 values from ethers.encodeBytes32String
 contract MEAT is ERC20 {
     address private immutable _owner;
 
@@ -21,6 +22,7 @@ contract MEAT is ERC20 {
     }
 
     // Balance per user per subtype with lineage info
+    // Subtype values must be bytes32 generated via ethers.encodeBytes32String
     mapping(address => mapping(bytes32 => SubtypeBalance)) public subtypeBalances;
 
     // Total supply per subtype

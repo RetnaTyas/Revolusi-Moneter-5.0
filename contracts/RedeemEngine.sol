@@ -6,6 +6,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title RedeemEngine
 /// @notice Processes MEAT redemption with lineage verification
+/// @dev Subtype arguments must use ethers.encodeBytes32String
 contract RedeemEngine is Ownable {
     MEAT public immutable meat;
 
@@ -21,6 +22,7 @@ contract RedeemEngine is Ownable {
         meat = MEAT(payable(meatAddress));
     }
 
+    /// Subtype parameter should be bytes32 via ethers.encodeBytes32String
     /// @notice Redeem MEAT subtype after verifying lineage
     function redeem(bytes32 subtype, uint256 amount) external {
         require(amount > 0, "Invalid amount");
