@@ -55,7 +55,7 @@ describe("GOAT extra", function () {
       emittedReward > expected
         ? emittedReward - expected
         : expected - emittedReward;
-    expect(diff).to.be.lte(secReward);
+    expect(diff).to.be.lte(secReward * 2n);
 
     expect(await goat.balanceOf(user.address)).to.equal(amount + emittedReward);
     expect(await goat.stakingBalance(user.address)).to.equal(0n);

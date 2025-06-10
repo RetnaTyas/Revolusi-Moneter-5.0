@@ -25,6 +25,9 @@ contract MEAT is ERC20 {
     // Subtype values must be bytes32 generated via ethers.encodeBytes32String
     mapping(address => mapping(bytes32 => SubtypeBalance)) public subtypeBalances;
 
+    // List of owned subtypes per user for iteration
+    mapping(address => bytes32[]) private _userSubtypes;
+
     // Total supply per subtype
     mapping(bytes32 => uint256) public subtypeTotalSupply;
 
@@ -46,6 +49,28 @@ contract MEAT is ERC20 {
     event MinterUpdated(address indexed account, bool status);
     event BurnerUpdated(address indexed account, bool status);
 
+    // ----- internal helpers for subtype tracking -----
+    function _addUserSubtype(address user, bytes32 subtype) internal {
+        bytes32[] storage list = _userSubtypes[user];
+        for (uint256 i = 0; i < list.length; i++) {
+            if (list[i] == subtype) {
+                return;
+            }
+        }
+        list.push(subtype);
+    }
+
+    function _removeUserSubtype(address user, bytes32 subtype) internal {
+        bytes32[] storage list = _userSubtypes[user];
+        for (uint256 i = 0; i < list.length; i++) {
+            if (list[i] == subtype) {
+                list[i] = list[list.length - 1];
+                list.pop();
+                break;
+            }
+        }
+    }
+
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
         _;
@@ -58,6 +83,11 @@ contract MEAT is ERC20 {
 
     modifier onlyBurner() {
         require(isBurner[msg.sender], "Not burner");
+        _;
+    }
+
+    modifier onlyOwnerOrMinter() {
+        require(msg.sender == _owner || isMinter[msg.sender], "Not authorized");
         _;
     }
 
@@ -131,6 +161,9 @@ contract MEAT is ERC20 {
         require(amount > 0, "Invalid amount");
 
         SubtypeBalance storage s = subtypeBalances[to][subtype];
+        if (s.balance == 0) {
+            _addUserSubtype(to, subtype);
+        }
         s.balance += amount;
         subtypeTotalSupply[subtype] += amount;
 
@@ -146,6 +179,9 @@ contract MEAT is ERC20 {
         require(s.balance >= amount, "Insufficient subtype balance");
 
         s.balance -= amount;
+        if (s.balance == 0) {
+            _removeUserSubtype(from, subtype);
+        }
         subtypeTotalSupply[subtype] -= amount;
 
         if (msg.sender != from) {
@@ -165,7 +201,7 @@ contract MEAT is ERC20 {
         return subtypeTotalSupply[subtype];
     }
 
-    function setSubtypeLineage(address user, bytes32 subtype, uint256 lineageID) external onlyOwner {
+    function setSubtypeLineage(address user, bytes32 subtype, uint256 lineageID) external onlyOwnerOrMinter {
         SubtypeBalance storage s = subtypeBalances[user][subtype];
         s.lineageID = lineageID;
         emit SubtypeLineageUpdated(user, subtype, lineageID);
@@ -174,6 +210,57 @@ contract MEAT is ERC20 {
     function balanceOfSubtypeWithLineage(address user, bytes32 subtype) external view returns (uint256 balance, uint256 lineageID) {
         SubtypeBalance storage s = subtypeBalances[user][subtype];
         return (s.balance, s.lineageID);
+    }
+
+    /// @dev Move subtype balances and lineage metadata during ERC20 transfers
+    function _update(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        super._update(from, to, amount);
+
+        if (from == address(0) || to == address(0) || amount == 0) {
+            return;
+        }
+
+        uint256 remaining = amount;
+        bytes32[] storage list = _userSubtypes[from];
+        uint256 i = 0;
+        while (i < list.length && remaining > 0) {
+            bytes32 st = list[i];
+            SubtypeBalance storage sFrom = subtypeBalances[from][st];
+            uint256 available = sFrom.balance;
+            if (available == 0) {
+                list[i] = list[list.length - 1];
+                list.pop();
+                continue;
+            }
+
+            uint256 tAmt = remaining > available ? available : remaining;
+            sFrom.balance = available - tAmt;
+            if (sFrom.balance == 0) {
+                _removeUserSubtype(from, st);
+                // list may change, reload
+                list = _userSubtypes[from];
+            } else {
+                i++;
+            }
+
+            SubtypeBalance storage sTo = subtypeBalances[to][st];
+            if (sTo.balance == 0) {
+                _addUserSubtype(to, st);
+                sTo.lineageID = sFrom.lineageID;
+                emit SubtypeLineageUpdated(to, st, sFrom.lineageID);
+            } else {
+                require(
+                    sTo.lineageID == sFrom.lineageID,
+                    "Lineage mismatch"
+                );
+            }
+            sTo.balance += tAmt;
+            remaining -= tAmt;
+        }
     }
 
     /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap (dipakai di BarterEngine, bukan di MEAT)
