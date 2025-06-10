@@ -81,6 +81,9 @@ describe("BarterEngine", function () {
 
     expect(await meat.getBalanceOfSubtype(user.address, SUBTYPE_A)).to.equal(ethers.parseEther("8"));
     expect(await meat.getBalanceOfSubtype(user.address, SUBTYPE_B)).to.equal(expected);
+
+    const info = await meat.balanceOfSubtypeWithLineage(user.address, SUBTYPE_B);
+    expect(info[1]).to.equal(1n);
   });
 
   it("reverts when lineage not set", async function () {

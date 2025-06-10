@@ -78,6 +78,7 @@ contract BarterEngine {
 
         meatToken.burnSubtype(msg.sender, fromSubtype, fromAmount);
         meatToken.mintSubtype(msg.sender, toSubtype, toAmount);
+        meatToken.setSubtypeLineage(msg.sender, toSubtype, lineageID);
 
         emit BarterExecuted(msg.sender, fromSubtype, fromAmount, toSubtype, toAmount);
     }

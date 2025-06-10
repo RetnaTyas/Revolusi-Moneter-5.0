@@ -2,10 +2,10 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("MEAT subtype functions", function () {
-  let owner, minter, burner, user, meat;
+  let owner, minter, burner, user, other, meat;
 
   beforeEach(async function () {
-    [owner, minter, burner, user] = await ethers.getSigners();
+    [owner, minter, burner, user, other] = await ethers.getSigners();
 
     const MEAT = await ethers.getContractFactory("MEAT");
     meat = await MEAT.deploy();
@@ -97,7 +97,7 @@ describe("MEAT subtype functions", function () {
 
     await expect(
       meat.connect(user).setSubtypeLineage(user.address, subtype, 99)
-    ).to.be.revertedWith("Not the owner");
+    ).to.be.revertedWith("Not authorized");
 
     await expect(meat.setSubtypeLineage(user.address, subtype, 99))
       .to.emit(meat, "SubtypeLineageUpdated")
@@ -105,5 +105,19 @@ describe("MEAT subtype functions", function () {
 
     const result = await meat.balanceOfSubtypeWithLineage(user.address, subtype);
     expect(result[1]).to.equal(99n);
+  });
+
+  it("lineage persists after transfer", async function () {
+    const subtype = ethers.encodeBytes32String("GOATMEAT");
+    const amount = ethers.parseEther("2");
+
+    await meat.connect(minter).mintSubtype(user.address, subtype, amount);
+    await meat.setSubtypeLineage(user.address, subtype, 7);
+
+    await meat.connect(user).transfer(other.address, amount);
+
+    const result = await meat.balanceOfSubtypeWithLineage(other.address, subtype);
+    expect(result[0]).to.equal(amount);
+    expect(result[1]).to.equal(7n);
   });
 });

@@ -94,6 +94,9 @@ describe("BarterEngine GOAT<->BEEF", function () {
       ethers.parseEther("8")
     );
     expect(await meat.getBalanceOfSubtype(user.address, SUBTYPE_BEEFMEAT)).to.equal(expected);
+
+    const info = await meat.balanceOfSubtypeWithLineage(user.address, SUBTYPE_BEEFMEAT);
+    expect(info[1]).to.equal(1n);
   });
 
   it("reverts when lineage missing", async function () {
