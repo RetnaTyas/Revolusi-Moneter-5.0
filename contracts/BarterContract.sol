@@ -69,6 +69,11 @@ contract BarterContract {
         uint256 toAmount = (fromAmount * rate) / 1e18;
         require(toAmount > 0, "Resulting toAmount too low");
 
+        (uint256 balance, uint256 lineageID) =
+            meatToken.balanceOfSubtypeWithLineage(msg.sender, fromSubtype);
+        require(balance >= fromAmount, "Insufficient subtype balance");
+        require(lineageID != 0, "Invalid lineage");
+
         meatToken.burnSubtype(msg.sender, fromSubtype, fromAmount);
         meatToken.mintSubtype(msg.sender, toSubtype, toAmount);
 
