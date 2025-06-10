@@ -44,5 +44,39 @@ describe("GoatNFTBurnHook", function () {
       meatAmount
     );
   });
+
+  it("owner() returns deployer", async function () {
+    expect(await hook.owner()).to.equal(owner.address);
+  });
+
+  it("setNFTAddress only owner", async function () {
+    const GoatNFT = await ethers.getContractFactory("GoatNFT");
+    const newNFT = await GoatNFT.deploy();
+    await newNFT.waitForDeployment();
+
+    await expect(
+      hook.connect(user).setNFTAddress(newNFT.target)
+    ).to.be.revertedWith("Not the owner");
+
+    await expect(hook.setNFTAddress(newNFT.target))
+      .to.emit(hook, "NFTAddressUpdated")
+      .withArgs(nft.target, newNFT.target);
+    expect(await hook.goatNFT()).to.equal(newNFT.target);
+  });
+
+  it("setMEATAddress only owner", async function () {
+    const MEAT = await ethers.getContractFactory("MEAT");
+    const newMeat = await MEAT.deploy();
+    await newMeat.waitForDeployment();
+
+    await expect(
+      hook.connect(user).setMEATAddress(newMeat.target)
+    ).to.be.revertedWith("Not the owner");
+
+    await expect(hook.setMEATAddress(newMeat.target))
+      .to.emit(hook, "MeatAddressUpdated")
+      .withArgs(meat.target, newMeat.target);
+    expect(await hook.meatToken()).to.equal(newMeat.target);
+  });
 });
 
