@@ -62,4 +62,42 @@ describe("MEAT subtype functions", function () {
     expect(result[0]).to.equal(amount);
     expect(result[1]).to.equal(42n);
   });
+
+  it("owner() returns deployer", async function () {
+    expect(await meat.owner()).to.equal(owner.address);
+  });
+
+  it("setMinter onlyOwner and updates", async function () {
+    await expect(
+      meat.connect(user).setMinter(user.address, true)
+    ).to.be.revertedWith("Not the owner");
+
+    await meat.setMinter(user.address, true);
+    expect(await meat.isMinter(user.address)).to.equal(true);
+  });
+
+  it("setBurner onlyOwner and updates", async function () {
+    await expect(
+      meat.connect(user).setBurner(user.address, true)
+    ).to.be.revertedWith("Not the owner");
+
+    await meat.setBurner(user.address, true);
+    expect(await meat.isBurner(user.address)).to.equal(true);
+  });
+
+  it("setSubtypeLineage onlyOwner and emits", async function () {
+    const subtype = ethers.encodeBytes32String("GOATMEAT");
+    await meat.connect(minter).mintSubtype(user.address, subtype, 1);
+
+    await expect(
+      meat.connect(user).setSubtypeLineage(user.address, subtype, 99)
+    ).to.be.revertedWith("Not the owner");
+
+    await expect(meat.setSubtypeLineage(user.address, subtype, 99))
+      .to.emit(meat, "SubtypeLineageUpdated")
+      .withArgs(user.address, subtype, 99);
+
+    const result = await meat.balanceOfSubtypeWithLineage(user.address, subtype);
+    expect(result[1]).to.equal(99n);
+  });
 });
