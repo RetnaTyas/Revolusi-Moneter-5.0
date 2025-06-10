@@ -113,4 +113,26 @@ describe("GOAT extra", function () {
     expect(await goat.rewardInterval()).to.equal(newInterval);
     expect(await goat.minClaimInterval()).to.equal(newMin);
   });
+
+  it("mint only callable by wrapper", async function () {
+    const amount = ethers.parseEther("1");
+    await expect(
+      goat.connect(user).mint(user.address, amount)
+    ).to.be.revertedWith("Unauthorized mint");
+
+    await expect(goat.mint(user.address, amount)).to.not.be.reverted;
+    expect(await goat.balanceOf(user.address)).to.equal(amount);
+  });
+
+  it("burnFrom only callable by wrapper", async function () {
+    const amount = ethers.parseEther("2");
+    await goat.mint(owner.address, amount);
+
+    await expect(
+      goat.connect(user).burnFrom(owner.address, amount)
+    ).to.be.revertedWith("Unauthorized burn");
+
+    await expect(goat.burnFrom(owner.address, amount)).to.not.be.reverted;
+    expect(await goat.balanceOf(owner.address)).to.equal(0n);
+  });
 });
