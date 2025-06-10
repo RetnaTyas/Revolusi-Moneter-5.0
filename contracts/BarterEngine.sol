@@ -7,6 +7,7 @@ import { MEAT } from "./MEAT.sol";
 /// @title BarterEngine v1
 /// @notice Enables PRODUCT↔PRODUCT swap based on RateHandler LOD parity.
 /// @dev Fully Reasoning Path FINAL Compliant. NO cross-layer swap allowed.
+/// @dev Subtype args are bytes32 generated via ethers.encodeBytes32String
 contract BarterEngine {
     address private immutable _owner;
     RateHandler public rateHandler;
@@ -48,6 +49,7 @@ contract BarterEngine {
     /// @notice PRODUCT↔PRODUCT swap
     /// @param fromSubtype Subtype of MEAT being burned
     /// @param toSubtype Subtype of MEAT being minted
+    /// Subtype parameters must be bytes32 from ethers.encodeBytes32String
     /// @param fromAmount Amount of fromSubtype to burn
     function barterProductToProduct(
         bytes32 fromSubtype,

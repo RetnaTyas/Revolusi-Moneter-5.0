@@ -25,7 +25,7 @@ Pemilik kontrak dapat memanggil `setCommodityRepresentation(bytes32 commodityId,
 - alamat NFT
 - alamat token virtual
 - alamat token produk
-- subtype produk (bytes32) - contoh: `ethers.encodeBytes32String("GOATMEAT")`
+- subtype produk (bytes32) - contoh: `ethers.encodeBytes32String("GOATMEAT")` MEAT selalu mengharapkan parameter subtype berbentuk `bytes32`; ID numerik harus diubah ke string sebelum di-encode.
 - status aktif masing-masing layer
 - nilai `lodPerDay` untuk setiap layer
 - parameter transparan: `protein_g_per_kg`, `fat_g_per_kg`, `micronutrient_index_x1000`, `yield_per_cycle_kg`, `cycle_time_days`
