@@ -16,6 +16,8 @@ Berikut gambaran umum alur penggunaan kedua token:
 3. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
 4. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
 5. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
+Subtypes disimpan sebagai nilai `bytes32` hasil `ethers.encodeBytes32String` dari nama produk. Contoh:
+`bytes32 goatMeatSubtype = ethers.encodeBytes32String("GOATMEAT");`
 6. **GoatNFTBurnHook** – Hook ini dipanggil saat NFT kambing dibakar dan otomatis mencetak `GOATMEAT` sesuai berat yang dilaporkan.
 7. **SapiNFTBurnHook** – Versi untuk sapi yang memicu pencetakan `BEEFMEAT` ketika `SapiNFT` dibakar.
 8. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya untuk keperluan staking. Membuka kembali NFT mengharuskan jumlah GOAT yang sama dibakar.
@@ -51,6 +53,8 @@ flowchart LR
 - Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
 
 ### MEAT.sol — Subtype & Lineage Tracking
+
+Semua subtype direpresentasikan sebagai `bytes32` yang dihasilkan dari nama produk. Gunakan `ethers.encodeBytes32String("GOATMEAT")` untuk mengonversi string ke format ini.
 
 Kontrak MEAT kini menyimpan metadata `lineageID` untuk setiap kombinasi pengguna dan subtype. Pemilik kontrak dapat menetapkan nilai ini melalui `setSubtypeLineage(user, subtype, lineageID)`. Untuk membaca saldo sekaligus asal-usul token, gunakan `balanceOfSubtypeWithLineage(user, subtype)` yang mengembalikan `(balance, lineageID)`. Fungsi ini dipakai `BarterEngine` maupun `RedeemEngine` guna memverifikasi token sebelum dipertukarkan atau ditebus.
 

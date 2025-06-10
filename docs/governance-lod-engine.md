@@ -65,7 +65,7 @@ Jalankan untuk tiap komoditas dengan data dari `lod_data.json`, meliputi:
 - Alamat NFT
 - Alamat token virtual
 - Alamat token produk
-- Subtype produk (bila ada)
+- Subtype produk (bila ada) - gunakan `ethers.encodeBytes32String("GOATMEAT")` untuk nilainya
 - Seluruh parameter transparan
 - Nilai LOD per layer
 
