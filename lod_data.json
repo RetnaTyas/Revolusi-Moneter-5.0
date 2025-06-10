@@ -1,15 +1,6 @@
 [
   {
     "commodity_id": "KAMBING",
-    "parameters": {
-      "protein_g_per_kg": 270,
-      "fat_g_per_kg": 200,
-      "micronutrient_index": 0.9,
-      "yield_per_cycle_kg": 25,
-      "cycle_time_days": 365,
-      "market_price_usd_per_kg": 8.5,
-      "bias_factor": 1.0
-    },
     "lod_per_day_nft": 44.38,
     "lod_per_day_virtual": 44.38,
     "lod_per_day_product": 44.38,
@@ -17,15 +8,6 @@
   },
   {
     "commodity_id": "SAPI",
-    "parameters": {
-      "protein_g_per_kg": 250,
-      "fat_g_per_kg": 180,
-      "micronutrient_index": 0.95,
-      "yield_per_cycle_kg": 300,
-      "cycle_time_days": 730,
-      "market_price_usd_per_kg": 7.0,
-      "bias_factor": 1.1
-    },
     "lod_per_day_nft": 281.29,
     "lod_per_day_virtual": 281.29,
     "lod_per_day_product": 281.29,

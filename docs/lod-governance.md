@@ -57,7 +57,7 @@ Nilai dikalikan `1e18` agar presisi tetap terjaga pada operasi desimal.
 
 Untuk menyesuaikan LOD atau menambah komoditas baru:
 
-1. Edit daftar komoditas di [compute_lod.py](../compute_lod.py) sesuai kebutuhan.
+1. Edit daftar komoditas di [lod_data_base.json](../lod_data_base.json) sesuai kebutuhan.
 2. Jalankan perintah berikut di root repositori untuk menghasilkan ulang `lod_data.json`:
 
    ```bash
