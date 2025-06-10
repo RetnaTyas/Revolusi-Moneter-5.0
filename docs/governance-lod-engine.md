@@ -20,12 +20,12 @@ Lihat diagram *Canonical Reasoning Path* pada [architecture.md](../architecture.
 
 ## 🛠️ Governance Workflow
 
-### 1⃣ Perbarui `compute_lod.py`
+### 1⃣ Perbarui `lod_data_base.json`
 
-File: `compute_lod.py`
+File: `lod_data_base.json`
 
-- Ubah daftar `commodities`.
-- Untuk setiap komoditas, sesuaikan parameter berikut:
+- Tambahkan atau ubah entri komoditas.
+- Setiap komoditas menyimpan parameter berikut:
   - `protein_g_per_kg`
   - `fat_g_per_kg`
   - `micronutrient_index`
@@ -104,7 +104,7 @@ LOD v1.1 → lod_data_v1_1_202507XX.json
 
 ## Checklist Governance
 
-- [ ] Update `compute_lod.py` lalu jalankan untuk menghasilkan `lod_data.json`.
+- [ ] Update `lod_data_base.json` lalu jalankan `compute_lod.py` untuk menghasilkan `lod_data.json`.
 - [ ] Review dan approve `lod_data.json` secara internal.
 - [ ] Push `CommodityRepresentation` on-chain.
 - [ ] Jalankan seluruh unit test → harus lulus.

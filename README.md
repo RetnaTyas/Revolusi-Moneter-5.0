@@ -203,8 +203,8 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
 
 ### Memperbarui Data LOD
 
-Apabila parameter komoditas pada `compute_lod.py` diubah, jalankan ulang skrip
-tersebut dengan:
+Apabila data pada `lod_data_base.json` diubah, jalankan ulang skrip
+`compute_lod.py` dengan:
 
 ```bash
 python3 compute_lod.py
