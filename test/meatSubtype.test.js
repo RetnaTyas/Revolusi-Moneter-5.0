@@ -72,7 +72,9 @@ describe("MEAT subtype functions", function () {
       meat.connect(user).setMinter(user.address, true)
     ).to.be.revertedWith("Not the owner");
 
-    await meat.setMinter(user.address, true);
+    await expect(meat.setMinter(user.address, true))
+      .to.emit(meat, "MinterUpdated")
+      .withArgs(user.address, true);
     expect(await meat.isMinter(user.address)).to.equal(true);
   });
 
@@ -81,7 +83,9 @@ describe("MEAT subtype functions", function () {
       meat.connect(user).setBurner(user.address, true)
     ).to.be.revertedWith("Not the owner");
 
-    await meat.setBurner(user.address, true);
+    await expect(meat.setBurner(user.address, true))
+      .to.emit(meat, "BurnerUpdated")
+      .withArgs(user.address, true);
     expect(await meat.isBurner(user.address)).to.equal(true);
   });
 
