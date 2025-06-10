@@ -56,5 +56,28 @@ describe("GoatNFTWrapper", function () {
     expect(await nft.ownerOf(tokenId)).to.equal(user.address);
     expect(await goat.balanceOf(user.address)).to.equal(0n);
   });
+
+  it("reverts wrap when caller not NFT owner", async function () {
+    const tx = await nft.mint(owner.address, 500, "tag", "Boer", 2020);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await nft.connect(owner).approve(wrapper.target, tokenId);
+
+    await expect(wrapper.connect(user).wrap(tokenId)).to.be.revertedWith(
+      "Not token owner"
+    );
+  });
+
+  it("reverts unwrap when caller not token owner", async function () {
+    const tx = await nft.mint(user.address, 600, "tag", "Boer", 2020);
+    const tokenId = (await tx.wait()).logs[0].args[2];
+    await nft.connect(user).approve(wrapper.target, tokenId);
+    await wrapper.connect(user).wrap(tokenId);
+
+    await expect(wrapper.unwrap(tokenId)).to.be.revertedWith("Not owner");
+  });
+
+  it("owner() returns deployer", async function () {
+    expect(await wrapper.owner()).to.equal(owner.address);
+  });
 });
 

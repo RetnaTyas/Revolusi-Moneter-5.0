@@ -5,6 +5,7 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
 - Setiap **GoatNFT** mencatat *ras*, *NFC tag*, *tahun lahir*, dan *berat* terkini.
 - Pemilik bebas memindahkan NFT dan memperbarui berat seiring pertumbuhan hewan.
 - Sebelum kambing disembelih, token dapat **dibakar** dengan berat terbaru yang mencetak `GOATMEAT` melalui `GoatNFTBurnHook`.
+- Pemilik hook dapat memperbarui alamat `GoatNFT` maupun `MEAT` melalui `setNFTAddress` dan `setMEATAddress` bila diperlukan.
 - GOAT diperoleh dengan mengunci NFT pada `GoatNFTWrapper` dan digunakan untuk staking.
 - MEAT pada akhirnya dibakar menggunakan `redeemForMeat` untuk menebus daging fisik.
 
