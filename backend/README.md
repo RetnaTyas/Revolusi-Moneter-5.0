@@ -8,6 +8,7 @@ Folder ini berisi server Express sederhana yang menyajikan statistik cache untuk
    ```bash
    npm install
    ```
+   Jalankan perintah di atas sebelum mengeksekusi Hardhat test apa pun.
 2. Kompilasi kontrak untuk menghasilkan file ABI yang digunakan server:
    ```bash
    npx hardhat compile
