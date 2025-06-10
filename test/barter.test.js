@@ -69,6 +69,7 @@ describe("BarterContract", function () {
 
   it("barters between product subtypes", async function () {
     const fromAmount = ethers.parseEther("2");
+    await meat.setSubtypeLineage(user.address, SUBTYPE_A, 1);
     await meat.connect(user).approve(barter.target, fromAmount);
 
     const rate = await handler.computeBarterRate(SUBTYPE_A, "PRODUCT", SUBTYPE_B, "PRODUCT");
@@ -80,5 +81,11 @@ describe("BarterContract", function () {
 
     expect(await meat.getBalanceOfSubtype(user.address, SUBTYPE_A)).to.equal(ethers.parseEther("8"));
     expect(await meat.getBalanceOfSubtype(user.address, SUBTYPE_B)).to.equal(expected);
+  });
+
+  it("reverts when lineage not set", async function () {
+    const fromAmount = ethers.parseEther("1");
+    await expect(barter.connect(user).barterProductToProduct(SUBTYPE_A, SUBTYPE_B, fromAmount))
+      .to.be.revertedWith("Invalid lineage");
   });
 });
