@@ -50,6 +50,20 @@ flowchart LR
 - GOATMEAT dapat dipertukarkan dengan token produk lain melalui `RateHandler`.
 - Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**.
 
+### MEAT.sol — Subtype & Lineage Tracking
+
+Kontrak MEAT kini menyimpan metadata `lineageID` untuk setiap kombinasi pengguna dan subtype. Pemilik kontrak dapat menetapkan nilai ini melalui `setSubtypeLineage(user, subtype, lineageID)`. Untuk membaca saldo sekaligus asal-usul token, gunakan `balanceOfSubtypeWithLineage(user, subtype)` yang mengembalikan `(balance, lineageID)`. Fungsi ini dipakai `BarterEngine` maupun `RedeemEngine` guna memverifikasi token sebelum dipertukarkan atau ditebus.
+
+### Token Lifecycle Flow
+
+```mermaid
+flowchart LR
+  MintMEAT["Mint MEAT with Native"] --> Subtype["Subtype Balance"]
+  Subtype --> BarterEngine["BarterEngine"]
+  Subtype --> RedeemEngine["RedeemEngine"]
+  RedeemEngine --> Physical["Physical Meat Delivery"]
+```
+
 ## What is GoatNFT?
 
 GoatNFT bukan sekadar NFT koleksi. Token ini berfungsi sebagai **identitas digital** dan **ledger siklus hidup** bagi setiap kambing di ekosistem. Setiap NFT mencatat `nfcId`, ras, tahun lahir, dan berat yang terus diperbarui hingga saat penyembelihan.
@@ -290,7 +304,8 @@ Struktur dan hubungan antar kontrak:
 - `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan fungsi staking, klaim, kompaun, serta konfigurasi reward. Token hanya dicetak melalui `GoatNFTWrapper` saat NFT dibungkus.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
   untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterContract`.
-- `BarterContract` (`contracts/BarterContract.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT berdasarkan parity LOD dari `RateHandler`.
+- `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
+- `RedeemEngine` (`contracts/RedeemEngine.sol`) memproses penebusan MEAT dan memverifikasi lineage melalui `balanceOfSubtypeWithLineage()` sebelum distribusi.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
   Metadata tiap token dikemas dalam struct `GoatData` (`nfcId`, `breed`,
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
@@ -407,6 +422,32 @@ Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
 - [LOD Governance](docs/lod-governance.md)
 - [Governance Pipeline](docs/governance-lod-engine.md)
 
+## RedeemEngine.sol — Basic Template v1
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.29;
+
+import { MEAT } from "./MEAT.sol";
+
+contract RedeemEngine {
+    MEAT public immutable meat;
+
+    event Redeemed(address indexed user, bytes32 indexed subtype, uint256 lineageID, uint256 amount);
+
+    constructor(address meatAddress) {
+        meat = MEAT(meatAddress);
+    }
+
+    function redeem(bytes32 subtype, uint256 amount) external {
+        require(amount > 0, "Invalid amount");
+        (uint256 balance, uint256 lineageID) = meat.balanceOfSubtypeWithLineage(msg.sender, subtype);
+        require(balance >= amount, "Insufficient balance");
+        require(lineageID != 0, "Lineage not set");
+        meat.burnSubtype(msg.sender, subtype, amount);
+        emit Redeemed(msg.sender, subtype, lineageID, amount);
+    }
+}
+```
 ---
 
 Bukan sekadar dokumen, README ini menjadi "suara sistem" yang terus diperbarui
