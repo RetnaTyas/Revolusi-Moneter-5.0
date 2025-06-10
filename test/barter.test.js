@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("BarterContract", function () {
+describe("BarterEngine", function () {
   let owner, user, handler, meat, barter;
   const SUBTYPE_A = ethers.encodeBytes32String("GOATMEAT");
   const SUBTYPE_B = ethers.encodeBytes32String("DUCKMEAT");
@@ -17,7 +17,7 @@ describe("BarterContract", function () {
     meat = await MEAT.deploy();
     await meat.waitForDeployment();
 
-    const Barter = await ethers.getContractFactory("BarterContract");
+    const Barter = await ethers.getContractFactory("BarterEngine");
     barter = await Barter.deploy(handler.target, meat.target);
     await barter.waitForDeployment();
 

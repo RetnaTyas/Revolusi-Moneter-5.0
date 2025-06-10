@@ -166,7 +166,7 @@ contract MEAT is ERC20 {
         return (s.balance, s.lineageID);
     }
 
-    /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap (dipakai di BarterContract, bukan di MEAT)
+    /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap (dipakai di BarterEngine, bukan di MEAT)
     function setRateHandler(address rateHandlerAddress) external onlyOwner {
         require(rateHandlerAddress != address(0), "Invalid address");
         address old = address(rateHandler);

@@ -165,7 +165,7 @@ npx hardhat compile
 
 Folder `wasm-contracts/` menyimpan versi CosmWasm dari setiap kontrak.
 Kontrak Solidity yang **sudah** terporting meliputi `GOAT` (paket `starter`),
-`MEAT`, `GoatNFT`, dan `RateHandler`. Implementasi untuk `BarterContract`,
+`MEAT`, `GoatNFT`, dan `RateHandler`. Implementasi untuk `BarterEngine`,
 `GoatNFTWrapper`, `GoatNFTBurnHook`, serta varian `SapiNFT` masih *pending*.
 Saat ini fungsi wrapper dan burn hook digabungkan ke dalam `starter` dan akan
 dipisah ke paket terpisah ketika kontrak baru diimplementasikan. Seluruh pesan
@@ -303,7 +303,7 @@ Setelah itu edit `frontend/.env.local` dan isi `NEXT_PUBLIC_GOAT_ADDRESS` serta 
 Struktur dan hubungan antar kontrak:
 - `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan fungsi staking, klaim, kompaun, serta konfigurasi reward. Token hanya dicetak melalui `GoatNFTWrapper` saat NFT dibungkus.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
-  untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterContract`.
+  untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterEngine`.
 - `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
 - `RedeemEngine` (`contracts/RedeemEngine.sol`) memproses penebusan MEAT dan memverifikasi lineage melalui `balanceOfSubtypeWithLineage()` sebelum distribusi.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
