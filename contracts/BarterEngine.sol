@@ -21,6 +21,12 @@ contract BarterEngine {
         uint256 toAmount
     );
 
+    event MeatSubtypeWithdrawn(
+        address indexed to,
+        bytes32 indexed subtype,
+        uint256 amount
+    );
+
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
         _;
@@ -96,6 +102,40 @@ contract BarterEngine {
                 toSubtype,
                 "PRODUCT"
             );
+    }
+
+    /// @notice Emergency withdraw stuck MEAT subtype from this contract
+    /// @param subtype Subtype to withdraw (bytes32 encoded string)
+    /// @param amount Amount of subtype to withdraw
+    /// @param useTransfer If true, call transferSubtype; otherwise burn+mint
+    function emergencyWithdrawMEATSubtype(
+        bytes32 subtype,
+        uint256 amount,
+        bool useTransfer
+    ) external onlyOwner {
+        require(subtype != bytes32(0), "Invalid subtype");
+        require(amount > 0, "Amount must be > 0");
+
+        uint256 balance = meatToken.getBalanceOfSubtype(address(this), subtype);
+        require(balance >= amount, "Insufficient subtype balance");
+
+        if (useTransfer) {
+            (bool success, ) = address(meatToken).call(
+                abi.encodeWithSignature(
+                    "transferSubtype(address,address,bytes32,uint256)",
+                    address(this),
+                    _owner,
+                    subtype,
+                    amount
+                )
+            );
+            require(success, "transferSubtype failed");
+        } else {
+            meatToken.burnSubtype(address(this), subtype, amount);
+            meatToken.mintSubtype(_owner, subtype, amount);
+        }
+
+        emit MeatSubtypeWithdrawn(_owner, subtype, amount);
     }
 
     /// @notice Returns owner
