@@ -37,8 +37,8 @@ Berikut langkah detail siklus kambing hingga daging tercatat di ledger:
  - Nilai `weight` disimpan dengan satu tempat desimal menggunakan `WEIGHT_DECIMALS = 1` sehingga `425` berarti **42.5 kg**.
 - NFT (standar ERC721) bebas dipindahtangankan ke pemilik baru.
 - Untuk memperoleh GOAT sebelum penyembelihan, pemilik mengunci NFT melalui `GoatNFTWrapper` yang mencetak GOAT berdasarkan berat terakhir.
-- Ketika kambing disembelih, pemilik membakar NFT; `GoatNFTBurnHook` mencetak `GOATMEAT` sejumlah `weight / rate` dari `RateHandler`.
-- GOAT digunakan untuk staking sementara GOATMEAT dipertukarkan antar produk melalui `RateHandler`.
+- Ketika kambing disembelih, pemilik membakar NFT; `GoatNFTBurnHook` mencetak `GOATMEAT` sebesar 60% dari berat hidup (konstanta `SLAUGHTER_YIELD_BPS`).
+- GOAT digunakan untuk staking sementara GOATMEAT dipertukarkan antar produk. `RateHandler` hanya dipakai pada tahap barter.
 - MEAT kemudian ditebus sebagai daging nyata sehingga seluruh riwayat ternak tersimpan on-chain.
 
 ```mermaid
@@ -51,7 +51,7 @@ flowchart LR
 
 - Membungkus `GoatNFT` mencetak GOAT yang bisa langsung di-stake.
 - Membakar `GoatNFT` menghasilkan GOATMEAT sesuai bobot ternak.
-- GOATMEAT dapat dipertukarkan dengan token produk lain melalui `RateHandler`.
+- GOATMEAT dapat dipertukarkan dengan token produk lain melalui `RateHandler` (hanya untuk barter).
 - Pengguna harus memberikan *approval* pada `BarterEngine` sebelum menukar subtype melalui `barterProductToProduct`.
 - Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**. Sebelum memanggil `redeem`, berikan *approval* kepada `RedeemEngine` untuk jumlah yang akan dibakar.
 
