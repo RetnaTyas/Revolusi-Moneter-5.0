@@ -28,7 +28,12 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
    * Subtype seperti `GOATMEAT` harus di-encode ke `bytes32` misal `ethers.encodeBytes32String("GOATMEAT")`.
    * MEAT selalu mengharapkan parameter subtype berupa `bytes32`; ubah ID numerik ke string sebelum di-encode. contoh: `bytes32 subtypeFromId = ethers.encodeBytes32String("99");`
 6. **Menebus MEAT**
-   * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain. Tiap token yang ditebus mewakili **satu kilogram daging** dari mitra distribusi kami. Diagram singkat jalur burn dan redemption dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow) di README.
+   * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain.
+     Berat daging dihitung memakai `RedeemConfig.gramsPerTokenUnit`.
+     Konfigurasi default sering menyamakan **1 MEAT (1e18 unit) dengan 1 kg**,
+     namun nilainya dapat diatur ulang. Diagram singkat jalur burn dan redemption
+     dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow)
+     di README.
    * Pengguna harus men-*approve* `RedeemEngine` sebelum memanggil `redeem`.
 
 Siklus ini memastikan setiap tahap partisipasi didukung oleh fungsi kontrak yang eksplisit dan alur token yang transparan.

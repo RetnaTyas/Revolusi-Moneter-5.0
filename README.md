@@ -53,7 +53,11 @@ flowchart LR
 - Membakar `GoatNFT` menghasilkan GOATMEAT sesuai bobot ternak.
 - GOATMEAT dapat dipertukarkan dengan token produk lain melalui `RateHandler` (hanya untuk barter).
 - Pengguna harus memberikan *approval* pada `BarterEngine` sebelum menukar subtype melalui `barterProductToProduct`.
-- Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik. **1 MEAT setara 1 KG daging**. Sebelum memanggil `redeem`, berikan *approval* kepada `RedeemEngine` untuk jumlah yang akan dibakar.
+- Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik.
+  Jumlah daging dihitung dari konfigurasi `RedeemConfig.gramsPerTokenUnit`.
+  Nilai bawaan umumnya menyetarakan **1 MEAT (1e18 unit) dengan 1 kg**, namun
+  angka ini dapat diubah sesuai kebutuhan. Sebelum memanggil `redeem`, berikan
+  *approval* kepada `RedeemEngine` untuk jumlah yang akan dibakar.
 
 ### MEAT.sol — Subtype & Lineage Tracking
 
