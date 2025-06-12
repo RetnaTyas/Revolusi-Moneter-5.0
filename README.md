@@ -9,8 +9,8 @@ Repositori ini berisi dua token ERC20:
 
 Berikut gambaran umum alur penggunaan kedua token:
 
-1. **Mint MEAT** – Kirim native token langsung ke alamat kontrak `MEAT` untuk mencetak token sesuai rasio `DepositRate`. Fungsi `receive()` otomatis memproses dana dan mengirim MEAT ke pengirim. Versi CosmWasm menggunakan pesan `mint_with_native` seperti dijelaskan pada bagian berikutnya.
-   *MEAT hanya dapat dicetak lewat deposit token native; tidak ada penghubung alamat dengan kontrak lain.*
+1. **Mint MEAT** – MEAT dapat dicetak dengan mengirim token native ke kontrak `MEAT` yang diproses otomatis oleh `receive()` sesuai `DepositRate`, atau melalui `mintSubtype` oleh minter terotorisasi seperti hook pembakaran NFT. Saat kontrak dideploy, suplai awal juga dicetak ke alamat pemilik. Versi CosmWasm menggunakan pesan `mint_with_native` untuk cara pertama.
+   *MEAT dapat dicetak lewat deposit token native maupun `mintSubtype` oleh kontrak terotorisasi.*
 2. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
 3. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
