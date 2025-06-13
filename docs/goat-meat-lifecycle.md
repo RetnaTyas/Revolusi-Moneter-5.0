@@ -63,3 +63,17 @@ graph TD
 ```
 
 Diagram di atas menunjukkan pemisahan lapisan token dan jalur pertukaran yang diizinkan.
+
+## Alur SapiNFT → BEEFMEAT
+
+Sapi juga tercatat menggunakan [SapiNFT](contracts/SapiNFT.sol). NFT ini dapat
+dibungkus lewat [SapiNFTWrapper.sol](contracts/SapiNFTWrapper.sol) untuk
+mendapatkan GOAT sesuai beratnya. Ketika sapi disembelih, fungsi `burn` pada
+`SapiNFT` memicu
+[SapiNFTBurnHook.sol](contracts/SapiNFTBurnHook.sol) yang otomatis mencetak
+`BEEFMEAT`.
+
+Kontrak hook memiliki konstanta `SLAUGHTER_YIELD_BPS` sebesar `6500`, artinya
+**65 %** dari berat hidup dicetak sebagai BEEFMEAT. Sebelum burn, berat harus
+dipastikan terkini sebagaimana alur kambing. Token BEEFMEAT selanjutnya dapat
+dibarter atau ditebus melalui `RedeemEngine`.
