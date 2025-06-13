@@ -102,7 +102,8 @@ describe("BarterEngine", function () {
     await newHandler.waitForDeployment();
 
     await expect(barter.connect(user).setRateHandler(newHandler.target))
-      .to.be.revertedWith("Not the owner");
+      .to.be.revertedWithCustomError(barter, "OwnableUnauthorizedAccount")
+      .withArgs(user.address);
 
     await barter.setRateHandler(newHandler.target);
     expect(await barter.rateHandler()).to.equal(newHandler.target);
@@ -113,9 +114,10 @@ describe("BarterEngine", function () {
     const newMeat = await MEAT.deploy();
     await newMeat.waitForDeployment();
 
-    await expect(barter.connect(user).setMEAT(newMeat.target)).to.be.revertedWith(
-      "Not the owner"
-    );
+    await expect(barter.connect(user).setMEAT(newMeat.target)).to.be.revertedWithCustomError(
+      barter,
+      "OwnableUnauthorizedAccount"
+    ).withArgs(user.address);
 
     await barter.setMEAT(newMeat.target);
     expect(await barter.meatToken()).to.equal(newMeat.target);

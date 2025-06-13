@@ -81,7 +81,9 @@ describe("MEAT subtype functions", function () {
   it("setMinter onlyOwner and updates", async function () {
     await expect(
       meat.connect(user).setMinter(user.address, true)
-    ).to.be.revertedWith("Not the owner");
+    ).to.be.revertedWithCustomError(meat, "OwnableUnauthorizedAccount").withArgs(
+      user.address
+    );
 
     await expect(meat.setMinter(user.address, true))
       .to.emit(meat, "MinterUpdated")
@@ -92,7 +94,9 @@ describe("MEAT subtype functions", function () {
   it("setBurner onlyOwner and updates", async function () {
     await expect(
       meat.connect(user).setBurner(user.address, true)
-    ).to.be.revertedWith("Not the owner");
+    ).to.be.revertedWithCustomError(meat, "OwnableUnauthorizedAccount").withArgs(
+      user.address
+    );
 
     await expect(meat.setBurner(user.address, true))
       .to.emit(meat, "BurnerUpdated")

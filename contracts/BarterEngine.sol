@@ -3,13 +3,13 @@ pragma solidity ^0.8.29;
 
 import { RateHandler } from "./RateHandler.sol";
 import { MEAT } from "./MEAT.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title BarterEngine v1
 /// @notice Enables PRODUCT↔PRODUCT swap based on RateHandler LOD parity.
 /// @dev Fully Reasoning Path FINAL Compliant. NO cross-layer swap allowed.
 /// @dev Subtype args are bytes32 generated via ethers.encodeBytes32String
-contract BarterEngine {
-    address private immutable _owner;
+contract BarterEngine is Ownable {
     RateHandler public rateHandler;
     MEAT public meatToken;
 
@@ -27,15 +27,9 @@ contract BarterEngine {
         uint256 amount
     );
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
-    }
-
-    constructor(address rateHandlerAddress, address meatAddress) {
+    constructor(address rateHandlerAddress, address meatAddress) Ownable(msg.sender) {
         require(rateHandlerAddress != address(0), "Invalid RateHandler address");
         require(meatAddress != address(0), "Invalid MEAT address");
-        _owner = msg.sender;
         rateHandler = RateHandler(rateHandlerAddress);
         meatToken = MEAT(payable(meatAddress));
     }
@@ -116,14 +110,12 @@ contract BarterEngine {
         meatToken.burnSubtype(address(this), subtype, balance);
 
         // Mint to owner → avoid reentrancy problems
-        meatToken.mintSubtype(_owner, subtype, balance);
+        meatToken.mintSubtype(owner(), subtype, balance);
 
-        emit MeatSubtypeWithdrawn(_owner, subtype, balance);
+        emit MeatSubtypeWithdrawn(owner(), subtype, balance);
     }
 
     /// @notice Returns owner
-    function owner() external view returns (address) {
-        return _owner;
-    }
+    // Ownable already exposes owner() view
 }
 

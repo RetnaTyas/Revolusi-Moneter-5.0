@@ -56,7 +56,9 @@ describe("GoatNFTBurnHook", function () {
 
     await expect(
       hook.connect(user).setNFTAddress(newNFT.target)
-    ).to.be.revertedWith("Not the owner");
+    ).to.be.revertedWithCustomError(hook, "OwnableUnauthorizedAccount").withArgs(
+      user.address
+    );
 
     await expect(hook.setNFTAddress(newNFT.target))
       .to.emit(hook, "NFTAddressUpdated")
@@ -71,7 +73,9 @@ describe("GoatNFTBurnHook", function () {
 
     await expect(
       hook.connect(user).setMEATAddress(newMeat.target)
-    ).to.be.revertedWith("Not the owner");
+    ).to.be.revertedWithCustomError(hook, "OwnableUnauthorizedAccount").withArgs(
+      user.address
+    );
 
     await expect(hook.setMEATAddress(newMeat.target))
       .to.emit(hook, "MeatAddressUpdated")

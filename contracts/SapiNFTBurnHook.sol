@@ -3,14 +3,14 @@ pragma solidity ^0.8.29;
 
 import { ISapiNFT } from "./interfaces/ISapiNFT.sol";
 import { IMeat } from "./interfaces/IMeat.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title SapiNFTBurnHook
 /// @notice Mints BEEFMEAT tokens when a SapiNFT is burned
-contract SapiNFTBurnHook {
+contract SapiNFTBurnHook is Ownable {
     ISapiNFT public sapiNFT;
     IMeat public meatToken;
 
-    address private immutable _owner;
 
     bytes32 public constant BEEFMEAT_SUBTYPE = keccak256("BEEFMEAT");
     uint256 public constant SLAUGHTER_YIELD_BPS = 6500;
@@ -20,16 +20,10 @@ contract SapiNFTBurnHook {
     event NFTAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event BeefMeatMinted(address indexed to, uint256 amount);
 
-    constructor(address nftAddress, address meatAddress) {
+    constructor(address nftAddress, address meatAddress) Ownable(msg.sender) {
         require(nftAddress != address(0) && meatAddress != address(0), "Invalid address");
-        _owner = msg.sender;
         sapiNFT = ISapiNFT(nftAddress);
         meatToken = IMeat(meatAddress);
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
     }
 
     function setNFTAddress(address nftAddress) external onlyOwner {
@@ -57,7 +51,5 @@ contract SapiNFTBurnHook {
         emit BeefMeatMinted(to, meatAmount);
     }
 
-    function owner() external view returns (address) {
-        return _owner;
-    }
+    // Ownable already exposes owner() view
 }

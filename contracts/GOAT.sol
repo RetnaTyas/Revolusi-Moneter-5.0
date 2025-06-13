@@ -2,13 +2,13 @@
 pragma solidity ^0.8.29;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title Token GOAT - Guardian of Agricultural Trade (Capital Layer Token)
 /// @notice Token GOAT hanya dapat dicetak oleh GoatNFTWrapper (wrap) dan digunakan untuk staking / ROI.
 /// @dev Tidak ada path mintTo oleh MEAT. Tidak ada cross-layer leak. Reasoning Path FINAL Compliant.
 
-contract GOAT is ERC20 {
-    address private immutable _owner;
+contract GOAT is ERC20, Ownable {
 
     event RewardConfigChanged(
         uint256 oldRate,
@@ -35,14 +35,7 @@ contract GOAT is ERC20 {
 
     address public wrapperContract;
 
-    constructor() ERC20("Guardian of Agricultural Trade", "GOAT") {
-        _owner = msg.sender;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
-    }
+    constructor() ERC20("Guardian of Agricultural Trade", "GOAT") Ownable(msg.sender) {}
 
     /// @notice Set wrapper contract (GoatNFTWrapper) — only this contract can mint/burn GOAT
     function setWrapperContract(address wrapperAddress) external onlyOwner {
@@ -170,8 +163,5 @@ contract GOAT is ERC20 {
         minClaimInterval = newMinClaimTime;
     }
 
-    /// @notice Mengembalikan alamat pemilik kontrak
-    function owner() external view returns (address) {
-        return _owner;
-    }
+    // Ownable already exposes owner() view
 }

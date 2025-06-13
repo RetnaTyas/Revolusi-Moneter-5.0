@@ -19,7 +19,9 @@ describe("GOAT extra", function () {
   it("setWrapperContract only owner", async function () {
     await expect(
       goat.connect(user).setWrapperContract(user.address)
-    ).to.be.revertedWith("Not the owner");
+    ).to.be.revertedWithCustomError(goat, "OwnableUnauthorizedAccount").withArgs(
+      user.address
+    );
 
     await expect(goat.setWrapperContract(user.address))
       .to.emit(goat, "WrapperAddressUpdated")
