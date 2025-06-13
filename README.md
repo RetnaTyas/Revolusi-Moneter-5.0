@@ -99,6 +99,16 @@ Goat lahir → mint GoatNFT → update berat → transfer bila dijual → burn s
 
 Semua peristiwa tersebut tercatat on-chain sehingga pasokan GOAT dan MEAT selalu dapat diaudit. Dengan desain ini, nilai digital senantiasa terhubung ke komoditas nyata.
 
+## What is SapiNFT?
+
+SapiNFT memodernisasi pencatatan sapi dengan pendekatan serupa. Token ini menyimpan `nfcId`, ras, tahun lahir, dan berat yang dapat diperbarui oleh pemilik agar valuasi tetap akurat. NFT dapat dipindahtangankan bebas sesuai standar ERC721. Saat sapi disembelih, NFT dibakar sehingga `SapiNFTBurnHook` otomatis mencetak `BEEFMEAT`. Token BEEFMEAT kemudian bisa ditebus menjadi daging fisik.
+
+Alurnya ringkas sebagai berikut:
+
+```
+Sapi lahir → mint SapiNFT → update berat → transfer bila dijual → burn saat disembelih → mint BEEFMEAT → tebus daging fisik
+```
+
 ## Deployment
 
 1. Install all dependencies from this repository:
