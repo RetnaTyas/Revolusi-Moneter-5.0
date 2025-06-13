@@ -45,7 +45,9 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
         ExecuteMsg::Redeem { subtype, amount } => {
             execute_redeem(deps, env.clone(), info, subtype, amount)
         }
-        ExecuteMsg::EmergencyWithdraw { subtype } => execute_withdraw(deps, env, info, subtype),
+        ExecuteMsg::EmergencyWithdrawMEATSubtype { subtype } => {
+            execute_withdraw(deps, env, info, subtype)
+        }
     }
 }
 
@@ -86,29 +88,35 @@ fn execute_redeem(
         return Err(StdError::generic_err("Redeem inactive"));
     }
     let meat = MEAT.load(deps.storage)?;
-    let transfer = WasmMsg::Execute {
-        contract_addr: meat.to_string(),
-        msg: to_json_binary(&meat::msg::ExecuteMsg::TransferFrom {
-            owner: info.sender.to_string(),
-            recipient: env.contract.address.to_string(),
-            amount: Uint128::new(amount),
-        })?,
-        funds: vec![],
-    };
+    let bal: meat::msg::BalanceSubtypeWithLineageResponse = deps.querier.query_wasm_smart(
+        meat.clone(),
+        &meat::msg::QueryMsg::BalanceOfSubtypeWithLineage {
+            user: info.sender.to_string(),
+            subtype: subtype.clone(),
+        },
+    )?;
+    if bal.balance < Uint128::new(amount) {
+        return Err(StdError::generic_err("Insufficient subtype balance"));
+    }
+    if bal.lineage_id == 0 {
+        return Err(StdError::generic_err("Lineage not set"));
+    }
     let burn = WasmMsg::Execute {
         contract_addr: meat.to_string(),
-        msg: to_json_binary(&meat::msg::ExecuteMsg::RedeemForMeat {
+        msg: to_json_binary(&meat::msg::ExecuteMsg::BurnSubtype {
+            from: info.sender.to_string(),
+            subtype: subtype.clone(),
             amount: Uint128::new(amount),
         })?,
         funds: vec![],
     };
     let grams = amount * cfg.grams_per_token_unit / 1_000_000_000_000_000_000u128;
     Ok(Response::new()
-        .add_message(transfer)
         .add_message(burn)
         .add_attribute("action", "redeem")
         .add_attribute("user", info.sender)
         .add_attribute("subtype", subtype)
+        .add_attribute("lineage_id", bal.lineage_id.to_string())
         .add_attribute("amount", amount.to_string())
         .add_attribute("grams", grams.to_string()))
 }
@@ -117,30 +125,46 @@ fn execute_withdraw(
     mut deps: DepsMut,
     env: Env,
     info: MessageInfo,
-    _subtype: String,
+    subtype: String,
 ) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
+    if subtype.is_empty() {
+        return Err(StdError::generic_err("Invalid subtype"));
+    }
     let meat = MEAT.load(deps.storage)?;
-    let bal: meat::msg::BalanceResponse = deps.querier.query_wasm_smart(
+    let bal: meat::msg::BalanceSubtypeWithLineageResponse = deps.querier.query_wasm_smart(
         meat.clone(),
-        &meat::msg::QueryMsg::Balance {
-            address: env.contract.address.to_string(),
+        &meat::msg::QueryMsg::BalanceOfSubtypeWithLineage {
+            user: env.contract.address.to_string(),
+            subtype: subtype.clone(),
         },
     )?;
     if bal.balance.is_zero() {
-        return Err(StdError::generic_err("No balance"));
+        return Err(StdError::generic_err("No subtype balance"));
     }
-    let transfer = WasmMsg::Execute {
+    let burn = WasmMsg::Execute {
         contract_addr: meat.to_string(),
-        msg: to_json_binary(&meat::msg::ExecuteMsg::Transfer {
-            recipient: info.sender.to_string(),
+        msg: to_json_binary(&meat::msg::ExecuteMsg::BurnSubtype {
+            from: env.contract.address.to_string(),
+            subtype: subtype.clone(),
+            amount: bal.balance,
+        })?,
+        funds: vec![],
+    };
+    let mint = WasmMsg::Execute {
+        contract_addr: meat.to_string(),
+        msg: to_json_binary(&meat::msg::ExecuteMsg::MintSubtype {
+            to: info.sender.to_string(),
+            subtype: subtype.clone(),
             amount: bal.balance,
         })?,
         funds: vec![],
     };
     Ok(Response::new()
-        .add_message(transfer)
-        .add_attribute("action", "emergency_withdraw")
+        .add_message(burn)
+        .add_message(mint)
+        .add_attribute("action", "emergency_withdraw_meat_subtype")
+        .add_attribute("subtype", subtype)
         .add_attribute("amount", bal.balance))
 }
 

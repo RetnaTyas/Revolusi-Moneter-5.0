@@ -18,7 +18,7 @@ pub enum ExecuteMsg {
         subtype: String,
         amount: u128,
     },
-    EmergencyWithdraw {
+    EmergencyWithdrawMEATSubtype {
         subtype: String,
     },
 }
