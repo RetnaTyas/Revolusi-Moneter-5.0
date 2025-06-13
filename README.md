@@ -24,6 +24,7 @@ Semua fungsi MEAT mengharapkan parameter subtype dalam bentuk `bytes32`. Gunakan
 7. **SapiNFTBurnHook** – Versi untuk sapi yang memicu pencetakan `BEEFMEAT` ketika `SapiNFT` dibakar.
 8. **GoatNFTWrapper** – Kontrak ini mengunci GoatNFT dan mencetak GOAT sesuai beratnya untuk keperluan staking. Membuka kembali NFT mengharuskan jumlah GOAT yang sama dibakar.
    *GOAT sepenuhnya dicetak oleh `GoatNFTWrapper`; kontrak lain tidak memiliki izin mint.*
+9. **SapiNFTWrapper** – Kontrak pembungkus untuk SapiNFT yang mencetak GOAT berdasarkan berat sapi.
 
 ## Burn & Redeem Flow
 

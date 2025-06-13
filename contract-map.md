@@ -24,6 +24,9 @@ flowchart TD
 * **IGoatToken** dipakai GoatNFTWrapper dan GoatNFT untuk berinteraksi dengan kontrak GOAT.
 * **RateHandler** mengendalikan rasio swap terkini untuk barter produk.
 * **RedeemEngine** memproses penebusan MEAT dan memverifikasi lineage sebelum pembakaran.
+* **SapiNFT** menyimpan identitas sapi ERC721 dan metadata di `sapiMetadata`.
+* **SapiNFTBurnHook** mencetak `BEEFMEAT` setiap kali SapiNFT dibakar.
+* **SapiNFTWrapper** mengunci SapiNFT dan mencetak GOAT hingga NFT dibuka kembali.
 
 Kontrak GOAT dan MEAT dimiliki alamat yang sama. Tabel di bawah merangkum kontrak utama beserta perannya.
 
@@ -34,6 +37,9 @@ Kontrak GOAT dan MEAT dimiliki alamat yang sama. Tabel di bawah merangkum kontra
 | GoatNFT | Identitas kambing ERC721 yang menyimpan metadata di `goatMetadata` sebagai `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Berat dapat diperbarui via `updateWeight` dan harus segar saat dibakar. Fungsi `burn` memicu `GoatNFTBurnHook` serta event `GoatBurned`. |
 | GoatNFTBurnHook | Kontrak hook yang mencetak `GOATMEAT` setiap kali GoatNFT dibakar. |
 | GoatNFTWrapper | Mengunci GoatNFT dan mencetak GOAT setara hingga NFT dibuka kembali dengan membakar GOAT. |
+| SapiNFT | Identitas sapi ERC721 yang menyimpan metadata di `sapiMetadata` sebagai `SapiData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Berat dapat diperbarui via `updateWeight` dan harus segar saat dibakar. Fungsi `burn` memicu `SapiNFTBurnHook` serta event `SapiBurned`. |
+| SapiNFTBurnHook | Kontrak hook yang mencetak `BEEFMEAT` setiap kali SapiNFT dibakar. |
+| SapiNFTWrapper | Mengunci SapiNFT dan mencetak GOAT setara hingga NFT dibuka kembali dengan membakar GOAT. |
 | IGOAT | Antarmuka pencetakan GOAT yang digunakan GoatNFTWrapper. |
 | IGoatToken | Antarmuka pencetakan GOAT yang digunakan GoatNFTWrapper dan GoatNFT. |
 | RedeemEngine | Memverifikasi lineage dan membakar subtype MEAT saat penebusan. |
