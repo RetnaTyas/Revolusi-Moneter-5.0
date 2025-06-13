@@ -1,0 +1,21 @@
+[package]
+name = "barterengine"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cosmwasm-std = "1.3"
+cw2 = "1.1"
+serde = { version = "1.0", features = ["derive"] }
+schemars = "0.8"
+serde-json-wasm = "0.5"
+cw-storage-plus = "1.1"
+
+ratehandler = { path = "../ratehandler" }
+meat = { path = "../meat" }
+
+[dev-dependencies]
+cw-multi-test = "0.16"
