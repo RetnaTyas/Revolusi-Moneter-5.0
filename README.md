@@ -210,7 +210,8 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
  - **GOAT_WRAP_RATE** – konstanta di `SwapConfig` yang dipakai `GoatNFTWrapper` untuk menghitung jumlah GOAT dari berat NFT. Nilai default `85`.
  - **SAPI_WRAP_RATE** – konstanta di `SwapConfig` yang digunakan `SapiNFTWrapper` untuk menentukan jumlah token virtual sapi dari berat NFT. Nilai default `595`.
    `SwapConfig` kini hanya menyimpan dua konstanta ini.
- - **RateHandler LOD Parity** – Fungsi `computeBarterRate` tidak lagi memakai `SwapConfig` dan sepenuhnya menghitung rasio barter berdasarkan nilai LOD masing-masing komoditas.
+- **RateHandler LOD Parity** – Fungsi `computeBarterRate` tidak lagi memakai `SwapConfig` dan sepenuhnya menghitung rasio barter berdasarkan nilai LOD masing-masing komoditas.
+- **Set LOD via CommodityRepresentation** – `RateHandler` mendapatkan semua data LOD melalui `setCommodityRepresentation` tanpa fallback ke konfigurasi lain.
 - **rewardRate** – tingkat imbal hasil tahunan di kontrak GOAT (dalam skala
   `1e18`). Nilai ini dikombinasikan dengan `rewardInterval` untuk menghitung
   reward harian pengguna.

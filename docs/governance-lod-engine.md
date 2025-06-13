@@ -13,6 +13,8 @@ Setiap komoditas direpresentasikan sebagai:
 - **Token produk** → Produk olahan (subtype MEAT, JMC, dll)
 
 LOD per hari untuk tiap layer disimpan on-chain.
+Semua nilai tersebut kini hanya dimuat melalui fungsi `setCommodityRepresentation` pada `RateHandler`.
+Tidak ada fallback atau referensi ke `SwapConfig` maupun mapping lama lainnya.
 
 Lihat diagram *Canonical Reasoning Path* pada [architecture.md](../architecture.md#token-layer-separation--lod-engine-enforcement) bagian 4 untuk pemahaman menyeluruh mengenai pemisahan layer dan aturan swap.
 
@@ -100,6 +102,7 @@ LOD v1.1 → lod_data_v1_1_202507XX.json
 ✅ Governance mengontrol pembaruan parameter secara transparan.
 ✅ Riwayat LOD harus versi.
 ✅ Unit Test **WAJIB** lulus sebelum mengirim pembaruan on-chain.
+✅ `RateHandler` hanya mengambil data melalui `setCommodityRepresentation` tanpa fallback ke `SwapConfig`.
 
 ---
 
