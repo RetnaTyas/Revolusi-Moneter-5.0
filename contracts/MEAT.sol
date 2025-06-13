@@ -4,13 +4,14 @@ pragma solidity ^0.8.29;
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { RateHandler } from "./RateHandler.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title Token MEAT - Market-Enabled Agricultural Token
 /// @notice Kontrak pintar untuk mint MEAT menggunakan native token dan PRODUCT subtype token.
 /// @dev Reasoning Path FINAL Compliant → NO awareness of GOAT token. NO swap GOAT ↔ MEAT allowed.
 
 /// @dev Subtype parameters expect bytes32 values from ethers.encodeBytes32String
-contract MEAT is ERC20, Ownable {
+contract MEAT is ERC20, Ownable, ReentrancyGuard {
 
     // Authorized addresses allowed to mint or burn subtype balances
     mapping(address => bool) public isMinter;
@@ -137,7 +138,7 @@ contract MEAT is ERC20, Ownable {
         emit MintedWithNative(msg.sender, msg.value, meatAmount);
     }
 
-    function withdrawNative() external onlyOwner {
+    function withdrawNative() external onlyOwner nonReentrant {
         uint256 balance = address(this).balance;
         require(balance > 0, "No Native Token to withdraw");
         (bool sent, ) = payable(owner()).call{value: balance}("");
