@@ -16,8 +16,9 @@ Folder ini berisi server Express sederhana yang menyajikan statistik cache untuk
    Salin ABI JSON yang diperbarui dari `artifacts/contracts/` ke `backend/abi/` ketika Anda memodifikasi kontrak.
 3. Salin template environment dan atur variabel yang diperlukan:
    ```bash
-   cp .env.example .env
+   cp backend/.env.example backend/.env
    ```
+   (Jika Anda berada di dalam direktori `backend/`, jalankan `cp .env.example .env`.)
    Atur `RPC_URL`, `GOAT_ADDRESS`, `MEAT_ADDRESS` dan `PORT` di `backend/.env`.
 
 ## Menjalankan
