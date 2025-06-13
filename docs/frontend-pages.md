@@ -1,6 +1,6 @@
 # Halaman Frontend
 
-Dokumen ini merangkum halaman-halaman utama yang akan ada pada UI penuh dan hubungannya dengan fungsi kontrak. Halaman tersebut hanya dimock di template `frontend/`, namun alurnya mencerminkan perilaku yang diuji pada test Solidity.
+Dokumen ini merangkum halaman-halaman utama yang akan ada pada UI penuh dan hubungannya dengan fungsi kontrak. Halaman tersebut hanya dimock di template `frontend/`, namun alurnya mencerminkan perilaku yang diuji pada test Solidity. Sebuah landing page statis juga tersedia di `frontend/static/` untuk keperluan demo GitHub Pages.
 
 ## `/dashboard`
 *Gambaran*: halaman awal menampilkan statistik umum seperti total suplai dan total staking.
