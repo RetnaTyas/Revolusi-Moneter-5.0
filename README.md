@@ -454,6 +454,7 @@ Dokumen pendukung lain tersedia untuk memahami keseluruhan proyek:
 - [Frontend Pages](docs/frontend-pages.md)
 - [LOD Governance](docs/lod-governance.md)
 - [Governance Pipeline](docs/governance-lod-engine.md)
+- [White Paper](docs/whitepaper.md)
 
 ## RedeemEngine.sol — Basic Template v1
 ```solidity
