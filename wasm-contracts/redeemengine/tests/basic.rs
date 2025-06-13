@@ -1,7 +1,10 @@
-use cosmwasm_std::{coin, Addr, Empty, Uint128};
+use cosmwasm_std::{Addr, Empty, Uint128};
 use cw_multi_test::{App, ContractWrapper, Executor};
 
-use meat::msg::{ExecuteMsg as MeatExec, InstantiateMsg as MeatInstantiate};
+use meat::msg::{
+    ExecuteMsg as MeatExec,
+    InstantiateMsg as MeatInstantiate,
+};
 use meat::{execute as meat_execute, instantiate as meat_init, query as meat_query};
 use redeemengine::msg::{ExecuteMsg, InstantiateMsg, QueryMsg, RedeemConfigResponse};
 use redeemengine::{execute, instantiate, query};
@@ -21,17 +24,12 @@ fn contract_engine() -> Box<dyn cw_multi_test::Contract<Empty>> {
 
 #[test]
 fn redeem_burns_meat() {
-    let mut app = App::new(|router, _, storage| {
-        router
-            .bank
-            .init_balance(storage, &Addr::unchecked("user"), vec![coin(1000, "ucosm")])
-            .unwrap();
-    });
+    let mut app = App::default();
     let goat_id = app.store_code(contract_goat());
     let meat_id = app.store_code(contract_meat());
     let eng_id = app.store_code(contract_engine());
 
-    let goat_addr = app
+    let _goat_addr = app
         .instantiate_contract(
             goat_id,
             Addr::unchecked("owner"),
@@ -48,9 +46,7 @@ fn redeem_burns_meat() {
         .instantiate_contract(
             meat_id,
             Addr::unchecked("owner"),
-            &MeatInstantiate {
-                goat_contract: goat_addr.to_string(),
-            },
+            &MeatInstantiate {},
             &[],
             "meat",
             None,
@@ -71,10 +67,14 @@ fn redeem_burns_meat() {
         .unwrap();
 
     app.execute_contract(
-        Addr::unchecked("user"),
+        Addr::unchecked("owner"),
         meat_addr.clone(),
-        &MeatExec::MintWithNative {},
-        &[coin(1000, "ucosm")],
+        &MeatExec::MintSubtype {
+            to: "user".into(),
+            subtype: "GOATMEAT".into(),
+            amount: Uint128::new(1000),
+        },
+        &[],
     )
     .unwrap();
 
@@ -121,5 +121,5 @@ fn redeem_burns_meat() {
             },
         )
         .unwrap();
-    assert_eq!(bal.balance, Uint128::new(50));
+    assert_eq!(bal.balance, Uint128::new(950));
 }

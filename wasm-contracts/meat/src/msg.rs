@@ -3,9 +3,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct InstantiateMsg {
-    pub goat_contract: String,
-}
+pub struct InstantiateMsg {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -26,8 +24,28 @@ pub enum ExecuteMsg {
     RedeemForMeat {
         amount: Uint128,
     },
-    SetGoatAddress {
-        goat_address: String,
+    MintSubtype {
+        to: String,
+        subtype: String,
+        amount: Uint128,
+    },
+    BurnSubtype {
+        from: String,
+        subtype: String,
+        amount: Uint128,
+    },
+    SetMinter {
+        account: String,
+        status: bool,
+    },
+    SetBurner {
+        account: String,
+        status: bool,
+    },
+    SetSubtypeLineage {
+        user: String,
+        subtype: String,
+        lineage_id: u64,
     },
 }
 
@@ -38,6 +56,7 @@ pub enum QueryMsg {
     Allowance { owner: String, spender: String },
     TokenInfo {},
     Owner {},
+    BalanceOfSubtypeWithLineage { user: String, subtype: String },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -58,3 +77,8 @@ pub struct TokenInfoResponse {
     pub total_supply: Uint128,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct BalanceSubtypeWithLineageResponse {
+    pub balance: Uint128,
+    pub lineage_id: u64,
+}
