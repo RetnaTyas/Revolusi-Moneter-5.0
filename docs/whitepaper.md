@@ -38,7 +38,7 @@ Berdasarkan [goat-meat-lifecycle.md](goat-meat-lifecycle.md), setiap `GoatNFT` d
 
 1. Dibungkus menjadi GOAT untuk staking.
 2. Dibakar melalui hook yang mencetak subtype *MEAT* sesuai berat ternak.
-3. Token MEAT dapat dibarter ke produk lain dengan `BarterEngine` atau ditebus melalui `RedeemEngine`. Port CosmWasm untuk `BarterEngine` masih dalam pengerjaan.
+3. Token MEAT dapat dibarter ke produk lain dengan `BarterEngine` pada CosmWasm atau ditebus melalui `RedeemEngine`.
 
 ## Governance dan LOD Engine
 White paper ini mengikuti panduan [governance-lod-engine.md](governance-lod-engine.md). LOD Engine menetapkan paritas komoditas melalui fungsi `setCommodityRepresentation`. Setiap pembaruan diwajibkan melewati pipeline governansi dan diuji dengan Hardhat.

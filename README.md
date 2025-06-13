@@ -195,8 +195,8 @@ npx hardhat compile
 
 Folder `wasm-contracts/` menyimpan versi CosmWasm dari setiap kontrak.
 Kontrak Solidity yang **sudah** terporting meliputi paket `starter`, `meat`,
-`goatnft`, `ratehandler`, `goatnftwrapper`, dan `goatnftburnhook`.
-Implementasi `BarterEngine` serta varian `SapiNFT` masih *pending*.
+`goatnft`, `sapinft`, `ratehandler`, `goatnftwrapper`, `sapinftwrapper`,
+`goatnftburnhook`, `sapinftburnhook`, dan `barterengine`.
 Seluruh pesan
 CosmWasm tetap mengikuti fungsi di Solidity namun ada beberapa perbedaan tak
 terelakkan:
