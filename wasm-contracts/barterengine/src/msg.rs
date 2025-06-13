@@ -10,20 +10,29 @@ pub struct InstantiateMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
-    SetRateHandler { rate_handler: String },
-    SetMeat { meat: String },
+    SetRateHandler {
+        rate_handler: String,
+    },
+    SetMeat {
+        meat: String,
+    },
     BarterProductToProduct {
         from_subtype: String,
         to_subtype: String,
         from_amount: u128,
     },
-    EmergencyWithdraw { subtype: String },
+    EmergencyWithdrawMEATSubtype {
+        subtype: String,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
-    GetRate { from_subtype: String, to_subtype: String },
+    GetRate {
+        from_subtype: String,
+        to_subtype: String,
+    },
     Owner {},
 }
 
