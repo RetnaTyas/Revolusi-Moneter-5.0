@@ -38,6 +38,23 @@ describe("MEAT core functions", function () {
     expect(await ethers.provider.getBalance(meat.target)).to.equal(0n);
   });
 
+  it("prevents reentrancy during withdrawNative", async function () {
+    const deposit = ethers.parseEther("1");
+    await user.sendTransaction({ to: meat.target, value: deposit });
+
+    const Reentrant = await ethers.getContractFactory("ReentrantWithdrawer");
+    const attacker = await Reentrant.deploy(meat.target);
+    await attacker.waitForDeployment();
+
+    await meat.transferOwnership(attacker.target);
+
+    await expect(attacker.attackWithdraw()).to.be.revertedWith(
+      "Native transfer failed"
+    );
+
+    expect(await ethers.provider.getBalance(meat.target)).to.equal(deposit);
+  });
+
   it("changeDepositRate updates rate and affects minting", async function () {
     expect(await meat.DepositRate()).to.equal(100n);
 
