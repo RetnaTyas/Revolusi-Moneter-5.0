@@ -322,7 +322,7 @@ Struktur dan hubungan antar kontrak:
 - `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Hanya pertukaran PRODUCT↔PRODUCT yang diperbolehkan dan token GOAT **tidak** dapat ditukar. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
 -   Pengguna harus men-*approve* `BarterEngine` agar kontrak dapat membakar subtype miliknya.
 -   Fungsi `getCurrentBarterRate(fromSubtype, toSubtype)` menyediakan rasio swap terkini tanpa mengeksekusi transaksi.
--   Fungsi `emergencyWithdrawMEATSubtype` memungkinkan pemilik menarik **seluruh** saldo subtype yang tersangkut di dalam kontrak secara aman melalui skema `burn+mint`.
+-   Fungsi `emergencyWithdrawMEATSubtype` memungkinkan pemilik menarik **seluruh** saldo subtype yang tersangkut di dalam kontrak secara aman melalui skema `burn+mint`. Event `MeatSubtypeWithdrawn` mencatat jumlah yang dipindahkan.
 - `RedeemEngine` (`contracts/RedeemEngine.sol`) memproses penebusan MEAT dan memverifikasi lineage melalui `balanceOfSubtypeWithLineage()`. Tiap subtype memiliki `RedeemConfig` yang berisi berat (gram) per token dan status aktif.
 -   Sebelum menebus, berikan *approval* ke `RedeemEngine` untuk jumlah yang akan dibakar.
 - `GoatNFT` (`contracts/GoatNFT.sol`) menyimpan identitas kambing sebagai NFT.
@@ -343,9 +343,9 @@ Saat dieksekusi, kontrak akan:
 
 1. Membakar seluruh saldo subtype milik kontrak.
 2. Mencetak kembali jumlah yang sama ke alamat pemilik.
+3. Memancarkan `MeatSubtypeWithdrawn` sebagai catatan resmi.
 
-Skema *burn + mint* memastikan tidak ada perubahan pasokan, namun token yang
-terjebak dapat dipindahkan ke pemilik untuk diproses manual.
+Skema *burn + mint* memastikan tidak ada perubahan pasokan. Alur ini sengaja membakar terlebih dulu baru mencetak ke pemilik guna menghindari reentrancy, sehingga token yang tersangkut dapat diproses manual dengan aman.
 
 ### Contoh Penggunaan
 
@@ -478,6 +478,12 @@ contract RedeemEngine is Ownable {
         uint256 grams
     );
 
+    event MeatSubtypeWithdrawn(
+        address indexed to,
+        bytes32 indexed subtype,
+        uint256 amount
+    );
+
     constructor(address meatAddress) Ownable(msg.sender) {
         require(meatAddress != address(0), "Invalid MEAT address");
         meat = MEAT(payable(meatAddress));
@@ -503,6 +509,18 @@ contract RedeemEngine is Ownable {
 
         uint256 grams = (amount * cfg.gramsPerTokenUnit) / 1e18;
         emit RedeemExecuted(msg.sender, subtype, lineageID, amount, grams);
+    }
+
+    function emergencyWithdrawMEATSubtype(bytes32 subtype) external onlyOwner {
+        require(subtype != bytes32(0), "Invalid subtype");
+
+        uint256 balance = meat.getBalanceOfSubtype(address(this), subtype);
+        require(balance > 0, "No subtype balance");
+
+        meat.burnSubtype(address(this), subtype, balance);
+        meat.mintSubtype(owner(), subtype, balance);
+
+        emit MeatSubtypeWithdrawn(owner(), subtype, balance);
     }
 }
 ```
