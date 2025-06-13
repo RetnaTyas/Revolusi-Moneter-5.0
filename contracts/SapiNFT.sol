@@ -84,17 +84,17 @@ contract SapiNFT is ERC721Burnable {
 
         bytes32 hash = keccak256(bytes(sapiMetadata[tokenId].nfcId));
 
-        if (address(burnHook) != address(0)) {
-            burnHook.onBurn(tokenOwner, currentWeight);
-        }
-
-        emit SapiBurned(tokenId, tokenOwner, currentWeight);
-
         super.burn(tokenId);
         delete sapiValue[tokenId];
         delete sapiMetadata[tokenId];
         delete lastWeightUpdateAt[tokenId];
         delete nfcIdToTokenId[hash];
+
+        if (address(burnHook) != address(0)) {
+            burnHook.onBurn(tokenOwner, currentWeight);
+        }
+
+        emit SapiBurned(tokenId, tokenOwner, currentWeight);
     }
 
     function getSapiData(uint256 tokenId) external view returns (SapiData memory) {
