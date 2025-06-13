@@ -76,13 +76,13 @@ wasmd tx wasm instantiate <code_id_sapi_wrapper> '{"nft_contract":"<sapi_nft_add
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 
 # contoh instansiasi burn hook kambing
-wasmd tx wasm instantiate <code_id_hook> '{"nft_contract":"<nft_addr>"}' \
+wasmd tx wasm instantiate <code_id_hook> '{"nft_contract":"<nft_addr>","meat_contract":"<meat_addr>"}' \
   --from wallet --label "goat-burnhook" \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 
 # contoh instansiasi burn hook sapi
-wasmd tx wasm instantiate <code_id_sapi_hook> '{"nft_contract":"<sapi_nft_addr>"}' \
+wasmd tx wasm instantiate <code_id_sapi_hook> '{"nft_contract":"<sapi_nft_addr>","meat_contract":"<meat_addr>"}' \
   --from wallet --label "sapi-burnhook" \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network

@@ -16,7 +16,10 @@ fn owner_query_works() {
         .instantiate_contract(
             hook_id,
             Addr::unchecked("owner"),
-            &InstantiateMsg { nft_contract: "nft".into() },
+            &InstantiateMsg {
+                nft_contract: "nft".into(),
+                meat_contract: "meat".into(),
+            },
             &[],
             "hook",
             None,
