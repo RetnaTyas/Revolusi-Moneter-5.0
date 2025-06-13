@@ -1,24 +1,63 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "Revolusi-Moneter-5.0" ]
+  pull_request:
+    branches: [ "Revolusi-Moneter-5.0" ]
 
 jobs:
-  build:
+  hardhat-tests:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: npm install
-      - run: yes | npx hardhat test
+
+      - name: Cache NPM dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: npm ci
+
+      - name: Run Hardhat tests
+        run: npx hardhat test
+
+  wasm-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
       - uses: actions/setup-rust@v1
         with:
           rust-version: stable
+
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Add wasm target
+        run: rustup target add wasm32-unknown-unknown
+
       - name: Run CosmWasm tests
         run: |
           for dir in wasm-contracts/*; do
             if [ -f "$dir/Cargo.toml" ]; then
-              (cd "$dir" && cargo test)
+              echo "Testing $dir..."
+              (cd "$dir" && cargo build && cargo test)
             fi
           done
-
