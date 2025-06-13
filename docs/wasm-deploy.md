@@ -3,7 +3,7 @@
 Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direktori `wasm-contracts/`:
 
 - `starter` – token GOAT dengan logika staking
-- `meat` – token MEAT yang mendukung pencetakan menggunakan native token dan perintah `redeem_for_meat`. Fitur swap GOAT↔MEAT dan konfigurasi `ratehandler` tidak disertakan.
+- `meat` – token MEAT. Pencetakan dilakukan via pesan `mint_subtype` oleh kontrak terotorisasi dan penebusan menggunakan `redeem` pada `RedeemEngine`.
 - `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
 - `ratehandler` – utilitas kecil yang menyimpan rasio konversi terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
 - `goatnftwrapper` – membungkus GoatNFT untuk mencetak GOAT, NFT dikunci hingga pengguna melakukan `unwrap`
@@ -11,7 +11,7 @@ Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direk
 
 Paket-paket ini mencerminkan kontrak Solidity di `contracts/`. Sebagian besar fungsi memiliki pesan execute yang setara, namun terdapat beberapa perbedaan penting:
 
-- **MEAT** tidak dapat mencetak otomatis ketika menerima token native tanpa pesan. Pengguna **harus** memanggil `mint_with_native` dan menyertakan dana.
+- **MEAT** tidak memiliki fungsi auto-mint. Token dicetak melalui pesan `mint_subtype` yang dipanggil kontrak lain.
 - **starter** menerapkan staking GOAT dan penebusan NFT sama seperti `GOAT.sol`, hanya saja event menjadi atribut log.
 - **goatnft** menyimpan metadata kambing dan berat mirip dengan `GoatNFT.sol` dengan sedikit perbedaan penamaan. Pemilik dapat memanggil `update_weight` untuk memperbarui berat. Pembakaran membutuhkan pembaruan terakhir dalam rentang `WEIGHT_UPDATE_VALIDITY` (7 hari).
 
@@ -71,20 +71,8 @@ wasmd tx wasm instantiate <code_id_hook> '{"nft_contract":"<nft_addr>"}' \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
 
-### Mencetak MEAT
 
-Panggil entri `mint_with_native` sambil mengirim koin native untuk mencetak MEAT. Contoh:
-
-```bash
-wasmd tx wasm execute <meat_address> '{"mint_with_native":{}}' \
-  --amount 1000000uatom --from wallet \
-  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
-  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
-```
-
-Mengirim koin tanpa pesan ini **tidak** akan mencetak token; koin hanya tersimpan di kontrak sampai ditarik pemilik.
-
-Setelah `goatnft` dideploy, pemilik dapat langsung memanggil `burn` pada kontrak NFT untuk menandai penyembelihan. Fungsi ini akan memicu `GoatNFTBurnHook` yang mencetak `GOATMEAT` sesuai berat terakhir.
+Setelah `goatnft` dideploy, pemilik dapat langsung memanggil `burn` pada kontrak NFT untuk menandai penyembelihan. Fungsi ini memicu `GoatNFTBurnHook` yang menjalankan `mint_subtype` pada kontrak MEAT dan mencetak `GOATMEAT` sesuai berat terakhir.
 
 ```bash
 wasmd tx wasm execute <nft_address> '{"burn":{"token_id":1}}' \

@@ -9,7 +9,7 @@ flowchart TD
   Hook[BurnHook]
   RateHandler[RateHandler]
 
-  UserWallet -- "native token" --> MEAT
+  UserWallet -- "approval" --> MEAT
   GoatNFT -- burn --> Hook
   Hook --> MEAT
   MEAT -->|withdraw| UserWallet
@@ -17,7 +17,7 @@ flowchart TD
   RateHandler --> MEAT
 ```
 
-* **MEAT** berperan sebagai gerbang: menerima koin native, mencetak MEAT, dan mengontrol rasio deposit. Pemilik dapat menarik saldo native yang terkumpul.
+* **MEAT** berperan sebagai gerbang: token dicetak melalui `mintSubtype` oleh kontrak terotorisasi.
 * **GOAT** menerima suplai dari GoatNFTWrapper yang mencetak token saat NFT dibungkus. Reward serta parameter konfigurasi dapat diatur pemilik.
 * **FailingGOAT** hanya untuk pengujian; menerapkan antarmuka yang sama namun memungkinkan simulasi kegagalan transfer.
 * **IGOAT** mendefinisikan fungsi `mintTo` yang memungkinkan GoatNFTWrapper mencetak GOAT.
@@ -33,7 +33,7 @@ Kontrak GOAT dan MEAT dimiliki alamat yang sama. Tabel di bawah merangkum kontra
 | Kontrak | Deskripsi |
 |---------|-----------|
 | GOAT | Token ERC20 untuk staking yang dicetak oleh GoatNFTWrapper saat NFT dibungkus. |
-| MEAT | Token ERC20 yang dicetak dengan deposit native. |
+| MEAT | Token ERC20 yang dicetak melalui `mintSubtype` oleh kontrak terotorisasi. |
 | GoatNFT | Identitas kambing ERC721 yang menyimpan metadata di `goatMetadata` sebagai `GoatData` (`nfcId`, `breed`, `birthYear`, `weight`, `mintedAt`). Berat dapat diperbarui via `updateWeight` dan harus segar saat dibakar. Fungsi `burn` memicu `GoatNFTBurnHook` serta event `GoatBurned`. |
 | GoatNFTBurnHook | Kontrak hook yang mencetak `GOATMEAT` setiap kali GoatNFT dibakar. |
 | GoatNFTWrapper | Mengunci GoatNFT dan mencetak GOAT setara hingga NFT dibuka kembali dengan membakar GOAT. |

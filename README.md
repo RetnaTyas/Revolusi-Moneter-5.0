@@ -3,18 +3,18 @@
 Repositori ini berisi dua token ERC20:
 
 - **GOAT** (Guardian of Agricultural Trade) mendukung proses staking. Token GOAT dicetak saat `GoatNFT` dikunci melalui `GoatNFTWrapper`. Pemegang dapat melakukan staking guna memperoleh imbal hasil tahunan tinggi.
-- **MEAT** (Market-Enabled Agricultural Token) memungkinkan pengguna mencetak token dengan mata uang native dan menjadi gerbang utama bagi ekosistem.
+- **MEAT** (Market-Enabled Agricultural Token) dicetak hanya melalui `mintSubtype()` oleh kontrak terotorisasi dan menjadi gerbang utama bagi ekosistem.
 
 ## Cara Kerja Token
 
 Berikut gambaran umum alur penggunaan kedua token:
 
-1. **Mint MEAT** – MEAT dapat dicetak dengan mengirim token native ke kontrak `MEAT` yang diproses otomatis oleh `receive()` sesuai `DepositRate`, atau melalui `mintSubtype` oleh minter terotorisasi seperti hook pembakaran NFT. Saat kontrak dideploy, suplai awal juga dicetak ke alamat pemilik. Versi CosmWasm menggunakan pesan `mint_with_native` untuk cara pertama.
-   *MEAT dapat dicetak lewat deposit token native maupun `mintSubtype` oleh kontrak terotorisasi.*
+1. **Mint MEAT** – MEAT hanya dicetak melalui `mintSubtype()` oleh kontrak yang telah diberi otorisasi seperti hook pembakaran NFT. Saat kontrak dideploy, suplai awal dikirim ke alamat pemilik.
+   *MEAT hanya dicetak oleh kontrak terotorisasi.*
 2. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
 3. **Claim atau Compound** – Setelah melewati `minClaimInterval`, pengguna dapat mencairkan reward melalui `claimReward` atau melakukan `compoundReward` agar hasilnya otomatis ditambahkan ke saldo staking.
-4. **Redeem MEAT** – Panggil `redeemForMeat(amount)` untuk membakar token MEAT dan men-trigger distribusi daging secara off-chain. Fungsi ini mengurangi saldo MEAT dan memancarkan event `MeatRedeemed`.
+4. **Redeem MEAT** – Panggil `RedeemEngine.redeem(subtype, amount)` untuk membakar MEAT setelah verifikasi lineage. Event `RedeemExecuted` mencatat jumlah dan asal token.
 5. **Subtype Registry** – Kontrak MEAT menyimpan saldo per subtype (contoh `GOATMEAT`, `DUCKMEAT`). Hak khusus `mintSubtype` dan `burnSubtype` dapat diberikan ke kontrak lain seperti hook pembakaran NFT untuk mencatat produksi daging spesifik.
 Subtypes disimpan sebagai nilai `bytes32` hasil `ethers.encodeBytes32String` dari nama produk. Contoh:
 `bytes32 goatMeatSubtype = ethers.encodeBytes32String("GOATMEAT");`
@@ -54,11 +54,10 @@ flowchart LR
 - Membakar `GoatNFT` menghasilkan GOATMEAT sesuai bobot ternak.
 - GOATMEAT dapat dipertukarkan dengan token produk lain melalui `RateHandler` (hanya untuk barter).
 - Pengguna harus memberikan *approval* pada `BarterEngine` sebelum menukar subtype melalui `barterProductToProduct`.
-- Pemegang MEAT menukarkan tokennya lewat `redeemForMeat` untuk menerima daging fisik.
-  Jumlah daging dihitung dari konfigurasi `RedeemConfig.gramsPerTokenUnit`.
-  Nilai bawaan umumnya menyetarakan **1 MEAT (1e18 unit) dengan 1 kg**, namun
-  angka ini dapat diubah sesuai kebutuhan. Sebelum memanggil `redeem`, berikan
-  *approval* kepada `RedeemEngine` untuk jumlah yang akan dibakar.
+- Pemegang MEAT menukarkan tokennya dengan memanggil `RedeemEngine.redeem(subtype, amount)`.
+  Fungsi ini memverifikasi `lineageID` melalui `balanceOfSubtypeWithLineage` dan
+  menghitung berat berdasarkan `RedeemConfig.gramsPerTokenUnit`.
+  Sebelum memanggil `redeem`, berikan *approval* kepada `RedeemEngine` untuk jumlah yang akan dibakar.
 
 ### MEAT.sol — Subtype & Lineage Tracking
 
@@ -184,12 +183,7 @@ serta `goatnftburnhook` kini berdiri sendiri dan telah disertakan di
 CosmWasm tetap mengikuti fungsi di Solidity namun ada beberapa perbedaan tak
 terelakkan:
 
- - **MEAT**: Pada `MEAT.sol` pengguna cukup mengirim native token dan fungsi
-   `receive()` otomatis mencetak token. CosmWasm tidak menyediakan mekanisme
-   auto‑mint saat menerima dana tanpa pesan sehingga pengguna **harus** memanggil
-   `mint_with_native` sambil menyertakan koin. Versi CosmWasm hanya menyediakan
-   pesan `redeem_for_meat` dan tidak memiliki fitur swap GOAT↔MEAT maupun
-   konfigurasi `ratehandler`.
+- **MEAT**: Baik versi Solidity maupun CosmWasm hanya mencetak token melalui `mintSubtype()` yang dipanggil kontrak lain. Fitur auto-mint dengan token native telah dihapus.
 - **GOAT**: Kontrak `starter` mereplikasi logika staking, klaim, kompaun dan
   pembakaran NFT. Event Solidity diterjemahkan menjadi atribut di response
   CosmWasm, sedangkan cara perhitungan reward sama persis.
@@ -206,9 +200,6 @@ agar perilaku ekonomi konsisten di EVM maupun Cosmos.
  - **SAPI_WRAP_RATE** – konstanta di `SwapConfig` yang digunakan `SapiNFTWrapper` untuk menentukan jumlah token virtual sapi dari berat NFT. Nilai default `595`.
    `SwapConfig` kini hanya menyimpan dua konstanta ini.
  - **RateHandler LOD Parity** – Fungsi `computeBarterRate` tidak lagi memakai `SwapConfig` dan sepenuhnya menghitung rasio barter berdasarkan nilai LOD masing-masing komoditas.
-- **DepositRate** – rasio pencetakan MEAT ketika menerima native token. Nilai
-  dihitung per `DEPOSIT_DIVISOR` (1000) unit native token sehingga `100` berarti
-  100 MEAT untuk 1000 unit native (0.1 MEAT per 1 unit).
 - **rewardRate** – tingkat imbal hasil tahunan di kontrak GOAT (dalam skala
   `1e18`). Nilai ini dikombinasikan dengan `rewardInterval` untuk menghitung
   reward harian pengguna.
@@ -247,10 +238,6 @@ di [docs/lod-governance.md](docs/lod-governance.md).
 - `OwnershipTransferred(oldOwner, newOwner)` dicatat ketika kepemilikan RateHandler dialihkan ke alamat baru.
 
 MEAT juga memunculkan event utama berikut:
-
-- `MintedWithNative(user, nativeReceived, meatMinted)` dicatat ketika kontrak
-  menerima native token dan mencetak MEAT. Pada versi CosmWasm event ini
-  dipicu saat `mint_with_native` dipanggil.
 - `SubtypeMinted(to, subtype, amount)` dicatat ketika minter terotorisasi
   mencetak MEAT untuk subtype tertentu.
 - `SubtypeBurned(from, subtype, amount)` dicatat ketika burner terotorisasi
