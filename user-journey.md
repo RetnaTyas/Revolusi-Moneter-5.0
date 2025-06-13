@@ -3,7 +3,7 @@
 Dokumen ini menggambarkan pengalaman umum bagi peserta baru di ekosistem GOAT/MEAT.
 
 1. **Mendapatkan MEAT**
-   * Pengguna membuka aplikasi web, menghubungkan dompet, lalu mengirim sejumlah kecil token native ke kontrak MEAT. Kontrak akan mencetak MEAT sesuai `DepositRate` saat ini.
+   * Pengguna memperoleh MEAT ketika kontrak terotorisasi memanggil `mintSubtype` setelah aksi tertentu, misalnya pembakaran NFT melalui hook.
 2. **Staking untuk Reward**
    * Pengguna membungkus GoatNFT melalui `GoatNFTWrapper` untuk memperoleh GOAT.
    * GOAT tersebut kemudian di-stake dan UI menampilkan hitungan mundur hingga klaim diperbolehkan (`minClaimInterval`).

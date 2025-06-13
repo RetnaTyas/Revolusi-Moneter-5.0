@@ -7,11 +7,10 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
 - Sebelum kambing disembelih, token dapat **dibakar** dengan berat terbaru yang mencetak `GOATMEAT` sebesar 60% dari berat hidup melalui `GoatNFTBurnHook`.
 - Pemilik hook dapat memperbarui alamat `GoatNFT` maupun `MEAT` melalui `setNFTAddress` dan `setMEATAddress` bila diperlukan.
 - GOAT diperoleh dengan mengunci NFT pada `GoatNFTWrapper` dan digunakan untuk staking.
-- MEAT pada akhirnya dibakar menggunakan `redeemForMeat` untuk menebus daging fisik.
+- MEAT pada akhirnya dibakar melalui `RedeemEngine.redeem` untuk menebus daging fisik.
 
 1. **Mencetak MEAT**
-   * Pengguna mengirim mata uang native ke kontrak MEAT. Fungsi `receive()` mencetak MEAT ke pengirim berdasarkan `DepositRate`, dihitung per 1000 unit (default `100`, artinya 100 MEAT per 1000 native).
-   * Kontrak memancarkan `MintedWithNative(user, nativeReceived, meatMinted)` yang mencatat siapa mencetak dan berapa jumlah token native diterima.
+   * Token hanya dicetak melalui `mintSubtype` oleh kontrak terotorisasi seperti `GoatNFTBurnHook`.
 2. **GoatNFT**
    * [GoatNFT](contracts/GoatNFT.sol) mewakili kambing hidup dan menyimpan beratnya di `goatValue`.
    * Pemilik dapat memperbarui berat kapan saja (event `WeightUpdated`). Berat memakai satu desimal (`WEIGHT_DECIMALS = 1`) sehingga `425` berarti **42.5 kg**.
@@ -28,12 +27,11 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
    * Subtype seperti `GOATMEAT` harus di-encode ke `bytes32` misal `ethers.encodeBytes32String("GOATMEAT")`.
    * MEAT selalu mengharapkan parameter subtype berupa `bytes32`; ubah ID numerik ke string sebelum di-encode. contoh: `bytes32 subtypeFromId = ethers.encodeBytes32String("99");`
 6. **Menebus MEAT**
-   * Pemegang membakar MEAT mereka melalui `redeemForMeat(amount)` yang memicu `MeatRedeemed` untuk pemrosesan off-chain.
-     Berat daging dihitung memakai `RedeemConfig.gramsPerTokenUnit`.
-     Konfigurasi default sering menyamakan **1 MEAT (1e18 unit) dengan 1 kg**,
-     namun nilainya dapat diatur ulang. Diagram singkat jalur burn dan redemption
-     dapat dilihat pada bagian [Burn & Redeem Flow](README.md#burn--redeem-flow)
-     di README.
+   * Panggil `RedeemEngine.redeem(subtype, amount)` untuk membakar MEAT setelah verifikasi lineage.
+     Berat daging dihitung memakai `RedeemConfig.gramsPerTokenUnit` dan hasilnya
+     dicatat dalam event `RedeemExecuted`.
+     Konfigurasi default menyetarakan **1 MEAT (1e18 unit) dengan 1 kg**, tetapi
+     nilainya dapat diubah. Lihat diagram [Burn & Redeem Flow](README.md#burn--redeem-flow).
    * Pengguna harus men-*approve* `RedeemEngine` sebelum memanggil `redeem`.
 
 Siklus ini memastikan setiap tahap partisipasi didukung oleh fungsi kontrak yang eksplisit dan alur token yang transparan.
