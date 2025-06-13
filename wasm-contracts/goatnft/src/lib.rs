@@ -1,12 +1,13 @@
 use base64::{engine::general_purpose, Engine as _};
 use cosmwasm_std::{
     entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError,
-    StdResult, Uint128,
+    StdResult, Uint128, WasmMsg,
 };
 use cw2::set_contract_version;
 use serde_json_wasm;
 
 use crate::msg::{ExecuteMsg, GoatDataResponse, GoatValueResponse, InstantiateMsg, QueryMsg};
+use goatnftburnhook::msg as hook_msg;
 use crate::state::*;
 
 pub mod msg;
@@ -24,6 +25,7 @@ pub fn instantiate(
 ) -> StdResult<Response> {
     OWNER.save(deps.storage, &info.sender)?;
     NEXT_ID.save(deps.storage, &0u64)?;
+    BURN_HOOK.save(deps.storage, &None)?;
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::default())
 }
@@ -62,6 +64,7 @@ fn handle_execute(
             token_id,
             new_weight,
         } => execute_update_weight(deps, env, info, token_id, new_weight),
+        ExecuteMsg::SetBurnHook { hook } => execute_set_burn_hook(deps, info, hook),
     }
 }
 
@@ -136,7 +139,19 @@ fn execute_burn(
     APPROVALS.remove(deps.storage, id);
     LAST_WEIGHT_UPDATE.remove(deps.storage, id);
     NFC_TO_TOKEN.remove(deps.storage, data.nfc_id.as_bytes());
-    Ok(Response::new())
+    let mut resp = Response::new();
+    if let Some(hook) = BURN_HOOK.load(deps.storage)? {
+        let msg = WasmMsg::Execute {
+            contract_addr: hook.to_string(),
+            msg: to_json_binary(&hook_msg::ExecuteMsg::OnBurn {
+                to: owner.to_string(),
+                weight: data.weight,
+            })?,
+            funds: vec![],
+        };
+        resp = resp.add_message(msg);
+    }
+    Ok(resp)
 }
 
 fn execute_approve(
@@ -231,6 +246,24 @@ fn execute_update_weight(
     GOAT_METADATA.save(deps.storage, id, &data)?;
     LAST_WEIGHT_UPDATE.save(deps.storage, id, &env.block.time.seconds())?;
     Ok(Response::new())
+}
+
+fn execute_set_burn_hook(
+    mut deps: DepsMut,
+    info: MessageInfo,
+    hook: String,
+) -> StdResult<Response> {
+    only_owner(deps.branch(), &info)?;
+    let addr = deps.api.addr_validate(&hook)?;
+    let old = BURN_HOOK.load(deps.storage)?;
+    BURN_HOOK.save(deps.storage, &Some(addr.clone()))?;
+    Ok(Response::new()
+        .add_attribute("action", "burn_hook_updated")
+        .add_attribute(
+            "old",
+            old.map(|a| a.into_string()).unwrap_or_else(|| "none".into()),
+        )
+        .add_attribute("new", addr))
 }
 
 fn handle_query(deps: Deps, q: QueryMsg) -> StdResult<Binary> {
