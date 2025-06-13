@@ -8,19 +8,19 @@ async function main() {
   const RateHandler = await ethers.getContractAt("RateHandler", rateHandlerAddress);
 
   // Example commodity data, adapt from lod_data.json
-  const commodityId = ethers.utils.formatBytes32String("KAMBING");
+  const commodityId = ethers.encodeBytes32String("KAMBING");
 
   const data = {
     nftAddress: "0xGoatNFTAddress", // set real NFT address
     tokenVirtualAddress: "0xGOATTokenAddress", // GOAT token
     tokenProductAddress: "0xMEATTokenAddress", // MEAT token (GOATMEAT subtype)
-    tokenProductSubtype: ethers.utils.formatBytes32String("GOATMEAT"),
+    tokenProductSubtype: ethers.encodeBytes32String("GOATMEAT"),
     isNftActive: true,
     isTokenVirtualActive: true,
     isTokenProductActive: true,
-    lodPerDayNft: ethers.utils.parseUnits("44.52", 18),
-    lodPerDayVirtual: ethers.utils.parseUnits("44.52", 18),
-    lodPerDayProduct: ethers.utils.parseUnits("44.52", 18),
+    lodPerDayNft: ethers.parseUnits("44.52", 18),
+    lodPerDayVirtual: ethers.parseUnits("44.52", 18),
+    lodPerDayProduct: ethers.parseUnits("44.52", 18),
     protein_g_per_kg: 270,
     fat_g_per_kg: 200,
     micronutrient_index_x1000: 900,
