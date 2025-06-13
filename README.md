@@ -65,6 +65,7 @@ Semua subtype direpresentasikan sebagai `bytes32`. MEAT selalu menerima paramete
 `bytes32 subtypeFromId = ethers.encodeBytes32String(String(123));`
 
 Kontrak MEAT kini menyimpan metadata `lineageID` untuk setiap kombinasi pengguna dan subtype. Pemilik kontrak dapat menetapkan nilai ini melalui `setSubtypeLineage(user, subtype, lineageID)`. Untuk membaca saldo sekaligus asal-usul token, gunakan `balanceOfSubtypeWithLineage(user, subtype)` yang mengembalikan `(balance, lineageID)`. Fungsi ini dipakai `BarterEngine` maupun `RedeemEngine` guna memverifikasi token sebelum dipertukarkan atau ditebus.
+Lineage ID otomatis diatur saat hook memanggil `mintSubtype()` sehingga mint manual tanpa lineage tidak diperbolehkan.
 
 ### Token Lifecycle Flow
 
@@ -304,7 +305,7 @@ Struktur dan hubungan antar kontrak:
 - `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan fungsi staking, klaim, kompaun, serta konfigurasi reward. Token hanya dicetak melalui `GoatNFTWrapper` saat NFT dibungkus.
 - `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
   untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterEngine`.
-- `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
+- `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Hanya pertukaran PRODUCT↔PRODUCT yang diperbolehkan dan token GOAT **tidak** dapat ditukar. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
 -   Pengguna harus men-*approve* `BarterEngine` agar kontrak dapat membakar subtype miliknya.
 -   Fungsi `getCurrentBarterRate(fromSubtype, toSubtype)` menyediakan rasio swap terkini tanpa mengeksekusi transaksi.
 -   Fungsi `emergencyWithdrawMEATSubtype` memungkinkan pemilik menarik **seluruh** saldo subtype yang tersangkut di dalam kontrak secara aman melalui skema `burn+mint`.
