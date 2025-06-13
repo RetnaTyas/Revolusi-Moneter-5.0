@@ -16,3 +16,8 @@ cw-storage-plus = "1.1"
 
 starter = { path = "../starter" }
 goatnft = { path = "../goatnft" }
+
+[dev-dependencies]
+cw-multi-test = "0.16"
+starter = { path = "../starter" }
+goatnft = { path = "../goatnft" }
