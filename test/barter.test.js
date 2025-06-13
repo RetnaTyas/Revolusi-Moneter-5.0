@@ -131,4 +131,16 @@ describe("BarterEngine", function () {
     const current = await barter.getCurrentBarterRate(SUBTYPE_A, SUBTYPE_B);
     expect(current).to.equal(rate);
   });
+
+  it("owner can emergency withdraw subtype", async function () {
+    const stuck = ethers.parseEther("2");
+    await meat.mintSubtype(barter.target, SUBTYPE_A, stuck);
+
+    await expect(barter.emergencyWithdrawMEATSubtype(SUBTYPE_A))
+      .to.emit(barter, "MeatSubtypeWithdrawn")
+      .withArgs(owner.address, SUBTYPE_A, stuck);
+
+    expect(await meat.getBalanceOfSubtype(barter.target, SUBTYPE_A)).to.equal(0n);
+    expect(await meat.getBalanceOfSubtype(owner.address, SUBTYPE_A)).to.equal(stuck);
+  });
 });

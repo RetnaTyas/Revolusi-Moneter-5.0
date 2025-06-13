@@ -25,6 +25,12 @@ contract RedeemEngine is Ownable {
         uint256 grams
     );
 
+    event MeatSubtypeWithdrawn(
+        address indexed to,
+        bytes32 indexed subtype,
+        uint256 amount
+    );
+
     constructor(address meatAddress) Ownable(msg.sender) {
         require(meatAddress != address(0), "Invalid MEAT address");
         meat = MEAT(payable(meatAddress));
@@ -56,5 +62,22 @@ contract RedeemEngine is Ownable {
 
         uint256 grams = (amount * cfg.gramsPerTokenUnit) / 1e18;
         emit RedeemExecuted(msg.sender, subtype, lineageID, amount, grams);
+    }
+
+    /// @notice Owner emergency withdraw ALL balance of MEAT subtype (used in RedeemEngine or Barter)
+    /// @param subtype The MEAT subtype to withdraw
+    function emergencyWithdrawMEATSubtype(bytes32 subtype) external onlyOwner {
+        require(subtype != bytes32(0), "Invalid subtype");
+
+        uint256 balance = meat.getBalanceOfSubtype(address(this), subtype);
+        require(balance > 0, "No subtype balance");
+
+        // Burn from this contract
+        meat.burnSubtype(address(this), subtype, balance);
+
+        // Mint to owner → avoid reentrancy problems
+        meat.mintSubtype(owner(), subtype, balance);
+
+        emit MeatSubtypeWithdrawn(owner(), subtype, balance);
     }
 }

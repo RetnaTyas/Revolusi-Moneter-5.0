@@ -104,38 +104,21 @@ contract BarterEngine {
             );
     }
 
-    /// @notice Emergency withdraw stuck MEAT subtype from this contract
-    /// @param subtype Subtype to withdraw (bytes32 encoded string)
-    /// @param amount Amount of subtype to withdraw
-    /// @param useTransfer If true, call transferSubtype; otherwise burn+mint
-    function emergencyWithdrawMEATSubtype(
-        bytes32 subtype,
-        uint256 amount,
-        bool useTransfer
-    ) external onlyOwner {
+    /// @notice Owner emergency withdraw ALL balance of MEAT subtype (used in RedeemEngine or Barter)
+    /// @param subtype The MEAT subtype to withdraw
+    function emergencyWithdrawMEATSubtype(bytes32 subtype) external onlyOwner {
         require(subtype != bytes32(0), "Invalid subtype");
-        require(amount > 0, "Amount must be > 0");
 
         uint256 balance = meatToken.getBalanceOfSubtype(address(this), subtype);
-        require(balance >= amount, "Insufficient subtype balance");
+        require(balance > 0, "No subtype balance");
 
-        if (useTransfer) {
-            (bool success, ) = address(meatToken).call(
-                abi.encodeWithSignature(
-                    "transferSubtype(address,address,bytes32,uint256)",
-                    address(this),
-                    _owner,
-                    subtype,
-                    amount
-                )
-            );
-            require(success, "transferSubtype failed");
-        } else {
-            meatToken.burnSubtype(address(this), subtype, amount);
-            meatToken.mintSubtype(_owner, subtype, amount);
-        }
+        // Burn from this contract
+        meatToken.burnSubtype(address(this), subtype, balance);
 
-        emit MeatSubtypeWithdrawn(_owner, subtype, amount);
+        // Mint to owner → avoid reentrancy problems
+        meatToken.mintSubtype(_owner, subtype, balance);
+
+        emit MeatSubtypeWithdrawn(_owner, subtype, balance);
     }
 
     /// @notice Returns owner

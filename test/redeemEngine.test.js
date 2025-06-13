@@ -18,6 +18,7 @@ describe("RedeemEngine", function () {
     await engine.waitForDeployment();
 
     await meat.setMinter(owner.address, true);
+    await meat.setMinter(engine.target, true);
     await meat.setBurner(engine.target, true);
 
     await engine.setRedeemConfig(SUBTYPE, GRAMS_PER_TOKEN, true);
@@ -84,6 +85,20 @@ describe("RedeemEngine", function () {
     const cfg = await engine.redeemConfigs(SUBTYPE);
     expect(cfg.gramsPerTokenUnit).to.equal(500n);
     expect(cfg.isActive).to.equal(true);
+  });
+
+  it("owner can emergency withdraw subtype", async function () {
+    const stuck = ethers.parseEther("1");
+    await meat.mintSubtype(engine.target, SUBTYPE, stuck);
+
+    await expect(engine.emergencyWithdrawMEATSubtype(SUBTYPE))
+      .to.emit(engine, "MeatSubtypeWithdrawn")
+      .withArgs(owner.address, SUBTYPE, stuck);
+
+    expect(await meat.getBalanceOfSubtype(engine.target, SUBTYPE)).to.equal(0n);
+    expect(await meat.getBalanceOfSubtype(owner.address, SUBTYPE)).to.equal(
+      stuck
+    );
   });
 });
 
