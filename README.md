@@ -64,7 +64,7 @@ flowchart LR
 Semua subtype direpresentasikan sebagai `bytes32`. MEAT selalu menerima parameter subtype dalam bentuk ini, jadi gunakan `ethers.encodeBytes32String("GOATMEAT")` atau konversi ID numerik ke string dahulu.
 `bytes32 subtypeFromId = ethers.encodeBytes32String(String(123));`
 
-Kontrak MEAT kini menyimpan metadata `lineageID` untuk setiap kombinasi pengguna dan subtype. Pemilik kontrak dapat menetapkan nilai ini melalui `setSubtypeLineage(user, subtype, lineageID)`. Untuk membaca saldo sekaligus asal-usul token, gunakan `balanceOfSubtypeWithLineage(user, subtype)` yang mengembalikan `(balance, lineageID)`. Fungsi ini dipakai `BarterEngine` maupun `RedeemEngine` guna memverifikasi token sebelum dipertukarkan atau ditebus.
+Kontrak MEAT kini menyimpan metadata `lineageID` untuk setiap kombinasi pengguna dan subtype. Pemilik kontrak atau minter yang diizinkan dapat menetapkan nilai ini melalui `setSubtypeLineage(user, subtype, lineageID)`. Untuk membaca saldo sekaligus asal-usul token, gunakan `balanceOfSubtypeWithLineage(user, subtype)` yang mengembalikan `(balance, lineageID)`. Fungsi ini dipakai `BarterEngine` maupun `RedeemEngine` guna memverifikasi token sebelum dipertukarkan atau ditebus.
 Lineage ID otomatis diatur saat hook memanggil `mintSubtype()` sehingga mint manual tanpa lineage tidak diperbolehkan.
 
 Pengiriman MEAT kini menggunakan mekanisme round-robin antar subtype. Kontrak
