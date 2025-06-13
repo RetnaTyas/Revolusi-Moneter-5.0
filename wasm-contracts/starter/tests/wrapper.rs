@@ -105,7 +105,7 @@ fn wrap_and_unwrap_flow() {
     app.execute_contract(
         Addr::unchecked("owner"),
         goat_addr.clone(),
-        &goat_msg::ExecuteMsg::SetMeatAddress { meat_address: wrapper_addr.to_string() },
+        &goat_msg::ExecuteMsg::SetWrapperContract { wrapper_address: wrapper_addr.to_string() },
         &[],
     ).unwrap();
 
@@ -163,17 +163,6 @@ fn wrap_and_unwrap_flow() {
         .iter()
         .any(|a| a.key == "action" && a.value == "Wrapped")));
 
-    // approve goat burn
-    app.execute_contract(
-        Addr::unchecked("user"),
-        goat_addr.clone(),
-        &goat_msg::ExecuteMsg::Approve {
-            spender: wrapper_addr.to_string(),
-            amount: Uint128::new(117647058823529400),
-        },
-        &[],
-    )
-    .unwrap();
     let res = app
         .execute_contract(
             Addr::unchecked("user"),

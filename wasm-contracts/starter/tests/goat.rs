@@ -19,11 +19,28 @@ fn contract_nft() -> Box<dyn cw_multi_test::Contract<Empty>> {
 fn init_app() -> (App, Addr) {
     let mut app = App::default();
     let code_id = app.store_code(contract_goat());
-    let msg = InstantiateMsg { meat_contract: "meat".into() };
+    let msg = InstantiateMsg {};
     let addr = app
         .instantiate_contract(code_id, Addr::unchecked("owner"), &msg, &[], "goat", None)
         .unwrap();
     (app, addr)
+}
+
+fn mint_to(app: &mut App, addr: Addr, to: &str, amount: Uint128) {
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        addr.clone(),
+        &ExecuteMsg::SetWrapperContract { wrapper_address: "wrapper".into() },
+        &[],
+    )
+    .unwrap();
+    app.execute_contract(
+        Addr::unchecked("wrapper"),
+        addr,
+        &ExecuteMsg::Mint { to: to.into(), amount },
+        &[],
+    )
+    .unwrap();
 }
 
 #[test]
@@ -45,8 +62,7 @@ fn stake_and_claim() {
         &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 },
         &[]
     ).unwrap();
-    // mint and stake
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "staker", Uint128::new(100));
     let resp = app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
     assert!(resp.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "Staked")));
     app.update_block(|b| b.time = b.time.plus_seconds(1));
@@ -65,7 +81,7 @@ fn stake_and_compound() {
         &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 },
         &[]
     ).unwrap();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "staker", Uint128::new(100));
     let stake_res = app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
     assert!(stake_res.events.iter().any(|e| e.ty == "wasm" && e.attributes.iter().any(|a| a.key == "action" && a.value == "Staked")));
     app.update_block(|b| b.time = b.time.plus_seconds(1));
@@ -83,7 +99,7 @@ fn stake_and_unstake() {
         &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 },
         &[]
     ).unwrap();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "staker", Uint128::new(100));
     app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
     app.update_block(|b| b.time = b.time.plus_seconds(1));
     let unstake_res = app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Unstake {}, &[]).unwrap();
@@ -98,7 +114,7 @@ fn owner_only() {
     let _err = app.execute_contract(
         Addr::unchecked("not_owner"),
         addr.clone(),
-        &ExecuteMsg::SetMeatAddress { meat_address: "new".into() },
+        &ExecuteMsg::SetWrapperContract { wrapper_address: "x".into() },
         &[]
     ).unwrap_err();
     let _err = app.execute_contract(
@@ -109,133 +125,6 @@ fn owner_only() {
     ).unwrap_err();
 }
 
-#[test]
-fn burn_and_mint_emits_burn() {
-    let mut app = App::default();
-    let goat_id = app.store_code(contract_goat());
-    let nft_id = app.store_code(contract_nft());
-
-    let goat_addr = app
-        .instantiate_contract(goat_id, Addr::unchecked("owner"), &InstantiateMsg { meat_contract: "meat".into() }, &[], "goat", None)
-        .unwrap();
-    let nft_addr = app
-        .instantiate_contract(nft_id, Addr::unchecked("owner"), &nft_msg::InstantiateMsg {}, &[], "nft", None)
-        .unwrap();
-
-    app.execute_contract(
-        Addr::unchecked("owner"),
-        goat_addr.clone(),
-        &ExecuteMsg::SetNftAddress { nft_address: nft_addr.to_string() },
-        &[]
-    ).unwrap();
-
-
-    let resp = app.execute_contract(
-        Addr::unchecked("owner"),
-        nft_addr.clone(),
-        &nft_msg::ExecuteMsg::Mint {
-            to: "user".into(),
-            nfc_id: "nfc".into(),
-            breed: "breed".into(),
-            birth_year: 2024,
-            weight: 10,
-        },
-        &[]
-    ).unwrap();
-    let token_id: u64 = resp.events.iter().find(|e| e.ty == "wasm").unwrap()
-        .attributes.iter().find(|a| a.key == "token_id").unwrap().value.parse().unwrap();
-
-    app.execute_contract(
-        Addr::unchecked("user"),
-        nft_addr.clone(),
-        &nft_msg::ExecuteMsg::Approve {
-            spender: goat_addr.to_string(),
-            token_id: token_id.to_string(),
-        },
-        &[]
-    ).unwrap();
-
-    let res = app.execute_contract(
-        Addr::unchecked("user"),
-        goat_addr.clone(),
-        &ExecuteMsg::BurnAndMint { token_id },
-        &[]
-    ).unwrap();
-
-    let has_event = res.events.iter().any(|e| {
-        e.ty == "execute" && e.attributes.iter().any(|a| a.key == "_contract_addr" && a.value == nft_addr)
-    });
-    assert!(has_event, "burn message not sent");
-
-    let owner_res: Result<String, _> = app.wrap().query_wasm_smart(nft_addr, &nft_msg::QueryMsg::Owner { token_id });
-    assert!(owner_res.is_err());
-}
-
-#[test]
-fn burn_and_mint_fails_with_stale_update() {
-    let mut app = App::default();
-    let goat_id = app.store_code(contract_goat());
-    let nft_id = app.store_code(contract_nft());
-
-    let goat_addr = app
-        .instantiate_contract(goat_id, Addr::unchecked("owner"), &InstantiateMsg { meat_contract: "meat".into() }, &[], "goat", None)
-        .unwrap();
-    let nft_addr = app
-        .instantiate_contract(nft_id, Addr::unchecked("owner"), &nft_msg::InstantiateMsg {}, &[], "nft", None)
-        .unwrap();
-
-    app.execute_contract(
-        Addr::unchecked("owner"),
-        goat_addr.clone(),
-        &ExecuteMsg::SetNftAddress { nft_address: nft_addr.to_string() },
-        &[]
-    ).unwrap();
-
-    let resp = app.execute_contract(
-        Addr::unchecked("owner"),
-        nft_addr.clone(),
-        &nft_msg::ExecuteMsg::Mint {
-            to: "user".into(),
-            nfc_id: "nfc".into(),
-            breed: "breed".into(),
-            birth_year: 2024,
-            weight: 10,
-        },
-        &[]
-    ).unwrap();
-    let token_id: u64 = resp.events.iter().find(|e| e.ty == "wasm").unwrap()
-        .attributes.iter().find(|a| a.key == "token_id").unwrap().value.parse().unwrap();
-
-    app.execute_contract(
-        Addr::unchecked("user"),
-        nft_addr.clone(),
-        &nft_msg::ExecuteMsg::Approve {
-            spender: goat_addr.to_string(),
-            token_id: token_id.to_string(),
-        },
-        &[]
-    ).unwrap();
-
-    app.execute_contract(
-        Addr::unchecked("user"),
-        nft_addr.clone(),
-        &nft_msg::ExecuteMsg::UpdateWeight {
-            token_id: token_id.to_string(),
-            new_weight: 12,
-        },
-        &[]
-    ).unwrap();
-
-    app.update_block(|b| b.time = b.time.plus_seconds(WEIGHT_UPDATE_VALIDITY + 1));
-
-    let err = app.execute_contract(
-        Addr::unchecked("user"),
-        goat_addr.clone(),
-        &ExecuteMsg::BurnAndMint { token_id },
-        &[]
-    ).unwrap_err();
-    assert!(!err.to_string().is_empty());
-}
 
 #[test]
 fn claim_reward_multiple_times() {
@@ -246,7 +135,7 @@ fn claim_reward_multiple_times() {
         &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 },
         &[]
     ).unwrap();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(100) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "staker", Uint128::new(100));
     app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(100) }, &[]).unwrap();
 
     app.update_block(|b| b.time = b.time.plus_seconds(1));
@@ -269,7 +158,7 @@ fn emergency_unstake_returns_only_stake() {
         &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 10 },
         &[]
     ).unwrap();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "user".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "user", Uint128::new(50));
     app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
     app.update_block(|b| b.time = b.time.plus_seconds(5));
     app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::EmergencyUnstake {}, &[]).unwrap();
@@ -294,7 +183,7 @@ fn claim_without_stake_fails() {
 #[test]
 fn emergency_unstake_mints_shortfall() {
     let (mut app, addr) = init_app();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "user".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "user", Uint128::new(50));
     app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
     // drain contract balance
     app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(30) }, &[]).unwrap();
@@ -309,7 +198,7 @@ fn emergency_unstake_mints_shortfall() {
 fn unstake_mints_shortfall() {
     let (mut app, addr) = init_app();
     app.execute_contract(Addr::unchecked("owner"), addr.clone(), &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 }, &[]).unwrap();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "user".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "user", Uint128::new(50));
     app.execute_contract(Addr::unchecked("user"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
     app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(30) }, &[]).unwrap();
     app.update_block(|b| b.time = b.time.plus_seconds(1));
@@ -324,7 +213,7 @@ fn unstake_mints_shortfall() {
 fn claim_reward_mints_shortfall() {
     let (mut app, addr) = init_app();
     app.execute_contract(Addr::unchecked("owner"), addr.clone(), &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 }, &[]).unwrap();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "staker", Uint128::new(50));
     app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
     app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(40) }, &[]).unwrap();
     app.update_block(|b| b.time = b.time.plus_seconds(1));
@@ -339,7 +228,7 @@ fn claim_reward_mints_shortfall() {
 fn compound_reward_mints_shortfall() {
     let (mut app, addr) = init_app();
     app.execute_contract(Addr::unchecked("owner"), addr.clone(), &ExecuteMsg::SetRewardConfig { new_rate: Uint128::new(1_000_000_000_000_000_000), new_interval: 1, new_min_claim: 1 }, &[]).unwrap();
-    app.execute_contract(Addr::unchecked("meat"), addr.clone(), &ExecuteMsg::MintTo { to: "staker".into(), amount: Uint128::new(50) }, &[]).unwrap();
+    mint_to(&mut app, addr.clone(), "staker", Uint128::new(50));
     app.execute_contract(Addr::unchecked("staker"), addr.clone(), &ExecuteMsg::Stake { amount: Uint128::new(50) }, &[]).unwrap();
     app.execute_contract(addr.clone(), addr.clone(), &ExecuteMsg::Transfer { recipient: "other".into(), amount: Uint128::new(30) }, &[]).unwrap();
     app.update_block(|b| b.time = b.time.plus_seconds(1));
