@@ -315,8 +315,7 @@ cp frontend/.env.example frontend/.env.local
 Setelah itu edit `frontend/.env.local` dan isi `NEXT_PUBLIC_GOAT_ADDRESS` serta `NEXT_PUBLIC_MEAT_ADDRESS` sesuai alamat hasil deploy.
 
 ### Static Landing Page
-
-Folder `frontend/static/` menyediakan `index.html` sederhana. Aktifkan GitHub Pages dengan memilih folder ini agar demo web dapat langsung diakses.
+Folder `docs/` kini menyediakan `index.html` sederhana untuk GitHub Pages. Aktifkan GitHub Pages dengan memilih folder ini agar demo web dapat langsung diakses.
 
 ## 🧱 Struktur Kontrak
 
