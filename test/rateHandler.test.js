@@ -44,7 +44,9 @@ describe("RateHandler integration", function () {
       yield_per_cycle_kg: 1,
       cycle_time_days: 1,
     };
-    await handler.setCommodityRepresentation(wheat, data);
+    await expect(handler.setCommodityRepresentation(wheat, data))
+      .to.emit(handler, "CommodityRepresentationUpdated")
+      .withArgs(wheat);
     expect(
       await handler["getLODPerDay(bytes32,string)"](wheat, "NFT")
     ).to.equal(2n);
@@ -168,8 +170,9 @@ describe("RateHandler - LOD Engine v1.0", function () {
       cycle_time_days: 365,
     };
 
-    const tx = await rateHandler.setCommodityRepresentation(commodityId, data);
-    await tx.wait();
+    await expect(rateHandler.setCommodityRepresentation(commodityId, data))
+      .to.emit(rateHandler, "CommodityRepresentationUpdated")
+      .withArgs(commodityId);
   });
 
   it("returns correct LOD for NFT layer", async function () {

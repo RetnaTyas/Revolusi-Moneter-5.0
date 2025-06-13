@@ -15,6 +15,7 @@ Setiap komoditas direpresentasikan sebagai:
 LOD per hari untuk tiap layer disimpan on-chain.
 Semua nilai tersebut kini hanya dimuat melalui fungsi `setCommodityRepresentation` pada `RateHandler`.
 Tidak ada fallback atau referensi ke `SwapConfig` maupun mapping lama lainnya.
+Panggilan fungsi tersebut memunculkan event `CommodityRepresentationUpdated(commodityId)` untuk menandai pembaruan data di blockchain.
 
 Lihat diagram *Canonical Reasoning Path* pada [architecture.md](../architecture.md#token-layer-separation--lod-engine-enforcement) bagian 4 untuk pemahaman menyeluruh mengenai pemisahan layer dan aturan swap.
 

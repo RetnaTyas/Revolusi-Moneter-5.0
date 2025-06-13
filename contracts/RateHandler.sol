@@ -29,6 +29,7 @@ contract RateHandler {
     mapping(bytes32 => CommodityRepresentation) public commodityRegistry;
 
     event OwnershipTransferred(address indexed oldOwner, address indexed newOwner);
+    event CommodityRepresentationUpdated(bytes32 indexed commodityId);
 
     modifier onlyOwner() {
         require(msg.sender == _owner, "Not the owner");
@@ -57,6 +58,7 @@ contract RateHandler {
         c.micronutrient_index_x1000 = data.micronutrient_index_x1000;
         c.yield_per_cycle_kg = data.yield_per_cycle_kg;
         c.cycle_time_days = data.cycle_time_days;
+        emit CommodityRepresentationUpdated(commodityId);
     }
 
     /// @notice Get LOD per layer for given commodity.
