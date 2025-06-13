@@ -26,9 +26,10 @@ describe("MEAT core functions", function () {
     const deposit = ethers.parseEther("1");
     await user.sendTransaction({ to: meat.target, value: deposit });
 
-    await expect(meat.connect(user).withdrawNative()).to.be.revertedWith(
-      "Not the owner"
-    );
+    await expect(meat.connect(user).withdrawNative()).to.be.revertedWithCustomError(
+      meat,
+      "OwnableUnauthorizedAccount"
+    ).withArgs(user.address);
 
     await expect(meat.withdrawNative())
       .to.emit(meat, "NativeWithdrawn")
@@ -71,9 +72,10 @@ describe("MEAT core functions", function () {
     const handler = await RateHandler.deploy();
     await handler.waitForDeployment();
 
-    await expect(meat.connect(user).setRateHandler(handler.target)).to.be.revertedWith(
-      "Not the owner"
-    );
+    await expect(meat.connect(user).setRateHandler(handler.target)).to.be.revertedWithCustomError(
+      meat,
+      "OwnableUnauthorizedAccount"
+    ).withArgs(user.address);
 
     await expect(meat.setRateHandler(handler.target))
       .to.emit(meat, "RateHandlerUpdated")

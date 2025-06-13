@@ -5,8 +5,9 @@ pragma solidity ^0.8.29;
 /// @notice Computes PRODUCT↔PRODUCT swap parity based purely on LOD values.
 /// @dev No fallback, no deprecated mappings. LOD parity is fully transparent and governed.
 
-contract RateHandler {
-    address private _owner;
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+
+contract RateHandler is Ownable {
 
     struct CommodityRepresentation {
         address nftAddress;
@@ -28,17 +29,9 @@ contract RateHandler {
 
     mapping(bytes32 => CommodityRepresentation) public commodityRegistry;
 
-    event OwnershipTransferred(address indexed oldOwner, address indexed newOwner);
     event CommodityRepresentationUpdated(bytes32 indexed commodityId);
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
-    }
-
-    constructor() {
-        _owner = msg.sender;
-    }
+    constructor() Ownable(msg.sender) {}
 
     /// @notice Register or update CommodityRepresentation.
     function setCommodityRepresentation(bytes32 commodityId, CommodityRepresentation calldata data) public onlyOwner {
@@ -103,17 +96,6 @@ contract RateHandler {
         return rate;
     }
 
-    /// @notice Transfer ownership.
-    function transferOwnership(address newOwner) external onlyOwner {
-        require(newOwner != address(0), "Invalid address");
-        address old = _owner;
-        _owner = newOwner;
-        emit OwnershipTransferred(old, newOwner);
-    }
-
-    /// @notice Return current owner.
-    function owner() external view returns (address) {
-        return _owner;
-    }
+    // Ownable already exposes transferOwnership() and owner()
 }
 

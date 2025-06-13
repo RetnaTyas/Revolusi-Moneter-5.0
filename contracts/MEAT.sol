@@ -3,14 +3,14 @@ pragma solidity ^0.8.29;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { RateHandler } from "./RateHandler.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title Token MEAT - Market-Enabled Agricultural Token
 /// @notice Kontrak pintar untuk mint MEAT menggunakan native token dan PRODUCT subtype token.
 /// @dev Reasoning Path FINAL Compliant → NO awareness of GOAT token. NO swap GOAT ↔ MEAT allowed.
 
 /// @dev Subtype parameters expect bytes32 values from ethers.encodeBytes32String
-contract MEAT is ERC20 {
-    address private immutable _owner;
+contract MEAT is ERC20, Ownable {
 
     // Authorized addresses allowed to mint or burn subtype balances
     mapping(address => bool) public isMinter;
@@ -72,10 +72,7 @@ contract MEAT is ERC20 {
         }
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
-    }
+
 
     modifier onlyMinter() {
         require(isMinter[msg.sender], "Not minter");
@@ -88,7 +85,7 @@ contract MEAT is ERC20 {
     }
 
     modifier onlyOwnerOrMinter() {
-        require(msg.sender == _owner || isMinter[msg.sender], "Not authorized");
+        require(msg.sender == owner() || isMinter[msg.sender], "Not authorized");
         _;
     }
 
@@ -96,13 +93,12 @@ contract MEAT is ERC20 {
     ///         and mints 1000 GOATMEAT via `mintSubtype` to the owner.
     /// @dev Initial supply is tracked through the `SubtypeMinted` event
     ///      emitted by `mintSubtype`.
-    constructor() ERC20("Market-Enabled Agricultural Token", "MEAT") {
-        _owner = msg.sender;
+    constructor() ERC20("Market-Enabled Agricultural Token", "MEAT") Ownable(msg.sender) {
 
-        isMinter[_owner] = true;
+        isMinter[owner()] = true;
 
         // Mint 1000 GOATMEAT to the owner via mintSubtype
-        mintSubtype(_owner, GOATMEAT_SUBTYPE, 1000 * 1e18);
+        mintSubtype(owner(), GOATMEAT_SUBTYPE, 1000 * 1e18);
     }
 
     /// @notice Menerima token native dan mencetak MEAT sesuai rate
@@ -128,9 +124,9 @@ contract MEAT is ERC20 {
     function withdrawNative() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "No Native Token to withdraw");
-        (bool sent, ) = payable(_owner).call{value: balance}("");
+        (bool sent, ) = payable(owner()).call{value: balance}("");
         require(sent, "Native transfer failed");
-        emit NativeWithdrawn(_owner, balance);
+        emit NativeWithdrawn(owner(), balance);
     }
 
     function changeDepositRate(uint256 newRate) external onlyOwner {
@@ -277,8 +273,5 @@ contract MEAT is ERC20 {
         emit RateHandlerUpdated(old, rateHandlerAddress);
     }
 
-    /// @notice Mengembalikan alamat pemilik kontrak
-    function owner() external view returns (address) {
-        return _owner;
-    }
+    // Ownable already exposes owner() view
 }

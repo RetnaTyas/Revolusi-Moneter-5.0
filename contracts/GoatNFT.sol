@@ -3,6 +3,7 @@ pragma solidity ^0.8.29;
 
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {GoatNFTBurnHook} from "./GoatNFTBurnHook.sol";
 
 /// @title GoatNFT - identitas kambing dalam bentuk token
@@ -12,7 +13,7 @@ import {GoatNFTBurnHook} from "./GoatNFTBurnHook.sol";
 /// - Mint: Menyimpan berat awal kambing.
 /// - UpdateWeight: Memperbarui berat terbaru.
 /// - Burn: Membutuhkan berat terbaru (valid), memicu burnHook untuk mint GOATMEAT, lalu membakar NFT.
-contract GoatNFT is ERC721Burnable {
+contract GoatNFT is ERC721Burnable, Ownable {
     uint256 public nextId;
     mapping(uint256 => uint256) public goatValue;
 
@@ -28,7 +29,6 @@ contract GoatNFT is ERC721Burnable {
     mapping(uint256 => uint256) public lastWeightUpdateAt;
     mapping(bytes32 => uint256) public nfcIdToTokenId;
 
-    address private immutable _owner;
     GoatNFTBurnHook public burnHook;
 
     /// @notice Jangka waktu validitas pembaruan berat dalam detik (7 hari)
@@ -36,14 +36,7 @@ contract GoatNFT is ERC721Burnable {
     /// @notice Jumlah digit desimal yang digunakan untuk berat
     uint256 public constant WEIGHT_DECIMALS = 1;
 
-    constructor() ERC721("Goat Identifier", "GOATNFT") {
-        _owner = msg.sender;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
-    }
+    constructor() ERC721("Goat Identifier", "GOATNFT") Ownable(msg.sender) {}
 
     /// @notice Mengatur kontrak hook yang dipanggil saat NFT dibakar
     function setBurnHook(address hookAddress) external onlyOwner {
@@ -119,9 +112,7 @@ contract GoatNFT is ERC721Burnable {
         return goatMetadata[tokenId];
     }
 
-    function owner() external view returns (address) {
-        return _owner;
-    }
+
 
     /// @notice Dipancarkan ketika alamat kontrak hook diubah
     event BurnHookUpdated(address indexed oldAddress, address indexed newAddress);

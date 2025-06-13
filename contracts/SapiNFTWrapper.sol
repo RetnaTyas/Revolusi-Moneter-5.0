@@ -6,14 +6,14 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ISapiNFT} from "./interfaces/ISapiNFT.sol";
 import {IGoatToken} from "./interfaces/IGoatToken.sol";
 import {SwapConfig} from "./SwapConfig.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title SapiNFTWrapper
 /// @notice Mengunci SapiNFT dan mencetak GOAT sebagai jaminan (berdasarkan SAPI_WRAP_RATE)
-contract SapiNFTWrapper is ERC721Holder {
+contract SapiNFTWrapper is ERC721Holder, Ownable {
     IERC721 public immutable sapiNFT;
     ISapiNFT public immutable sapiValueFeed;
     IGoatToken public goatToken;
-    address private immutable _owner;
 
     uint256 public constant WEIGHT_DECIMALS = 1;
 
@@ -27,17 +27,11 @@ contract SapiNFTWrapper is ERC721Holder {
     event Wrapped(address indexed user, uint256 indexed tokenId, uint256 goatAmount);
     event Unwrapped(address indexed user, uint256 indexed tokenId, uint256 goatAmount);
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
-    }
-
-    constructor(address nftAddress, address goatAddress) {
+    constructor(address nftAddress, address goatAddress) Ownable(msg.sender) {
         require(nftAddress != address(0) && goatAddress != address(0), "Invalid address");
         sapiNFT = IERC721(nftAddress);
         sapiValueFeed = ISapiNFT(nftAddress);
         goatToken = IGoatToken(goatAddress);
-        _owner = msg.sender;
     }
 
     function _getRate() internal pure returns (uint256) {
@@ -71,7 +65,5 @@ contract SapiNFTWrapper is ERC721Holder {
         emit Unwrapped(msg.sender, tokenId, info.goatAmount);
     }
 
-    function owner() external view returns (address) {
-        return _owner;
-    }
+    // Ownable already exposes owner() view
 }

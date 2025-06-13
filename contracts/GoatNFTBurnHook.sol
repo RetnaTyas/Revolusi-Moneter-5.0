@@ -3,14 +3,14 @@ pragma solidity ^0.8.29;
 
 import {IGoatNFT} from "./interfaces/IGoatNFT.sol";
 import {IMeat} from "./interfaces/IMeat.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title GoatNFTBurnHook
 /// @notice Mints GOATMEAT tokens when a GoatNFT is burned
-contract GoatNFTBurnHook {
+contract GoatNFTBurnHook is Ownable {
     IGoatNFT public goatNFT;
     IMeat public meatToken;
 
-    address private immutable _owner;
 
     bytes32 public constant GOATMEAT_SUBTYPE = keccak256("GOATMEAT");
     uint256 public constant SLAUGHTER_YIELD_BPS = 6000; // 60% of live weight
@@ -20,16 +20,10 @@ contract GoatNFTBurnHook {
     event NFTAddressUpdated(address indexed oldAddress, address indexed newAddress);
     event GoatMeatMinted(address indexed to, uint256 amount);
 
-    constructor(address nftAddress, address meatAddress) {
+    constructor(address nftAddress, address meatAddress) Ownable(msg.sender) {
         require(nftAddress != address(0) && meatAddress != address(0), "Invalid address");
-        _owner = msg.sender;
         goatNFT = IGoatNFT(nftAddress);
         meatToken = IMeat(meatAddress);
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
     }
 
     function setNFTAddress(address nftAddress) external onlyOwner {
@@ -57,8 +51,6 @@ contract GoatNFTBurnHook {
         emit GoatMeatMinted(to, meatAmount);
     }
 
-    function owner() external view returns (address) {
-        return _owner;
-    }
+    // Ownable already exposes owner() view
 }
 

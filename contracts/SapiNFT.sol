@@ -3,11 +3,12 @@ pragma solidity ^0.8.29;
 
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SapiNFTBurnHook} from "./SapiNFTBurnHook.sol";
 
 /// @title SapiNFT - identitas sapi dalam bentuk token
 /// @notice Menyimpan berat sapi hidup dan metadata terkait
-contract SapiNFT is ERC721Burnable {
+contract SapiNFT is ERC721Burnable, Ownable {
     uint256 public nextId;
     mapping(uint256 => uint256) public sapiValue;
 
@@ -23,20 +24,12 @@ contract SapiNFT is ERC721Burnable {
     mapping(uint256 => uint256) public lastWeightUpdateAt;
     mapping(bytes32 => uint256) public nfcIdToTokenId;
 
-    address private immutable _owner;
     SapiNFTBurnHook public burnHook;
 
     uint256 public constant WEIGHT_UPDATE_VALIDITY = 7 days;
     uint256 public constant WEIGHT_DECIMALS = 1;
 
-    constructor() ERC721("Sapi Identifier", "SAPINFT") {
-        _owner = msg.sender;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "Not the owner");
-        _;
-    }
+    constructor() ERC721("Sapi Identifier", "SAPINFT") Ownable(msg.sender) {}
 
     function setBurnHook(address hookAddress) external onlyOwner {
         address old = address(burnHook);
@@ -101,9 +94,7 @@ contract SapiNFT is ERC721Burnable {
         return sapiMetadata[tokenId];
     }
 
-    function owner() external view returns (address) {
-        return _owner;
-    }
+
 
     event BurnHookUpdated(address indexed oldAddress, address indexed newAddress);
     event SapiBurned(uint256 indexed tokenId, address indexed user, uint256 weight);
