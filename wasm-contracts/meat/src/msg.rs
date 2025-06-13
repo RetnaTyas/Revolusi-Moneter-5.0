@@ -23,13 +23,6 @@ pub enum ExecuteMsg {
         recipient: String,
         amount: Uint128,
     },
-    MintWithNative {},
-    WithdrawNative {
-        to: Option<String>,
-    },
-    ChangeDepositRate {
-        new_rate: Uint128,
-    },
     RedeemForMeat {
         amount: Uint128,
     },
@@ -44,7 +37,6 @@ pub enum QueryMsg {
     Balance { address: String },
     Allowance { owner: String, spender: String },
     TokenInfo {},
-    DepositRate {},
     Owner {},
 }
 
@@ -64,10 +56,5 @@ pub struct TokenInfoResponse {
     pub symbol: String,
     pub decimals: u8,
     pub total_supply: Uint128,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct RateResponse {
-    pub rate: Uint128,
 }
 
