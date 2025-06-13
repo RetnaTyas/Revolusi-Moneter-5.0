@@ -3,24 +3,21 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct InstantiateMsg {
-    pub meat_contract: String,
-}
+pub struct InstantiateMsg {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub enum ExecuteMsg {
     Transfer { recipient: String, amount: Uint128 },
     Approve { spender: String, amount: Uint128 },
     TransferFrom { owner: String, recipient: String, amount: Uint128 },
-    MintTo { to: String, amount: Uint128 },
-    BurnAndMint { token_id: u64 },
+    Mint { to: String, amount: Uint128 },
+    BurnFrom { from: String, amount: Uint128 },
     Stake { amount: Uint128 },
     EmergencyUnstake {},
     Unstake {},
     ClaimReward {},
     CompoundReward {},
-    SetMeatAddress { meat_address: String },
-    SetNftAddress { nft_address: String },
+    SetWrapperContract { wrapper_address: String },
     SetRewardConfig { new_rate: Uint128, new_interval: u64, new_min_claim: u64 },
 }
 

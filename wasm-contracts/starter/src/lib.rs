@@ -1,6 +1,5 @@
-use cosmwasm_std::{entry_point, to_json_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128, WasmMsg};
+use cosmwasm_std::{entry_point, to_json_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128};
 use cw2::set_contract_version;
-use cw721::Cw721ExecuteMsg;
 use crate::msg::{
     InstantiateMsg,
     ExecuteMsg,
@@ -11,8 +10,7 @@ use crate::msg::{
     StakingInfoResponse,
     PendingRewardResponse,
     NextClaimResponse,
-    GoatValueResponse,
-    GoatDataResponse,
+
 };
 use crate::state::*;
 
@@ -23,12 +21,10 @@ const CONTRACT_NAME: &str = "starter";
 const CONTRACT_VERSION: &str = "0.1.0";
 
 #[entry_point]
-pub fn instantiate(deps: DepsMut, _env: Env, info: MessageInfo, msg: InstantiateMsg) -> StdResult<Response> {
+pub fn instantiate(deps: DepsMut, _env: Env, info: MessageInfo, _msg: InstantiateMsg) -> StdResult<Response> {
     let owner = info.sender.clone();
     OWNER.save(deps.storage, &owner)?;
-    let meat_addr = deps.api.addr_validate(&msg.meat_contract)?;
-    MEAT_CONTRACT.save(deps.storage, &meat_addr)?;
-    NFT_CONTRACT.save(deps.storage, &None)?;
+    WRAPPER_CONTRACT.save(deps.storage, &None)?;
     TOTAL_SUPPLY.save(deps.storage, &Uint128::zero())?;
     REWARD_RATE.save(deps.storage, &Uint128::new(5_000_000_000_000_000_000))?;
     REWARD_INTERVAL.save(deps.storage, &(365u64 * 24 * 60 * 60))?;
@@ -45,9 +41,9 @@ fn only_owner(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
     Ok(())
 }
 
-fn only_meat(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
-    let meat = MEAT_CONTRACT.load(deps.storage)?;
-    if info.sender != meat {
+fn only_wrapper(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
+    let wrapper = WRAPPER_CONTRACT.load(deps.storage)?.ok_or_else(|| StdError::generic_err("Wrapper not set"))?;
+    if info.sender != wrapper {
         return Err(StdError::generic_err("Unauthorized"));
     }
     Ok(())
@@ -72,15 +68,14 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
         ExecuteMsg::Transfer { recipient, amount } => execute_transfer(deps, info, recipient, amount),
         ExecuteMsg::Approve { spender, amount } => execute_approve(deps, info, spender, amount),
         ExecuteMsg::TransferFrom { owner, recipient, amount } => execute_transfer_from(deps, info, owner, recipient, amount),
-        ExecuteMsg::MintTo { to, amount } => execute_mint_to(deps, info, to, amount),
-        ExecuteMsg::BurnAndMint { token_id } => execute_burn_and_mint(deps, env, info, token_id),
+        ExecuteMsg::Mint { to, amount } => execute_mint(deps, info, to, amount),
+        ExecuteMsg::BurnFrom { from, amount } => execute_burn_from(deps, info, from, amount),
         ExecuteMsg::Stake { amount } => execute_stake(deps, env, info, amount),
         ExecuteMsg::EmergencyUnstake {} => execute_emergency_unstake(deps, env, info),
         ExecuteMsg::Unstake {} => execute_unstake(deps, env, info),
         ExecuteMsg::ClaimReward {} => execute_claim_reward(deps, env, info),
         ExecuteMsg::CompoundReward {} => execute_compound_reward(deps, env, info),
-        ExecuteMsg::SetMeatAddress { meat_address } => execute_set_meat(deps, info, meat_address),
-        ExecuteMsg::SetNftAddress { nft_address } => execute_set_nft(deps, info, nft_address),
+        ExecuteMsg::SetWrapperContract { wrapper_address } => execute_set_wrapper_contract(deps, info, wrapper_address),
         ExecuteMsg::SetRewardConfig { new_rate, new_interval, new_min_claim } => execute_set_reward_config(deps, info, new_rate, new_interval, new_min_claim),
     }
 }
@@ -112,8 +107,24 @@ fn execute_transfer_from(deps: DepsMut, info: MessageInfo, owner: String, recipi
     Ok(Response::new())
 }
 
-fn execute_mint_to(mut deps: DepsMut, info: MessageInfo, to: String, amount: Uint128) -> StdResult<Response> {
-    only_meat(deps.branch(), &info)?;
+fn execute_burn_from(mut deps: DepsMut, info: MessageInfo, from: String, amount: Uint128) -> StdResult<Response> {
+    only_wrapper(deps.branch(), &info)?;
+    let from_addr = deps.api.addr_validate(&from)?;
+    sub_balance(deps.storage, &from_addr, amount)?;
+    let supply = TOTAL_SUPPLY.load(deps.storage)?.checked_sub(amount)?;
+    TOTAL_SUPPLY.save(deps.storage, &supply)?;
+    Ok(Response::new())
+}
+
+fn execute_set_wrapper_contract(mut deps: DepsMut, info: MessageInfo, wrapper_address: String) -> StdResult<Response> {
+    only_owner(deps.branch(), &info)?;
+    let addr = deps.api.addr_validate(&wrapper_address)?;
+    WRAPPER_CONTRACT.save(deps.storage, &Some(addr))?;
+    Ok(Response::new())
+}
+
+fn execute_mint(mut deps: DepsMut, info: MessageInfo, to: String, amount: Uint128) -> StdResult<Response> {
+    only_wrapper(deps.branch(), &info)?;
     let to = deps.api.addr_validate(&to)?;
     add_balance(deps.storage, &to, amount)?;
     let supply = TOTAL_SUPPLY.load(deps.storage)? + amount;
@@ -121,56 +132,6 @@ fn execute_mint_to(mut deps: DepsMut, info: MessageInfo, to: String, amount: Uin
     Ok(Response::new())
 }
 
-fn execute_burn_and_mint(
-    deps: DepsMut,
-    env: Env,
-    info: MessageInfo,
-    token_id: u64,
-) -> StdResult<Response> {
-    const WEIGHT_UPDATE_VALIDITY: u64 = 60 * 60 * 24 * 7;
-    let nft = NFT_CONTRACT
-        .load(deps.storage)?
-        .ok_or_else(|| StdError::generic_err("NFT not set"))?;
-
-    // query goat value
-    let query_val = to_json_binary(&serde_json::json!({"goat_value": {"token_id": token_id}}))?;
-    let resp: GoatValueResponse = deps.querier.query_wasm_smart(nft.clone(), &query_val)?;
-
-    // query last weight update timestamp via goat_data
-    let query_data = to_json_binary(&serde_json::json!({"goat_data": {"token_id": token_id}}))?;
-    let data: GoatDataResponse = deps.querier.query_wasm_smart(nft.clone(), &query_data)?;
-
-    if env.block.time.seconds().saturating_sub(data.minted_at) > WEIGHT_UPDATE_VALIDITY {
-        return Err(StdError::generic_err("Weight update too old"));
-    }
-
-    let burn = WasmMsg::Execute {
-        contract_addr: nft.to_string(),
-        msg: to_json_binary(&Cw721ExecuteMsg::Burn {
-            token_id: token_id.to_string(),
-        })?,
-        funds: vec![],
-    };
-
-    add_balance(deps.storage, &info.sender, resp.value)?;
-    let supply = TOTAL_SUPPLY.load(deps.storage)? + resp.value;
-    TOTAL_SUPPLY.save(deps.storage, &supply)?;
-    Ok(Response::new().add_message(burn))
-}
-
-fn execute_set_meat(mut deps: DepsMut, info: MessageInfo, meat_address: String) -> StdResult<Response> {
-    only_owner(deps.branch(), &info)?;
-    let addr = deps.api.addr_validate(&meat_address)?;
-    MEAT_CONTRACT.save(deps.storage, &addr)?;
-    Ok(Response::new())
-}
-
-fn execute_set_nft(mut deps: DepsMut, info: MessageInfo, nft_address: String) -> StdResult<Response> {
-    only_owner(deps.branch(), &info)?;
-    let addr = deps.api.addr_validate(&nft_address)?;
-    NFT_CONTRACT.save(deps.storage, &Some(addr))?;
-    Ok(Response::new())
-}
 
 fn execute_set_reward_config(mut deps: DepsMut, info: MessageInfo, new_rate: Uint128, new_interval: u64, new_min_claim: u64) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;

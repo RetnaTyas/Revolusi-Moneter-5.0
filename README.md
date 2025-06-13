@@ -340,7 +340,7 @@ Struktur dan hubungan antar kontrak:
   `birthYear`, `weight`, `mintedAt`) dan disimpan pada mapping `goatMetadata`.
   Pemilik dapat memperbarui berat melalui `updateWeight` (memancarkan `WeightUpdated`); berat terakhir harus
   masih valid (<=7 hari) saat dibakar. Fungsi `burn` kini hanya memicu `GoatNFTBurnHook` untuk mencetak `GOATMEAT`. Event `GoatBurned` tetap dipancarkan sebagai catatan berat dan rasio. Data dapat dibaca ulang melalui `getGoatData` dan dihapus setelah `burn`. Untuk mencegah *reentrancy*, data NFT dibersihkan dan `super.burn` dipanggil **sebelum** meneruskan kontrol ke `burnHook`.
-- `IGOAT` (`contracts/interfaces/IGOAT.sol`) mendefinisikan fungsi `mintTo` untuk dipanggil `GoatNFTWrapper` saat mencetak GOAT baru. `IGoatToken` dipakai oleh wrapper dan NFT untuk berinteraksi dengan kontrak GOAT.
+- `IGoatToken` (`contracts/interfaces/IGoatToken.sol`) mendefinisikan fungsi `mint` dan `burnFrom` yang dipanggil `GoatNFTWrapper` untuk mencetak maupun membakar GOAT saat proses wrap/unwrap.
 - `FailingGOAT` (`contracts/mocks/FailingGOAT.sol`) digunakan pada unit test
   guna mensimulasikan kegagalan `transfer`.
 - `emergencyUnstake` memungkinkan penarikan token yang di-stake tanpa reward kapan saja.

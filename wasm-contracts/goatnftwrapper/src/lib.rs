@@ -67,7 +67,7 @@ fn execute_wrap(deps: DepsMut, env: Env, info: MessageInfo, token_id: u64) -> St
 
     let mint = WasmMsg::Execute {
         contract_addr: goat.to_string(),
-        msg: to_json_binary(&starter::msg::ExecuteMsg::MintTo {
+        msg: to_json_binary(&starter::msg::ExecuteMsg::Mint {
             to: info.sender.to_string(),
             amount: goat_amount,
         })?,
@@ -107,9 +107,8 @@ fn execute_unwrap(
 
     let burn = WasmMsg::Execute {
         contract_addr: goat.to_string(),
-        msg: to_json_binary(&starter::msg::ExecuteMsg::TransferFrom {
-            owner: info.sender.to_string(),
-            recipient: env.contract.address.to_string(),
+        msg: to_json_binary(&starter::msg::ExecuteMsg::BurnFrom {
+            from: info.sender.to_string(),
             amount: info_wrapped.goat_amount,
         })?,
         funds: vec![],
