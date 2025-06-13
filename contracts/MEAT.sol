@@ -94,6 +94,8 @@ contract MEAT is ERC20 {
 
     /// @notice Constructor grants the deployer minter rights
     ///         and mints 1000 GOATMEAT via `mintSubtype` to the owner.
+    /// @dev Initial supply is tracked through the `SubtypeMinted` event
+    ///      emitted by `mintSubtype`.
     constructor() ERC20("Market-Enabled Agricultural Token", "MEAT") {
         _owner = msg.sender;
 
