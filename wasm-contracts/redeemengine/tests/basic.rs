@@ -76,6 +76,29 @@ fn redeem_burns_meat() {
         },
         &[],
     )
+        .unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        meat_addr.clone(),
+        &MeatExec::SetBurner {
+            account: eng_addr.to_string(),
+            status: true,
+        },
+        &[],
+    )
+    .unwrap();
+
+    app.execute_contract(
+        Addr::unchecked("owner"),
+        meat_addr.clone(),
+        &MeatExec::SetSubtypeLineage {
+            user: "user".into(),
+            subtype: "GOATMEAT".into(),
+            lineage_id: 1,
+        },
+        &[],
+    )
     .unwrap();
 
     app.execute_contract(
@@ -92,17 +115,6 @@ fn redeem_burns_meat() {
 
     app.execute_contract(
         Addr::unchecked("user"),
-        meat_addr.clone(),
-        &MeatExec::Approve {
-            spender: eng_addr.to_string(),
-            amount: Uint128::new(50),
-        },
-        &[],
-    )
-    .unwrap();
-
-    app.execute_contract(
-        Addr::unchecked("user"),
         eng_addr.clone(),
         &ExecuteMsg::Redeem {
             subtype: "GOATMEAT".into(),
@@ -112,14 +124,16 @@ fn redeem_burns_meat() {
     )
     .unwrap();
 
-    let bal: meat::msg::BalanceResponse = app
+    let bal: meat::msg::BalanceSubtypeWithLineageResponse = app
         .wrap()
         .query_wasm_smart(
             meat_addr,
-            &meat::msg::QueryMsg::Balance {
-                address: "user".into(),
+            &meat::msg::QueryMsg::BalanceOfSubtypeWithLineage {
+                user: "user".into(),
+                subtype: "GOATMEAT".into(),
             },
         )
         .unwrap();
     assert_eq!(bal.balance, Uint128::new(950));
+    assert_eq!(bal.lineage_id, 1);
 }
