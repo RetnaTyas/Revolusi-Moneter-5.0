@@ -321,6 +321,18 @@ Struktur dan hubungan antar kontrak:
   guna mensimulasikan kegagalan `transfer`.
 - `emergencyUnstake` memungkinkan penarikan token yang di-stake tanpa reward kapan saja.
 
+### emergencyWithdrawMEATSubtype(bytes32 subtype)
+
+Fungsi ini terdapat pada `BarterEngine` dan `RedeemEngine` dan **hanya** dapat
+dipanggil oleh pemilik kontrak ketika terjadi token MEAT yang tersangkut.
+Saat dieksekusi, kontrak akan:
+
+1. Membakar seluruh saldo subtype milik kontrak.
+2. Mencetak kembali jumlah yang sama ke alamat pemilik.
+
+Skema *burn + mint* memastikan tidak ada perubahan pasokan, namun token yang
+terjebak dapat dipindahkan ke pemilik untuk diproses manual.
+
 ### Contoh Penggunaan
 
 ```solidity
