@@ -29,6 +29,10 @@ contract MEAT is ERC20, Ownable {
 
     // List of owned subtypes per user for iteration
     mapping(address => bytes32[]) private _userSubtypes;
+    // Index of subtype in the list (+1) for quick lookup/removal
+    mapping(address => mapping(bytes32 => uint256)) private _userSubtypeIndex;
+    // Cursor to start iteration on transfers to avoid scanning from index 0
+    mapping(address => uint256) private _transferCursor;
 
     // Total supply per subtype
     mapping(bytes32 => uint256) public subtypeTotalSupply;
@@ -52,23 +56,35 @@ contract MEAT is ERC20, Ownable {
 
     // ----- internal helpers for subtype tracking -----
     function _addUserSubtype(address user, bytes32 subtype) internal {
-        bytes32[] storage list = _userSubtypes[user];
-        for (uint256 i = 0; i < list.length; i++) {
-            if (list[i] == subtype) {
-                return;
-            }
+        mapping(bytes32 => uint256) storage idxMap = _userSubtypeIndex[user];
+        if (idxMap[subtype] != 0) {
+            return;
         }
-        list.push(subtype);
+        _userSubtypes[user].push(subtype);
+        idxMap[subtype] = _userSubtypes[user].length; // store index + 1
     }
 
     function _removeUserSubtype(address user, bytes32 subtype) internal {
+        mapping(bytes32 => uint256) storage idxMap = _userSubtypeIndex[user];
+        uint256 idxPlus = idxMap[subtype];
+        if (idxPlus == 0) {
+            return;
+        }
+        uint256 idx = idxPlus - 1;
         bytes32[] storage list = _userSubtypes[user];
-        for (uint256 i = 0; i < list.length; i++) {
-            if (list[i] == subtype) {
-                list[i] = list[list.length - 1];
-                list.pop();
-                break;
-            }
+        uint256 lastIndex = list.length - 1;
+        if (idx != lastIndex) {
+            bytes32 lastSubtype = list[lastIndex];
+            list[idx] = lastSubtype;
+            idxMap[lastSubtype] = idx + 1;
+        }
+        list.pop();
+        delete idxMap[subtype];
+
+        if (_transferCursor[user] > lastIndex) {
+            _transferCursor[user] = 0;
+        } else if (_transferCursor[user] > idx) {
+            _transferCursor[user] -= 1;
         }
     }
 
@@ -228,14 +244,24 @@ contract MEAT is ERC20, Ownable {
 
         uint256 remaining = amount;
         bytes32[] storage list = _userSubtypes[from];
-        uint256 i = 0;
-        while (i < list.length && remaining > 0) {
-            bytes32 st = list[i];
+        uint256 idx = _transferCursor[from];
+        if (idx >= list.length) {
+            idx = 0;
+        }
+
+        while (remaining > 0 && list.length > 0) {
+            if (idx >= list.length) {
+                idx = 0;
+            }
+            bytes32 st = list[idx];
             SubtypeBalance storage sFrom = subtypeBalances[from][st];
             uint256 available = sFrom.balance;
             if (available == 0) {
-                list[i] = list[list.length - 1];
-                list.pop();
+                _removeUserSubtype(from, st);
+                list = _userSubtypes[from];
+                if (idx >= list.length) {
+                    idx = 0;
+                }
                 continue;
             }
 
@@ -243,10 +269,12 @@ contract MEAT is ERC20, Ownable {
             sFrom.balance = available - tAmt;
             if (sFrom.balance == 0) {
                 _removeUserSubtype(from, st);
-                // list may change, reload
                 list = _userSubtypes[from];
+                if (idx >= list.length) {
+                    idx = 0;
+                }
             } else {
-                i++;
+                idx++;
             }
 
             SubtypeBalance storage sTo = subtypeBalances[to][st];
@@ -263,6 +291,8 @@ contract MEAT is ERC20, Ownable {
             sTo.balance += tAmt;
             remaining -= tAmt;
         }
+
+        _transferCursor[from] = idx;
     }
 
     /// @notice Mengatur alamat kontrak rate handler untuk perhitungan swap (dipakai di BarterEngine, bukan di MEAT)

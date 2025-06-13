@@ -133,4 +133,33 @@ describe("MEAT subtype functions", function () {
     expect(result[0]).to.equal(amount);
     expect(result[1]).to.equal(7n);
   });
+
+  it("transfers multiple subtypes correctly", async function () {
+    const goat = ethers.encodeBytes32String("GOATMEAT");
+    const beef = ethers.encodeBytes32String("BEEFMEAT");
+    const amtGoat = ethers.parseEther("10");
+    const amtBeef = ethers.parseEther("20");
+
+    await meat.connect(minter).mintSubtype(user.address, goat, amtGoat);
+    await meat.connect(minter).mintSubtype(user.address, beef, amtBeef);
+    await meat.setSubtypeLineage(user.address, goat, 1);
+    await meat.setSubtypeLineage(user.address, beef, 2);
+
+    const transferAmt = ethers.parseEther("15");
+    await meat.connect(user).transfer(other.address, transferAmt);
+
+    expect(await meat.getBalanceOfSubtype(user.address, goat)).to.equal(0n);
+    expect(await meat.getBalanceOfSubtype(user.address, beef)).to.equal(
+      amtBeef - (transferAmt - amtGoat)
+    );
+    expect(await meat.getBalanceOfSubtype(other.address, goat)).to.equal(amtGoat);
+    expect(await meat.getBalanceOfSubtype(other.address, beef)).to.equal(
+      transferAmt - amtGoat
+    );
+
+    const resGoat = await meat.balanceOfSubtypeWithLineage(other.address, goat);
+    const resBeef = await meat.balanceOfSubtypeWithLineage(other.address, beef);
+    expect(resGoat[1]).to.equal(1n);
+    expect(resBeef[1]).to.equal(2n);
+  });
 });
