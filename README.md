@@ -201,6 +201,8 @@ terelakkan:
 - **GoatNFT**: Struktur data serta fungsi `mint` dan `burn` identik. Perbedaan
   hanya terletak pada penamaan pesan. Kontrak ini tetap mendukung `update_weight`
   dan memeriksa kesegaran data berat seperti implementasi Solidity.
+- Mulai versi `v1.1`, implementasi CosmWasm sepenuhnya mendukung alur
+  subtype-aware dan lineage-aware sehingga mencerminkan perilaku kontrak EVM.
 
 Secara umum kedua implementasi mempertahankan rasio reward yang sama
 agar perilaku ekonomi konsisten di EVM maupun Cosmos.
