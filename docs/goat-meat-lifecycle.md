@@ -22,7 +22,7 @@ Kedua token membentuk loop tertutup yang memungkinkan nilai masuk melalui MEAT d
 4. **Mengambil Reward**
    * Setelah `minClaimInterval`, staker bisa mengambil reward atau menggabungkannya kembali ke stake. Untuk keluar sepenuhnya panggil `unstake` agar pokok dan reward diterima.
 5. **Barter Produk**
-   * GOATMEAT dapat ditukar dengan token produk lain menggunakan `RateHandler` yang diakses oleh `BarterEngine` (port CosmWasm belum tersedia).
+   * GOATMEAT dapat ditukar dengan token produk lain menggunakan `RateHandler` yang diakses oleh `BarterEngine` pada CosmWasm.
    * Sebelum barter, pengguna harus memberikan *approval* kepada `BarterEngine` untuk jumlah subtype yang akan dibakar.
    * Subtype seperti `GOATMEAT` harus di-encode ke `bytes32` misal `ethers.encodeBytes32String("GOATMEAT")`.
    * MEAT selalu mengharapkan parameter subtype berupa `bytes32`; ubah ID numerik ke string sebelum di-encode. contoh: `bytes32 subtypeFromId = ethers.encodeBytes32String("99");`

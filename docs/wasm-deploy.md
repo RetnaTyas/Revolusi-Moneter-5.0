@@ -7,7 +7,11 @@ Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direk
 - `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
 - `ratehandler` – utilitas kecil yang menyimpan rasio konversi terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
 - `goatnftwrapper` – membungkus GoatNFT untuk mencetak GOAT, NFT dikunci hingga pengguna melakukan `unwrap`
-- `goatnftburnhook` – hook sederhana yang dipanggil saat NFT dibakar dan mencatat jumlah GOATMEAT yang seharusnya dicetak
+- `goatnftburnhook` – hook saat GoatNFT dibakar dan mencetak `GOATMEAT`
+- `sapinft` – NFT sapi yang menyimpan berat dan dapat dibakar menjadi `BEEFMEAT`
+- `sapinftwrapper` – membungkus SapiNFT untuk mencetak GOAT
+- `sapinftburnhook` – hook saat SapiNFT dibakar dan mencetak `BEEFMEAT`
+- `barterengine` – modul barter produk antar subtype menggunakan `RateHandler`
 
 Paket-paket ini mencerminkan kontrak Solidity di `contracts/`. Sebagian besar fungsi memiliki pesan execute yang setara, namun terdapat beberapa perbedaan penting:
 
@@ -56,17 +60,35 @@ wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
-Instansiasi `meat`, `goatnft`, dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan nantinya akan digunakan oleh `BarterEngine` untuk menentukan rasio barter setelah port CosmWasm-nya tersedia. Setelah itu deploy `goatnftwrapper` dan `goatnftburnhook` dengan parameter alamat kontrak terkait:
+Instansiasi `meat`, `goatnft`, `sapinft`, dan `ratehandler` dengan perintah serupa. `ratehandler` digunakan oleh `BarterEngine` untuk menentukan rasio barter. Setelah itu deploy `goatnftwrapper`, `sapinftwrapper`, `goatnftburnhook`, `sapinftburnhook`, dan `barterengine` dengan parameter alamat kontrak terkait:
 ```bash
 # contoh instansiasi goatnftwrapper
 wasmd tx wasm instantiate <code_id_wrapper> '{"nft_contract":"<nft_addr>","goat_contract":"<goat_addr>"}' \
-  --from wallet --label "wrapper" \
+  --from wallet --label "goat-wrapper" \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 
-# contoh instansiasi burn hook
+# contoh instansiasi sapinftwrapper
+wasmd tx wasm instantiate <code_id_sapi_wrapper> '{"nft_contract":"<sapi_nft_addr>","goat_contract":"<goat_addr>"}' \
+  --from wallet --label "sapi-wrapper" \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+
+# contoh instansiasi burn hook kambing
 wasmd tx wasm instantiate <code_id_hook> '{"nft_contract":"<nft_addr>"}' \
-  --from wallet --label "burnhook" \
+  --from wallet --label "goat-burnhook" \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+
+# contoh instansiasi burn hook sapi
+wasmd tx wasm instantiate <code_id_sapi_hook> '{"nft_contract":"<sapi_nft_addr>"}' \
+  --from wallet --label "sapi-burnhook" \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+
+# contoh instansiasi barterengine
+wasmd tx wasm instantiate <code_id_barter> '{"meat_contract":"<meat_addr>","rate_handler":"<rate_addr>"}' \
+  --from wallet --label "barter" \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
