@@ -9,7 +9,7 @@ Repositori ini berisi dua token ERC20:
 
 Berikut gambaran umum alur penggunaan kedua token:
 
-1. **Mint MEAT** – MEAT hanya dicetak melalui `mintSubtype()` oleh kontrak yang telah diberi otorisasi seperti hook pembakaran NFT. Saat kontrak dideploy, suplai awal dikirim ke alamat pemilik.
+1. **Mint MEAT** – MEAT hanya dicetak melalui `mintSubtype()` oleh kontrak yang telah diberi otorisasi seperti hook pembakaran NFT. Saat kontrak dideploy, pemilik otomatis menjadi minter dan menerima 1000 token `GOATMEAT`.
    *MEAT hanya dicetak oleh kontrak terotorisasi.*
 2. **Stake GOAT** – Pemegang GOAT dapat memanggil `stake(amount)` pada kontrak GOAT untuk mulai memperoleh reward. Besarnya reward dihitung linier berdasarkan `rewardRate` dengan periode akrual `rewardInterval`.
    *Memanggil `stake()` lagi akan mengatur ulang `lastStakedTime` dan membuang reward yang belum diambil, jadi sebaiknya `claimReward` terlebih dahulu sebelum menambah stake.*
@@ -362,10 +362,9 @@ Mekanisme lama digantikan alur baru:
 
 Cakupan unit test meliputi:
 
-- Deployment GOAT dan MEAT beserta kepemilikan serta suplai awal.
+- Deployment GOAT dan MEAT beserta kepemilikan, hak minter awal, dan suplai awal 1000 GOATMEAT.
 - Proses staking, klaim, dan unstake.
 - Pengujian interval klaim (`claim.test.js`).
-
 Untuk kontrak CosmWasm, jalankan skrip build berikut terlebih dahulu:
 
 ```bash
