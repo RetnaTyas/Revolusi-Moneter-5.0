@@ -56,7 +56,7 @@ wasmd tx wasm instantiate <code_id> '{"meat_contract":"cosmos1..."}' \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```
-Instansiasi `meat`, `goatnft`, dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan akan dikonfigurasi di `BarterEngine` untuk menentukan rasio barter. Setelah itu deploy `goatnftwrapper` dan `goatnftburnhook` dengan parameter alamat kontrak terkait:
+Instansiasi `meat`, `goatnft`, dan `ratehandler` dengan perintah serupa. `ratehandler` tidak memerlukan parameter dan nantinya akan digunakan oleh `BarterEngine` untuk menentukan rasio barter setelah port CosmWasm-nya tersedia. Setelah itu deploy `goatnftwrapper` dan `goatnftburnhook` dengan parameter alamat kontrak terkait:
 ```bash
 # contoh instansiasi goatnftwrapper
 wasmd tx wasm instantiate <code_id_wrapper> '{"nft_contract":"<nft_addr>","goat_contract":"<goat_addr>"}' \
