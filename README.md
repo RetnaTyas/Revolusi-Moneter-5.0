@@ -67,6 +67,11 @@ Semua subtype direpresentasikan sebagai `bytes32`. MEAT selalu menerima paramete
 Kontrak MEAT kini menyimpan metadata `lineageID` untuk setiap kombinasi pengguna dan subtype. Pemilik kontrak dapat menetapkan nilai ini melalui `setSubtypeLineage(user, subtype, lineageID)`. Untuk membaca saldo sekaligus asal-usul token, gunakan `balanceOfSubtypeWithLineage(user, subtype)` yang mengembalikan `(balance, lineageID)`. Fungsi ini dipakai `BarterEngine` maupun `RedeemEngine` guna memverifikasi token sebelum dipertukarkan atau ditebus.
 Lineage ID otomatis diatur saat hook memanggil `mintSubtype()` sehingga mint manual tanpa lineage tidak diperbolehkan.
 
+Pengiriman MEAT kini menggunakan mekanisme round-robin antar subtype. Kontrak
+menyimpan indeks terakhir yang digunakan sehingga transfer berikutnya tidak
+perlu memindai seluruh daftar subtype milik pengirim. Pendekatan ini menjaga
+lineage sambil menghemat gas ketika pengguna memiliki banyak subtype.
+
 ### Token Lifecycle Flow
 
 ```mermaid
