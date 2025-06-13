@@ -71,7 +71,7 @@ Lineage ID otomatis diatur saat hook memanggil `mintSubtype()` sehingga mint man
 
 ```mermaid
 flowchart LR
-  MintMEAT["Mint MEAT with Native"] --> Subtype["Subtype Balance"]
+  MintMEAT["Mint MEAT via mintSubtype"] --> Subtype["Subtype Balance"]
   Subtype --> BarterEngine["BarterEngine"]
   Subtype --> RedeemEngine["RedeemEngine"]
   RedeemEngine --> Physical["Physical Meat Delivery"]
@@ -316,8 +316,7 @@ Setelah itu edit `frontend/.env.local` dan isi `NEXT_PUBLIC_GOAT_ADDRESS` serta 
 
 Struktur dan hubungan antar kontrak:
 - `GOAT` (`contracts/GOAT.sol`) mewarisi `ERC20` OpenZeppelin dan menambahkan fungsi staking, klaim, kompaun, serta konfigurasi reward. Token hanya dicetak melalui `GoatNFTWrapper` saat NFT dibungkus.
-- `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang menerima native token
-  untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterEngine`.
+- `MEAT` (`contracts/MEAT.sol`) adalah token `ERC20` yang hanya dicetak lewat `mintSubtype()` oleh kontrak terotorisasi. Penebusan daging diproses melalui `RedeemEngine.redeem`. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterEngine`.
 - `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Hanya pertukaran PRODUCT↔PRODUCT yang diperbolehkan dan token GOAT **tidak** dapat ditukar. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
 -   Pengguna harus men-*approve* `BarterEngine` agar kontrak dapat membakar subtype miliknya.
 -   Fungsi `getCurrentBarterRate(fromSubtype, toSubtype)` menyediakan rasio swap terkini tanpa mengeksekusi transaksi.
