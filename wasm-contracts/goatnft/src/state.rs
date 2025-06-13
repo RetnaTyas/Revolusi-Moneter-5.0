@@ -19,6 +19,9 @@ pub const GOAT_VALUE: Map<u64, Uint128> = Map::new("goat_value");
 pub const GOAT_METADATA: Map<u64, GoatData> = Map::new("goat_metadata");
 pub const APPROVALS: Map<u64, Addr> = Map::new("approvals");
 
+/// Address of the burn hook contract
+pub const BURN_HOOK: Item<Option<Addr>> = Item::new("burn_hook");
+
 /// Timestamp of the last weight update for each token
 pub const LAST_WEIGHT_UPDATE: Map<u64, u64> = Map::new("last_weight_update");
 

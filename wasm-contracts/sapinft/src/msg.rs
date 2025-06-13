@@ -35,6 +35,9 @@ pub enum ExecuteMsg {
         token_id: String,
         new_weight: u64,
     },
+    SetBurnHook {
+        hook: String,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

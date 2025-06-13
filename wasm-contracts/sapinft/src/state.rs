@@ -19,6 +19,9 @@ pub const SAPI_VALUE: Map<u64, Uint128> = Map::new("sapi_value");
 pub const SAPI_METADATA: Map<u64, SapiData> = Map::new("sapi_metadata");
 pub const APPROVALS: Map<u64, Addr> = Map::new("approvals");
 
+/// Address of the burn hook contract
+pub const BURN_HOOK: Item<Option<Addr>> = Item::new("burn_hook");
+
 /// Timestamp of the last weight update for each token
 pub const LAST_WEIGHT_UPDATE: Map<u64, u64> = Map::new("last_weight_update");
 

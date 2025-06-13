@@ -92,6 +92,7 @@ GoatNFT bukan sekadar NFT koleksi. Token ini berfungsi sebagai **identitas digit
 - **Living Ledger** – Berat terakhir selalu di-update agar valuasi mengikuti kondisi riil.
 - **Ownership Record** – Mengikuti standar ERC721 sehingga kepemilikan dapat dipindahtangankan.
 - **Slaughter Certificate** – NFT wajib dibakar ketika kambing disembelih; pembakaran ini memicu `GoatNFTBurnHook` untuk mencetak `GOATMEAT` sesuai berat terakhir.
+- **Hook Configurable** – Alamat burn hook dapat diubah pemilik lewat `set_burn_hook` (CosmWasm) atau `setBurnHook` (Solidity).
 - **Fraud Prevention** – Proses burn menghapus NFT selamanya sehingga tidak ada klaim ganda.
 
 ### Lifecycle Tokenization
@@ -109,6 +110,7 @@ Semua peristiwa tersebut tercatat on-chain sehingga pasokan GOAT dan MEAT selalu
 SapiNFT memodernisasi pencatatan sapi dengan pendekatan serupa. Token ini menyimpan `nfcId`, ras, tahun lahir, dan berat yang dapat diperbarui oleh pemilik agar valuasi tetap akurat. NFT dapat dipindahtangankan bebas sesuai standar ERC721. Saat sapi disembelih, NFT dibakar sehingga `SapiNFTBurnHook` otomatis mencetak `BEEFMEAT`. Token BEEFMEAT kemudian bisa ditebus menjadi daging fisik.
 
 Fungsi `burn` pada SapiNFT juga menghapus data dan memanggil `super.burn` terlebih dulu sebelum menghubungi `burnHook` agar tidak rentan terhadap *reentrancy*.
+- Pemilik dapat mengubah alamat hook melalui `set_burn_hook` (CosmWasm) atau `setBurnHook` di versi Solidity.
 
 Alurnya ringkas sebagai berikut:
 

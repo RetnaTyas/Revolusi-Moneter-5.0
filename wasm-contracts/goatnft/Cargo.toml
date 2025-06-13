@@ -16,7 +16,10 @@ cw2 = "1.1"
 base64 = "0.21"
 serde-json-wasm = "0.5"
 cw721 = "0.18"
+goatnftburnhook = { path = "../goatnftburnhook" }
 
 [dev-dependencies]
 cw-multi-test = "0.16"
 starter = { path = "../starter" }
+meat = { path = "../meat" }
+goatnftburnhook = { path = "../goatnftburnhook" }
