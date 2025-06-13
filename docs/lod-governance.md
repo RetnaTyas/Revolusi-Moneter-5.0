@@ -1,6 +1,6 @@
 # Level of Decay (LOD)
 
-`LOD` menentukan penurunan nilai barter komoditas setiap hari. Data dasar tersimpan pada `lod_data_base.json` dan diolah oleh skrip `compute_lod.py` menjadi `lod_data.json`. Nilai pada berkas keluaran tersebut dapat dimuat on-chain melalui fungsi `setCommodityRepresentation` pada `RateHandler`.
+`LOD` menentukan penurunan nilai barter komoditas setiap hari. Data dasar tersimpan pada `lod_data_base.json` dan diolah oleh skrip `compute_lod.py` menjadi `lod_data.json`. Nilai pada berkas keluaran tersebut dimuat on-chain hanya melalui fungsi `setCommodityRepresentation` pada `RateHandler`. Tidak ada mekanisme fallback maupun ketergantungan `SwapConfig`.
 
 ```json
 [
