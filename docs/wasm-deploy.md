@@ -12,6 +12,7 @@ Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direk
 - `sapinftwrapper` – membungkus SapiNFT untuk mencetak GOAT
 - `sapinftburnhook` – hook saat SapiNFT dibakar dan mencetak `BEEFMEAT`
 - `barterengine` – modul barter produk antar subtype menggunakan `RateHandler`
+- `redeemengine` – memproses penebusan MEAT menjadi barang fisik
 
 Paket-paket ini mencerminkan kontrak Solidity di `contracts/`. Sebagian besar fungsi memiliki pesan execute yang setara, namun terdapat beberapa perbedaan penting:
 
@@ -89,6 +90,13 @@ wasmd tx wasm instantiate <code_id_sapi_hook> '{"nft_contract":"<sapi_nft_addr>"
 # contoh instansiasi barterengine
 wasmd tx wasm instantiate <code_id_barter> '{"meat_contract":"<meat_addr>","rate_handler":"<rate_addr>"}' \
   --from wallet --label "barter" \
+  --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
+  --chain-id testing-1 --node https://rpc.testnet.cosmos.network
+```
+
+# contoh instansiasi redeemengine
+wasmd tx wasm instantiate <code_id_redeem> '{"meat_contract":"<meat_addr>"}' \
+  --from wallet --label "redeem" \
   --gas-prices 0.025uatom --gas auto --gas-adjustment 1.3 \
   --chain-id testing-1 --node https://rpc.testnet.cosmos.network
 ```

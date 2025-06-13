@@ -9,7 +9,7 @@ if ! rustup target list --installed | grep -q wasm32-unknown-unknown; then
   rustup target add wasm32-unknown-unknown
 fi
 
-for pkg in starter meat goatnft ratehandler goatnftwrapper goatnftburnhook sapinft sapinftwrapper sapinftburnhook barterengine; do
+for pkg in starter meat goatnft ratehandler goatnftwrapper goatnftburnhook sapinft sapinftwrapper sapinftburnhook barterengine redeemengine; do
   cd "$DIR/$pkg"
   cargo build --release --target wasm32-unknown-unknown
   mkdir -p "$DIR/../artifacts"
