@@ -6,9 +6,10 @@ use cw2::set_contract_version;
 
 use crate::msg::{
     AllowanceResponse, BalanceResponse, BalanceSubtypeWithLineageResponse, ExecuteMsg,
-    InstantiateMsg, QueryMsg, TokenInfoResponse,
+    InstantiateMsg, QueryMsg, TokenInfoResponse, TotalSupplyResponse,
 };
 use crate::state::*;
+use std::cmp;
 
 pub mod msg;
 pub mod state;
@@ -122,6 +123,77 @@ fn burn_subtype_internal(
     Ok(())
 }
 
+fn move_subtypes(
+    store: &mut dyn cosmwasm_std::Storage,
+    from: &Addr,
+    to: &Addr,
+    mut amount: Uint128,
+) -> StdResult<()> {
+    if amount.is_zero() || from == to {
+        return Ok(());
+    }
+    let mut list = USER_SUBTYPES.may_load(store, from)?.unwrap_or_default();
+    let mut idx = TRANSFER_CURSOR.may_load(store, from)?.unwrap_or(0u64) as usize;
+    if idx >= list.len() {
+        idx = 0;
+    }
+    while amount > Uint128::zero() && !list.is_empty() {
+        if idx >= list.len() {
+            idx = 0;
+        }
+        let st = list[idx].clone();
+        let mut from_bal = SUBTYPE_BALANCES
+            .may_load(store, (from, st.as_slice()))?
+            .unwrap_or_default();
+        if from_bal.is_zero() {
+            remove_user_subtype(store, from, st.as_slice())?;
+            list = USER_SUBTYPES.may_load(store, from)?.unwrap_or_default();
+            if idx >= list.len() {
+                idx = 0;
+            }
+            continue;
+        }
+        let t_amt = cmp::min(from_bal, amount);
+        from_bal -= t_amt;
+        if from_bal.is_zero() {
+            remove_user_subtype(store, from, st.as_slice())?;
+            list = USER_SUBTYPES.may_load(store, from)?.unwrap_or_default();
+            if idx >= list.len() {
+                idx = 0;
+            }
+        } else {
+            idx += 1;
+        }
+        SUBTYPE_BALANCES.save(store, (from, st.as_slice()), &from_bal)?;
+
+        let mut to_bal = SUBTYPE_BALANCES
+            .may_load(store, (to, st.as_slice()))?
+            .unwrap_or_default();
+        if to_bal.is_zero() {
+            add_user_subtype(store, to, st.as_slice())?;
+            let lineage = SUBTYPE_LINEAGE
+                .may_load(store, (from, st.as_slice()))?
+                .unwrap_or_default();
+            SUBTYPE_LINEAGE.save(store, (to, st.as_slice()), &lineage)?;
+        } else {
+            let from_lineage = SUBTYPE_LINEAGE
+                .may_load(store, (from, st.as_slice()))?
+                .unwrap_or_default();
+            let to_lineage = SUBTYPE_LINEAGE
+                .may_load(store, (to, st.as_slice()))?
+                .unwrap_or_default();
+            if from_lineage != to_lineage {
+                return Err(StdError::generic_err("Lineage mismatch"));
+            }
+        }
+        to_bal += t_amt;
+        SUBTYPE_BALANCES.save(store, (to, st.as_slice()), &to_bal)?;
+        amount -= t_amt;
+    }
+    TRANSFER_CURSOR.save(store, from, &((idx) as u64))?;
+    Ok(())
+}
+
 #[entry_point]
 pub fn instantiate(
     deps: DepsMut,
@@ -132,6 +204,7 @@ pub fn instantiate(
     let owner = info.sender.clone();
     OWNER.save(deps.storage, &owner)?;
     MINTERS.save(deps.storage, &owner, &true)?;
+    RATE_HANDLER.save(deps.storage, &None)?;
     TOTAL_SUPPLY.save(deps.storage, &Uint128::zero())?;
     mint_subtype_internal(
         deps.storage,
@@ -213,6 +286,9 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             subtype,
             lineage_id,
         } => execute_set_lineage(deps, info, user, subtype, lineage_id),
+        ExecuteMsg::SetRateHandler { address } => {
+            execute_set_rate_handler(deps, info, address)
+        }
     }
 }
 
@@ -225,6 +301,7 @@ fn execute_transfer(
     let recipient = deps.api.addr_validate(&recipient)?;
     sub_balance(deps.storage, &info.sender, amount)?;
     add_balance(deps.storage, &recipient, amount)?;
+    move_subtypes(deps.storage, &info.sender, &recipient, amount)?;
     Ok(Response::new())
 }
 
@@ -258,6 +335,7 @@ fn execute_transfer_from(
     ALLOWANCES.save(deps.storage, (&owner_addr, &info.sender), &allowance)?;
     sub_balance(deps.storage, &owner_addr, amount)?;
     add_balance(deps.storage, &recipient, amount)?;
+    move_subtypes(deps.storage, &owner_addr, &recipient, amount)?;
     Ok(Response::new())
 }
 
@@ -348,6 +426,19 @@ fn execute_set_lineage(
         .add_attribute("lineage_id", lineage_id.to_string()))
 }
 
+fn execute_set_rate_handler(
+    mut deps: DepsMut,
+    info: MessageInfo,
+    address: String,
+) -> StdResult<Response> {
+    only_owner(deps.branch(), &info)?;
+    let addr = deps.api.addr_validate(&address)?;
+    RATE_HANDLER.save(deps.storage, &Some(addr.clone()))?;
+    Ok(Response::new()
+        .add_attribute("action", "RateHandlerUpdated")
+        .add_attribute("address", addr.into_string()))
+}
+
 fn execute_redeem_for_meat(
     deps: DepsMut,
     info: MessageInfo,
@@ -409,6 +500,23 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
                 balance: bal,
                 lineage_id: lineage,
             })
+        }
+        QueryMsg::BalanceOfSubtype { user, subtype } => {
+            let addr = deps.api.addr_validate(&user)?;
+            let bal = SUBTYPE_BALANCES
+                .may_load(deps.storage, (&addr, subtype.as_bytes()))?
+                .unwrap_or_default();
+            to_json_binary(&BalanceResponse { balance: bal })
+        }
+        QueryMsg::TotalSupplyOfSubtype { subtype } => {
+            let total = SUBTYPE_TOTAL_SUPPLY
+                .may_load(deps.storage, subtype.as_bytes())?
+                .unwrap_or_default();
+            to_json_binary(&TotalSupplyResponse { total })
+        }
+        QueryMsg::RateHandler {} => {
+            let addr = RATE_HANDLER.load(deps.storage)?.map(|a| a.into_string());
+            to_json_binary(&addr)
         }
     }
 }
