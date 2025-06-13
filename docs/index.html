@@ -1,57 +1,510 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revolusi Moneter 5.0</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="assets/img/logo.png" type="image/png">
+    <title>GOAT & MEAT Token Ecosystem - Futuristic Digital Commodity Platform</title>
+    <style>
+        /* Variables */
+        :root {
+            --primary: #0ff0fc;
+            --secondary: #ff00ff;
+            --accent: #00ff9d;
+            --dark: #0a0a1a;
+            --darker: #050511;
+            --light: #e0f7ff;
+            --card-bg: rgba(10, 15, 30, 0.7);
+            --glow-primary: 0 0 15px rgba(0, 255, 157, 0.7);
+            --glow-secondary: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 157, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            text-shadow: var(--glow-primary);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Layout */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at center, rgba(0, 255, 157, 0.1) 0%, transparent 70%),
+                linear-gradient(135deg, transparent 50%, rgba(255, 0, 255, 0.05) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .hero h1 {
+            margin-bottom: 1.5rem;
+            animation: pulse 3s infinite;
+        }
+
+        .hero p {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            font-size: 1.3rem;
+            color: #c2e9ff;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 157, 0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            z-index: -1;
+            border-radius: 17px;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), var(--glow-primary);
+        }
+
+        /* Diagrams */
+        .diagram-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 157, 0.1);
+            overflow: hidden;
+        }
+
+        .diagram {
+            width: 100%;
+            min-height: 300px;
+            background: rgba(10, 20, 40, 0.5);
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-weight: bold;
+            position: relative;
+        }
+
+        .diagram::before {
+            content: 'Diagram Mermaid Akan Ditampilkan di Sini';
+            position: absolute;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(5, 10, 20, 0.8);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0, 255, 157, 0.2);
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: var(--darker);
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 255, 157, 0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 255, 157, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { text-shadow: 0 0 10px rgba(0, 255, 157, 0.7); }
+            50% { text-shadow: 0 0 20px rgba(0, 255, 157, 0.9), 0 0 30px rgba(0, 255, 157, 0.5); }
+            100% { text-shadow: 0 0 10px rgba(0, 255, 157, 0.7); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(0, 255, 157, 0.1);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-links a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            text-shadow: var(--glow-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            .hero { padding: 3rem 0; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container">er">
-            <img src="assets/img/logo.png" alt="Logo Revolusi Moneter 5.0" class="logo">
-            <nav>
-                <ul>
-                    <li><a href="../docs/index.html" class="active">Beranda</a></li>
-                    <li><a href="../README.md">Tentang</a></li>
-                    <li><a href="kontak.html">Kontak</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
+    <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1>Revolusi Sistem Keuangan 5.0</h1>
-            <p>Transformasi menuju ekosistem moneter berbasis teknologi modern</p>
-            <a href="#fitur" class="btn">Jelajahi Konsep</a>
-        </div>
-    </section>
-
-    <section id="fitur" class="features">
-        <div class="container">
-            <div class="feature-card">
-                <h3>Digital Currency</h3>
-                <p>Mata uang digital terdesentralisasi berbasis blockchain</p>
-            </div>
-            <div class="feature-card">
-                <h3>Fintech Revolution</h3>
-                <p>Inovasi layanan keuangan berbasis AI dan big data</p>
-            </div>
-            <div class="feature-card">
-                <h3>Financial Inclusion</h3>
-                <p>Demokratisasi akses keuangan untuk seluruh lapisan masyarakat</p>
+            <h1>GOAT & MEAT TOKEN ECOSYSTEM</h1>
+            <p>Platform tokenisasi komoditas pertanian berbasis blockchain dengan mekanisme staking, redeem, dan rantai pasok terdesentralisasi</p>
+            <div class="btn-container">
+                <button class="btn">Explorer Contracts</button>
+                <button class="btn btn-outline">Whitepaper</button>
             </div>
         </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 Revolusi Moneter 5.0.</p>
+    <!-- Token Introduction -->
+    <section class="container">
+        <h2>Digital Commodity Ecosystem</h2>
+        <p>Ekosistem GOAT dan MEAT menghubungkan dunia pertanian dengan blockchain melalui tokenisasi siklus hidup hewan ternak, menciptakan sistem nilai yang transparan dan dapat diaudit.</p>
+        
+        <div class="card-grid">
+            <div class="card">
+                <h3>GOAT Token</h3>
+                <p><strong>Guardian of Agricultural Trade</strong> - Token utilitas yang mendukung proses staking dan mencerminkan nilai ternak hidup.</p>
+                <ul>
+                    <li>Dicetak saat NFT kambing dikunci (wrapped)</li>
+                    <li>Dapat di-stake untuk memperoleh imbal hasil</li>
+                    <li>Mekanisme klaim dan kompaun fleksibel</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>MEAT Token</h3>
+                <p><strong>Market-Enabled Agricultural Token</strong> - Token yang mewakili daging fisik dari ternak yang disembelih.</p>
+                <ul>
+                    <li>Dicetak saat NFT ternak dibakar</li>
+                    <li>Mewakili subtype spesifik (GOATMEAT, BEEFMEAT)</li>
+                    <li>Dapat ditebus menjadi produk fisik</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>Lifecycle NFT</h3>
+                <p>NFT yang mewakili identitas digital hewan ternak sepanjang siklus hidupnya.</p>
+                <ul>
+                    <li>Mencatat data ternak (NFC ID, ras, berat)</li>
+                    <li>Dapat diperbarui dan ditransfer</li>
+                    <li>Dibakar saat penyembelihan untuk mencetak MEAT</li>
+                </ul>
+            </div>
         </div>
+    </section>
+
+    <!-- Workflow Diagram -->
+    <section class="container">
+        <h2>Token Lifecycle Flow</h2>
+        <p>Alur lengkap dari kelahiran hewan ternak hingga penebusan daging fisik melalui token digital.</p>
+        
+        <div class="diagram-container">
+            <div class="diagram">
+                <!-- Diagram akan ditempatkan di sini -->
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23050a1a'/%3E%3Cpath d='M50,50 L150,50 L150,150 L50,150 Z' fill='none' stroke='%230ff0fc' stroke-width='2'/%3E%3Ctext x='100' y='100' fill='%230ff0fc' text-anchor='middle'%3EGOAT NFT%3C/text%3E%3Cpath d='M150,100 L250,100' stroke='%23ff00ff' stroke-width='2' marker-end='url(%23arrow)'/%3E%3Cpath d='M250,50 L350,50 L350,150 L250,150 Z' fill='none' stroke='%2300ff9d' stroke-width='2'/%3E%3Ctext x='300' y='100' fill='%2300ff9d' text-anchor='middle'%3EMEAT%3C/text%3E%3Cdefs%3E%3Cmarker id='arrow' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto' markerUnits='strokeWidth'%3E%3Cpath d='M0,0 L0,6 L9,3 z' fill='%23ff00ff'/%3E%3C/marker%3E%3C/defs%3E%3C/svg%3E" alt="Token Lifecycle Diagram">
+            </div>
+            
+            <div class="workflow-steps">
+                <div class="card">
+                    <h4>1. Mint GoatNFT</h4>
+                    <p>Setiap kambing yang lahir dicetak sebagai NFT unik dengan data identitas dan berat awal.</p>
+                </div>
+                
+                <div class="card">
+                    <h4>2. Update Weight</h4>
+                    <p>Pemilik memperbarui berat kambing secara berkala untuk menjaga keakuratan valuasi.</p>
+                </div>
+                
+                <div class="card">
+                    <h4>3. Wrap & Stake</h4>
+                    <p>Kunci GoatNFT untuk mencetak token GOAT yang dapat di-stake untuk memperoleh reward.</p>
+                </div>
+                
+                <div class="card">
+                    <h4>4. Burn NFT</h4>
+                    <p>Saat penyembelihan, NFT dibakar dan mencetak MEAT sesuai berat terakhir.</p>
+                </div>
+                
+                <div class="card">
+                    <h4>5. Redeem MEAT</h4>
+                    <p>Token MEAT ditebus menjadi produk daging fisik melalui RedeemEngine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Implementation -->
+    <section class="container">
+        <h2>Technical Implementation</h2>
+        <p>Implementasi kontrak pintar yang mengatur seluruh ekosistem token dan alur kerja.</p>
+        
+        <div class="card-grid">
+            <div class="card">
+                <h3>GoatNFTWrapper</h3>
+                <p>Kontrak yang mengunci GoatNFT dan mencetak token GOAT sesuai berat kambing.</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Solidity Implementation</span>
+                    </div>
+                    <pre><code>function wrap(uint256 tokenId) external {
+    require(goatNFT.ownerOf(tokenId) == msg.sender, "Not owner");
+    goatNFT.transferFrom(msg.sender, address(this), tokenId);
+    
+    uint256 weight = goatNFT.getWeight(tokenId);
+    uint256 amount = weight * GOAT_WRAP_RATE;
+    
+    goatToken.mint(msg.sender, amount);
+    emit Wrapped(msg.sender, tokenId, amount);
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Burn Hook</h3>
+                <p>Mekanisme otomatis yang mencetak MEAT saat NFT dibakar.</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Burn Function</span>
+                    </div>
+                    <pre><code>function burn(uint256 tokenId) external {
+    require(_isApprovedOrOwner(msg.sender, tokenId), "Not owner");
+    
+    uint256 weight = goatData[tokenId].weight;
+    _burn(tokenId);
+    
+    uint256 meatAmount = (weight * SLAUGHTER_YIELD_BPS) / 10000;
+    bytes32 subtype = encodeBytes32String("GOATMEAT");
+    
+    meatToken.mintSubtype(msg.sender, subtype, meatAmount);
+    emit GoatBurned(tokenId, weight);
+}</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="diagram-container">
+            <h3>Subtype MEAT Structure</h3>
+            <p>Token MEAT mendukung berbagai subtype yang mewakili jenis daging berbeda.</p>
+            <div class="diagram">
+                <!-- Diagram akan ditempatkan di sini -->
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23050a1a'/%3E%3Cellipse cx='200' cy='100' rx='150' ry='80' fill='none' stroke='%230ff0fc' stroke-width='2'/%3E%3Ctext x='200' y='70' fill='%230ff0fc' text-anchor='middle' font-size='20'%3EMEAT Token%3C/text%3E%3Ccircle cx='120' cy='100' r='30' fill='%23050a1a' stroke='%2300ff9d' stroke-width='2'/%3E%3Ctext x='120' y='105' fill='%2300ff9d' text-anchor='middle'%3EGOATMEAT%3C/text%3E%3Ccircle cx='200' cy='100' r='30' fill='%23050a1a' stroke='%23ff00ff' stroke-width='2'/%3E%3Ctext x='200' y='105' fill='%23ff00ff' text-anchor='middle'%3EBEEFMEAT%3C/text%3E%3Ccircle cx='280' cy='100' r='30' fill='%23050a1a' stroke='%23ffaa00' stroke-width='2'/%3E%3Ctext x='280' y='105' fill='%23ffaa00' text-anchor='middle'%3ECHICKENMEAT%3C/text%3E%3C/svg%3E" alt="MEAT Subtype Diagram">
+            </div>
+        </div>
+    </section>
+
+    <!-- Ecosystem Vision -->
+    <section class="container">
+        <h2>Visi Ekosistem</h2>
+        <div class="card">
+            <h3>Monetary 5.0</h3>
+            <p>Kami membangun sistem nilai baru yang transparan, terdesentralisasi, dan terikat pada siklus hidup nyata:</p>
+            <ul>
+                <li>Penancapan nilai pada seluruh siklus hidup hewan ternak</li>
+                <li>Transparansi pasokan dan alur nilai dari peternak ke konsumen</li>
+                <li>Pertukaran nilai yang adil dan dapat ditebus</li>
+                <li>Arsitektur anti-inflasi yang terdesentralisasi</li>
+                <li>Tata kelola berbasis komunitas</li>
+            </ul>
+            <p style="margin-top: 1.5rem; font-style: italic; border-left: 3px solid var(--accent); padding-left: 1rem;">
+                "Uang sejati hanyalah mitos — yang bertahan adalah sistem. Nilai harus senantiasa hidup."
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container">
+        <h3>GOAT & MEAT TOKEN ECOSYSTEM</h3>
+        <p>Platform tokenisasi komoditas pertanian berbasis blockchain</p>
+        
+        <div class="footer-links">
+            <a href="#">Documentation</a>
+            <a href="#">GitHub</a>
+            <a href="#">Whitepaper</a>
+            <a href="#">Community</a>
+        </div>
+        
+        <p style="margin-top: 2rem; color: rgba(224, 247, 255, 0.6);">
+            &copy; 2023 GOAT & MEAT Ecosystem. All rights reserved.
+        </p>
     </footer>
 
-    <script src="assets/js/script.js"></script>
+    <script>
+        // Animasi untuk elemen card
+        document.querySelectorAll('.card').forEach((card, index) => {
+            card.style.animation = `float ${6 + index/2}s infinite ease-in-out`;
+        });
+
+        // Animasi untuk tombol
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mousemove', e => {
+                const x = e.pageX - btn.getBoundingClientRect().left;
+                const y = e.pageY - btn.getBoundingClientRect().top;
+                
+                btn.style.setProperty('--x', `${x}px`);
+                btn.style.setProperty('--y', `${y}px`);
+            });
+        });
+    </script>
 </body>
 </html>
