@@ -319,6 +319,7 @@ Struktur dan hubungan antar kontrak:
   untuk mint dan mengontrol deposit rate. Pesan baru `redeem_for_meat` membakar MEAT untuk menebus daging. Perhitungan rasio barter menggunakan `RateHandler` yang dipanggil di dalam `BarterEngine`.
 - `BarterEngine` (`contracts/BarterEngine.sol`) memfasilitasi swap PRODUCT↔PRODUCT antar subtype MEAT. Engine ini menggunakan `balanceOfSubtypeWithLineage()` dari MEAT untuk memvalidasi asal-usul token sebelum swap dilakukan.
 -   Pengguna harus men-*approve* `BarterEngine` agar kontrak dapat membakar subtype miliknya.
+-   Fungsi `getCurrentBarterRate(fromSubtype, toSubtype)` menyediakan rasio swap terkini tanpa mengeksekusi transaksi.
 -   Fungsi `emergencyWithdrawMEATSubtype` memungkinkan pemilik menarik saldo subtype yang tersangkut di dalam kontrak secara aman. Pilih `transferSubtype` jika tersedia, atau gunakan jalur `burn+mint` sebagai fallback.
 - `RedeemEngine` (`contracts/RedeemEngine.sol`) memproses penebusan MEAT dan memverifikasi lineage melalui `balanceOfSubtypeWithLineage()`. Tiap subtype memiliki `RedeemConfig` yang berisi berat (gram) per token dan status aktif.
 -   Sebelum menebus, berikan *approval* ke `RedeemEngine` untuk jumlah yang akan dibakar.
