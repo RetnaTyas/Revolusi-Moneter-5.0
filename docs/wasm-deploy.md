@@ -5,7 +5,7 @@ Proyek ini menyertakan implementasi CosmWasm untuk seluruh kontrak inti di direk
 - `starter` – token GOAT dengan logika staking
 - `meat` – token MEAT. Pencetakan dilakukan via pesan `mint_subtype` oleh kontrak terotorisasi dan penebusan menggunakan `redeem` pada `RedeemEngine`.
 - `goatnft` – kontrak NFT sederhana tempat setiap token menyimpan nilai berat yang dapat ditebus menjadi GOAT
-- `ratehandler` – utilitas kecil yang menyimpan rasio konversi terbaru dan memungkinkan pemilik memperbarui atau menonaktifkannya
+- `ratehandler` – modul LOD Engine yang menyimpan `CommodityRepresentation` dan menghitung rasio barter PRODUCT↔PRODUCT melalui `computeBarterRate`
 - `goatnftwrapper` – membungkus GoatNFT untuk mencetak GOAT, NFT dikunci hingga pengguna melakukan `unwrap`
 - `goatnftburnhook` – hook saat GoatNFT dibakar dan mencetak `GOATMEAT`
 - `sapinft` – NFT sapi yang menyimpan berat dan dapat dibakar menjadi `BEEFMEAT`
