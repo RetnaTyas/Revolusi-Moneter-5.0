@@ -246,7 +246,7 @@ MEAT juga memunculkan event utama berikut:
 
 ## Running Tests
 
-Semua pengujian Hardhat berada di direktori `test/`. Pastikan Anda menggunakan **Node.js v18** agar kompatibel dengan Hardhat.
+Semua pengujian Hardhat berada di direktori `test/`. Pastikan Anda menggunakan **Node.js v18 atau lebih baru** agar kompatibel dengan Hardhat.
 
 1. **Install dependencies** – jalankan ini sebelum perintah `npx hardhat` apa pun:
 
