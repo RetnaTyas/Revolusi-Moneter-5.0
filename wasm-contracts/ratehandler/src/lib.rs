@@ -3,7 +3,7 @@ use cosmwasm_std::{
     StdResult, Uint128,
 };
 use cw2::set_contract_version;
-use cw_storage_plus::Item;
+use cw_storage_plus::{Item, Map};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -16,29 +16,58 @@ pub struct InstantiateMsg {}
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
-    UpdateRate { new_rate: Uint128 },
-    InvalidateRate {},
+    SetCommodityRepresentation {
+        commodity_id: String,
+        data: CommodityRepresentation,
+    },
     TransferOwnership { new_owner: String },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
-    GetRate {},
+    GetLODPerDay { commodity_id: String, layer: String },
+    GetRate {
+        from_commodity: String,
+        from_layer: String,
+        to_commodity: String,
+        to_layer: String,
+    },
     Owner {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct RateResponse {
     pub rate: Uint128,
-    pub last_update: u64,
-    pub valid: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct LODResponse {
+    pub lod_per_day: Uint128,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct CommodityRepresentation {
+    pub nft_address: String,
+    pub token_virtual_address: String,
+    pub token_product_address: String,
+    pub token_product_subtype: String,
+    pub is_nft_active: bool,
+    pub is_token_virtual_active: bool,
+    pub is_token_product_active: bool,
+    pub lod_per_day_nft: Uint128,
+    pub lod_per_day_virtual: Uint128,
+    pub lod_per_day_product: Uint128,
+    pub protein_g_per_kg: Uint128,
+    pub fat_g_per_kg: Uint128,
+    pub micronutrient_index_x1000: Uint128,
+    pub yield_per_cycle_kg: Uint128,
+    pub cycle_time_days: Uint128,
 }
 
 pub const OWNER: Item<Addr> = Item::new("owner");
-pub const DYNAMIC_RATE: Item<Uint128> = Item::new("dynamic_rate");
-pub const LAST_UPDATE: Item<u64> = Item::new("last_update");
-pub const VALID: Item<bool> = Item::new("valid");
+pub const COMMODITY_REGISTRY: Map<&[u8], CommodityRepresentation> = Map::new("registry");
+pub const DECIMAL_FACTOR: u128 = 1_000_000_000_000_000_000u128;
 
 #[entry_point]
 pub fn instantiate(
@@ -48,9 +77,6 @@ pub fn instantiate(
     _msg: InstantiateMsg,
 ) -> StdResult<Response> {
     OWNER.save(deps.storage, &info.sender)?;
-    DYNAMIC_RATE.save(deps.storage, &Uint128::zero())?;
-    LAST_UPDATE.save(deps.storage, &0u64)?;
-    VALID.save(deps.storage, &false)?;
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::default())
 }
@@ -64,35 +90,26 @@ fn only_owner(deps: DepsMut, info: &MessageInfo) -> StdResult<()> {
 }
 
 #[entry_point]
-pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
+pub fn execute(deps: DepsMut, _env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
-        ExecuteMsg::UpdateRate { new_rate } => execute_update_rate(deps, env, info, new_rate),
-        ExecuteMsg::InvalidateRate {} => execute_invalidate_rate(deps, info),
+        ExecuteMsg::SetCommodityRepresentation { commodity_id, data } => {
+            execute_set_commodity_representation(deps, info, commodity_id, data)
+        }
         ExecuteMsg::TransferOwnership { new_owner } => {
             execute_transfer_ownership(deps, info, new_owner)
         }
     }
 }
 
-fn execute_update_rate(
+
+fn execute_set_commodity_representation(
     mut deps: DepsMut,
-    env: Env,
     info: MessageInfo,
-    new_rate: Uint128,
+    commodity_id: String,
+    data: CommodityRepresentation,
 ) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
-    if new_rate.is_zero() {
-        return Err(StdError::generic_err("Rate must be > 0"));
-    }
-    DYNAMIC_RATE.save(deps.storage, &new_rate)?;
-    LAST_UPDATE.save(deps.storage, &env.block.time.seconds())?;
-    VALID.save(deps.storage, &true)?;
-    Ok(Response::new())
-}
-
-fn execute_invalidate_rate(mut deps: DepsMut, info: MessageInfo) -> StdResult<Response> {
-    only_owner(deps.branch(), &info)?;
-    VALID.save(deps.storage, &false)?;
+    COMMODITY_REGISTRY.save(deps.storage, commodity_id.as_bytes(), &data)?;
     Ok(Response::new())
 }
 
@@ -109,15 +126,42 @@ fn execute_transfer_ownership(
 
 fn handle_query(deps: Deps, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::GetRate {} => {
-            let rate = DYNAMIC_RATE.load(deps.storage)?;
-            let last = LAST_UPDATE.load(deps.storage)?;
-            let valid = VALID.load(deps.storage)?;
-            to_json_binary(&RateResponse {
-                rate,
-                last_update: last,
-                valid,
-            })
+        QueryMsg::GetLODPerDay { commodity_id, layer } => {
+            let cr = COMMODITY_REGISTRY.load(deps.storage, commodity_id.as_bytes())?;
+            let lod = match layer.as_str() {
+                "NFT" => cr.lod_per_day_nft,
+                "VIRTUAL" => cr.lod_per_day_virtual,
+                "PRODUCT" => cr.lod_per_day_product,
+                _ => return Err(StdError::generic_err("Invalid layer")),
+            };
+            to_json_binary(&LODResponse { lod_per_day: lod })
+        }
+        QueryMsg::GetRate {
+            from_commodity,
+            from_layer,
+            to_commodity,
+            to_layer,
+        } => {
+            if from_layer != "PRODUCT" {
+                return Err(StdError::generic_err("FROM layer must be PRODUCT"));
+            }
+            if to_layer != "PRODUCT" {
+                return Err(StdError::generic_err("TO layer must be PRODUCT"));
+            }
+            let from_cr = COMMODITY_REGISTRY.load(deps.storage, from_commodity.as_bytes())?;
+            let to_cr = COMMODITY_REGISTRY.load(deps.storage, to_commodity.as_bytes())?;
+            let from_lod = from_cr.lod_per_day_product;
+            let to_lod = to_cr.lod_per_day_product;
+
+            if from_lod.is_zero() {
+                return Err(StdError::generic_err("Invalid FROM LOD"));
+            }
+            if to_lod.is_zero() {
+                return Err(StdError::generic_err("Invalid TO LOD"));
+            }
+
+            let rate = Uint128::from((from_lod.u128() * DECIMAL_FACTOR) / to_lod.u128());
+            to_json_binary(&RateResponse { rate })
         }
         QueryMsg::Owner {} => {
             let owner = OWNER.load(deps.storage)?;

@@ -69,7 +69,15 @@ fn execute_barter(deps: DepsMut, _env: Env, _info: MessageInfo, from_sub: String
     let rate_handler = RATE_HANDLER.load(deps.storage)?;
     let rate_resp: RateHandlerResponse = deps
         .querier
-        .query_wasm_smart(rate_handler, &RateQueryMsg::GetRate {})?;
+        .query_wasm_smart(
+            rate_handler,
+            &RateQueryMsg::GetRate {
+                from_commodity: from_sub.clone(),
+                from_layer: "PRODUCT".into(),
+                to_commodity: to_sub.clone(),
+                to_layer: "PRODUCT".into(),
+            },
+        )?;
     if rate_resp.rate.is_zero() {
         return Err(StdError::generic_err("Invalid barter rate"));
     }
@@ -85,11 +93,19 @@ fn execute_barter(deps: DepsMut, _env: Env, _info: MessageInfo, from_sub: String
 #[entry_point]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::GetRate { from_subtype: _, to_subtype: _ } => {
+        QueryMsg::GetRate { from_subtype, to_subtype } => {
             let addr = RATE_HANDLER.load(deps.storage)?;
             let resp: RateHandlerResponse = deps
                 .querier
-                .query_wasm_smart(addr, &RateQueryMsg::GetRate {})?;
+                .query_wasm_smart(
+                    addr,
+                    &RateQueryMsg::GetRate {
+                        from_commodity: from_subtype,
+                        from_layer: "PRODUCT".into(),
+                        to_commodity: to_subtype,
+                        to_layer: "PRODUCT".into(),
+                    },
+                )?;
             Ok(to_binary(&RateResponse { rate: resp.rate.u128() })?)
         }
         QueryMsg::Owner {} => {
