@@ -33,9 +33,7 @@ fn redeem_burns_meat() {
         .instantiate_contract(
             goat_id,
             Addr::unchecked("owner"),
-            &starter::msg::InstantiateMsg {
-                meat_contract: "meat".into(),
-            },
+            &starter::msg::InstantiateMsg {},
             &[],
             "goat",
             None,
@@ -136,4 +134,50 @@ fn redeem_burns_meat() {
         .unwrap();
     assert_eq!(bal.balance, Uint128::new(950));
     assert_eq!(bal.lineage_id, 1);
+}
+
+#[test]
+fn lineage_not_set_rejected() {
+    let mut app = App::default();
+    let meat_id = app.store_code(contract_meat());
+    let eng_id = app.store_code(contract_engine());
+
+    let meat_addr = app
+        .instantiate_contract(meat_id, Addr::unchecked("owner"), &MeatInstantiate {}, &[], "meat", None)
+        .unwrap();
+    let eng_addr = app
+        .instantiate_contract(eng_id, Addr::unchecked("owner"), &InstantiateMsg { meat_contract: meat_addr.to_string() }, &[], "engine", None)
+        .unwrap();
+
+    app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExec::MintSubtype { to: "user".into(), subtype: "GOATMEAT".into(), amount: Uint128::new(1000) }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExec::SetBurner { account: eng_addr.to_string(), status: true }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("owner"), eng_addr.clone(), &ExecuteMsg::SetRedeemConfig { subtype: "GOATMEAT".into(), grams_per_token_unit: 100, active: true }, &[]).unwrap();
+
+    let err = app
+        .execute_contract(Addr::unchecked("user"), eng_addr.clone(), &ExecuteMsg::Redeem { subtype: "GOATMEAT".into(), amount: 10 }, &[])
+        .unwrap_err();
+    assert!(!err.to_string().is_empty());
+}
+
+#[test]
+fn owner_can_withdraw() {
+    let mut app = App::default();
+    let meat_id = app.store_code(contract_meat());
+    let eng_id = app.store_code(contract_engine());
+
+    let meat_addr = app
+        .instantiate_contract(meat_id, Addr::unchecked("owner"), &MeatInstantiate {}, &[], "meat", None)
+        .unwrap();
+    let eng_addr = app
+        .instantiate_contract(eng_id, Addr::unchecked("owner"), &InstantiateMsg { meat_contract: meat_addr.to_string() }, &[], "engine", None)
+        .unwrap();
+
+    app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExec::SetMinter { account: eng_addr.to_string(), status: true }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExec::SetBurner { account: eng_addr.to_string(), status: true }, &[]).unwrap();
+    app.execute_contract(Addr::unchecked("owner"), meat_addr.clone(), &MeatExec::MintSubtype { to: eng_addr.to_string(), subtype: "GOATMEAT".into(), amount: Uint128::new(50) }, &[]).unwrap();
+
+    let res = app
+        .execute_contract(Addr::unchecked("owner"), eng_addr.clone(), &ExecuteMsg::EmergencyWithdrawMEATSubtype { subtype: "GOATMEAT".into() }, &[])
+        .unwrap();
+    assert!(res.events.iter().any(|e| e.attributes.iter().any(|a| a.key == "action" && a.value == "emergency_withdraw_meat_subtype")));
 }
