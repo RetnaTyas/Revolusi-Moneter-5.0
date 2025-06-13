@@ -17,6 +17,8 @@ Semua nilai tersebut kini hanya dimuat melalui fungsi `setCommodityRepresentatio
 Tidak ada fallback atau referensi ke `SwapConfig` maupun mapping lama lainnya.
 Panggilan fungsi tersebut memunculkan event `CommodityRepresentationUpdated(commodityId)` untuk menandai pembaruan data di blockchain.
 
+Versi CosmWasm dari `RateHandler`, `BarterEngine`, dan `RedeemEngine` kini menerapkan pembatasan subtype serta perhitungan LOD yang sama persis dengan implementasi Solidity.
+
 Lihat diagram *Canonical Reasoning Path* pada [architecture.md](../architecture.md#token-layer-separation--lod-engine-enforcement) bagian 4 untuk pemahaman menyeluruh mengenai pemisahan layer dan aturan swap.
 
 ---

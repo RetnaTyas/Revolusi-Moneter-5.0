@@ -212,6 +212,7 @@ terelakkan:
   dan memeriksa kesegaran data berat seperti implementasi Solidity.
 - Mulai versi `v1.1`, implementasi CosmWasm sepenuhnya mendukung alur
   subtype-aware dan lineage-aware sehingga mencerminkan perilaku kontrak EVM.
+- Versi terbaru CosmWasm juga menegakkan batasan subtype dan perhitungan LOD yang sama dengan kontrak Solidity sehingga swap dan redeem mengikuti aturan identik.
 
 Secara umum kedua implementasi mempertahankan rasio reward yang sama
 agar perilaku ekonomi konsisten di EVM maupun Cosmos.
