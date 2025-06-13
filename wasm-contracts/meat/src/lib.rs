@@ -1,14 +1,11 @@
 use cosmwasm_std::{
-    entry_point, to_json_binary, Addr, BankMsg, Binary, Coin, Deps, DepsMut, Env, MessageInfo,
-    Response, StdError, StdResult, Uint128,
+    entry_point, to_json_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response,
+    StdError, StdResult, Uint128,
 };
 use cw2::set_contract_version;
 
 
-use crate::msg::{
-    AllowanceResponse, BalanceResponse, ExecuteMsg, InstantiateMsg, QueryMsg, RateResponse,
-    TokenInfoResponse,
-};
+use crate::msg::{AllowanceResponse, BalanceResponse, ExecuteMsg, InstantiateMsg, QueryMsg, TokenInfoResponse};
 use crate::state::*;
 
 pub mod msg;
@@ -50,7 +47,6 @@ pub fn instantiate(
     OWNER.save(deps.storage, &owner)?;
     let goat_addr = deps.api.addr_validate(&msg.goat_contract)?;
     GOAT_CONTRACT.save(deps.storage, &goat_addr)?;
-    RATE.save(deps.storage, &Uint128::new(100))?;
     let init = Uint128::new(INITIAL_SUPPLY);
     BALANCES.save(deps.storage, &owner, &init)?;
     TOTAL_SUPPLY.save(deps.storage, &init)?;
@@ -78,9 +74,6 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             recipient,
             amount,
         } => execute_transfer_from(deps, info, owner, recipient, amount),
-        ExecuteMsg::MintWithNative {} => execute_mint_with_native(deps, env, info),
-        ExecuteMsg::WithdrawNative { to } => execute_withdraw_native(deps, env, info, to),
-        ExecuteMsg::ChangeDepositRate { new_rate } => execute_change_rate(deps, info, new_rate),
         ExecuteMsg::RedeemForMeat { amount } => execute_redeem_for_meat(deps, info, amount),
         ExecuteMsg::SetGoatAddress { goat_address } => execute_set_goat(deps, info, goat_address),
     }
@@ -129,86 +122,6 @@ fn execute_transfer_from(
     sub_balance(deps.storage, &owner_addr, amount)?;
     add_balance(deps.storage, &recipient, amount)?;
     Ok(Response::new())
-}
-
-fn execute_mint_with_native(deps: DepsMut, env: Env, info: MessageInfo) -> StdResult<Response> {
-    let coin: &Coin = info
-        .funds
-        .first()
-        .ok_or_else(|| StdError::generic_err("No funds"))?;
-    if coin.amount.is_zero() {
-        return Err(StdError::generic_err("No funds"));
-    }
-    let rate = RATE.load(deps.storage)?.u128();
-    let meat_amount = coin.amount.u128() * rate / 1000u128;
-    let mint = Uint128::new(meat_amount);
-    let contract = env.contract.address.clone();
-    let mut contract_bal = BALANCES
-        .may_load(deps.storage, &contract)?
-        .unwrap_or_default();
-    if contract_bal >= mint {
-        contract_bal -= mint;
-        BALANCES.save(deps.storage, &contract, &contract_bal)?;
-    } else {
-        if !contract_bal.is_zero() {
-            BALANCES.save(deps.storage, &contract, &Uint128::zero())?;
-            add_balance(deps.storage, &info.sender, contract_bal)?;
-        }
-        let to_mint = mint.checked_sub(contract_bal)?;
-        add_balance(deps.storage, &info.sender, to_mint)?;
-        let total = TOTAL_SUPPLY.load(deps.storage)? + to_mint;
-        TOTAL_SUPPLY.save(deps.storage, &total)?;
-        return Ok(Response::new()
-            .add_attribute("action", "MintedWithNative")
-            .add_attribute("user", info.sender.clone())
-            .add_attribute("native", coin.amount)
-            .add_attribute("minted", to_mint));
-    }
-    add_balance(deps.storage, &info.sender, mint)?;
-    Ok(Response::new()
-        .add_attribute("action", "MintedWithNative")
-        .add_attribute("user", info.sender)
-        .add_attribute("native", coin.amount)
-        .add_attribute("minted", mint))
-}
-
-fn execute_withdraw_native(
-    mut deps: DepsMut,
-    env: Env,
-    info: MessageInfo,
-    to: Option<String>,
-) -> StdResult<Response> {
-    only_owner(deps.branch(), &info)?;
-    let bal = deps.querier.query_all_balances(env.contract.address)?;
-    if bal.is_empty() {
-        return Err(StdError::generic_err("No funds"));
-    }
-    let to_addr = to.unwrap_or_else(|| info.sender.to_string());
-    Ok(Response::new()
-        .add_message(BankMsg::Send {
-            to_address: to_addr.clone(),
-            amount: bal.clone(),
-        })
-        .add_attribute("action", "NativeWithdrawn")
-        .add_attribute("to", to_addr)
-        .add_attribute(
-            "amount",
-            format!("{}", bal.iter().map(|c| c.amount).sum::<Uint128>()),
-        ))
-}
-
-fn execute_change_rate(
-    mut deps: DepsMut,
-    info: MessageInfo,
-    new_rate: Uint128,
-) -> StdResult<Response> {
-    only_owner(deps.branch(), &info)?;
-    let old = RATE.load(deps.storage)?;
-    RATE.save(deps.storage, &new_rate)?;
-    Ok(Response::new()
-        .add_attribute("action", "DepositRateChanged")
-        .add_attribute("old_rate", old)
-        .add_attribute("new_rate", new_rate))
 }
 
 
@@ -268,10 +181,6 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
                 decimals: DECIMALS,
                 total_supply,
             })
-        }
-        QueryMsg::DepositRate {} => {
-            let rate = RATE.load(deps.storage)?;
-            to_json_binary(&RateResponse { rate })
         }
         QueryMsg::Owner {} => {
             let owner = OWNER.load(deps.storage)?;

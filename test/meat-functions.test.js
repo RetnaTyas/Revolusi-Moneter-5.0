@@ -11,71 +11,11 @@ describe("MEAT core functions", function () {
     await meat.waitForDeployment();
   });
 
-  it("mints when sending native ETH", async function () {
-    const deposit = ethers.parseEther("1");
-    const expected = (deposit * 100n) / 1000n;
-
-    await expect(user.sendTransaction({ to: meat.target, value: deposit }))
-      .to.emit(meat, "MintedWithNative")
-      .withArgs(user.address, deposit, expected);
-
-    expect(await meat.balanceOf(user.address)).to.equal(expected);
-  });
-
-  it("withdrawNative onlyOwner and transfers balance", async function () {
-    const deposit = ethers.parseEther("1");
-    await user.sendTransaction({ to: meat.target, value: deposit });
-
-    await expect(meat.connect(user).withdrawNative()).to.be.revertedWithCustomError(
-      meat,
-      "OwnableUnauthorizedAccount"
-    ).withArgs(user.address);
-
-    await expect(meat.withdrawNative())
-      .to.emit(meat, "NativeWithdrawn")
-      .withArgs(owner.address, deposit);
-
-    expect(await ethers.provider.getBalance(meat.target)).to.equal(0n);
-  });
-
-  it("prevents reentrancy during withdrawNative", async function () {
-    const deposit = ethers.parseEther("1");
-    await user.sendTransaction({ to: meat.target, value: deposit });
-
-    const Reentrant = await ethers.getContractFactory("ReentrantWithdrawer");
-    const attacker = await Reentrant.deploy(meat.target);
-    await attacker.waitForDeployment();
-
-    await meat.transferOwnership(attacker.target);
-
-    await expect(attacker.attackWithdraw()).to.be.revertedWith(
-      "Native transfer failed"
-    );
-
-    expect(await ethers.provider.getBalance(meat.target)).to.equal(deposit);
-  });
-
-  it("changeDepositRate updates rate and affects minting", async function () {
-    expect(await meat.DepositRate()).to.equal(100n);
-
-    await expect(meat.changeDepositRate(200))
-      .to.emit(meat, "DepositRateChanged")
-      .withArgs(100n, 200n);
-    expect(await meat.DepositRate()).to.equal(200n);
-
-    const deposit = ethers.parseEther("1");
-    const expected = (deposit * 200n) / 1000n;
-
-    await expect(user.sendTransaction({ to: meat.target, value: deposit }))
-      .to.emit(meat, "MintedWithNative")
-      .withArgs(user.address, deposit, expected);
-    expect(await meat.balanceOf(user.address)).to.equal(expected);
-  });
 
   it("redeemForMeat burns tokens and emits event", async function () {
-    const deposit = ethers.parseEther("1");
-    await user.sendTransaction({ to: meat.target, value: deposit });
-    const minted = (deposit * 100n) / 1000n;
+    const subtype = ethers.encodeBytes32String("GOATMEAT");
+    const minted = ethers.parseEther("1");
+    await meat.mintSubtype(user.address, subtype, minted);
 
     await expect(meat.connect(user).redeemForMeat(minted))
       .to.emit(meat, "MeatRedeemed")
@@ -100,8 +40,4 @@ describe("MEAT core functions", function () {
     expect(await meat.rateHandler()).to.equal(handler.target);
   });
 
-  it("returns current DepositRate", async function () {
-    const rate = await meat.DepositRate();
-    expect(rate).to.equal(100n);
-  });
 });
