@@ -1,17 +1,19 @@
 use cosmwasm_std::{
     entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError,
-    StdResult,
+    StdResult, Uint128, WasmMsg,
 };
 use cw2::set_contract_version;
 
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
-use crate::state::{GOAT_NFT, OWNER};
+use crate::state::{GOAT_NFT, MEAT, OWNER};
 
 pub mod msg;
 pub mod state;
 
 const CONTRACT_NAME: &str = "goatnftburnhook";
 const CONTRACT_VERSION: &str = "0.1.0";
+
+const GOATMEAT_SUBTYPE: &str = "GOATMEAT";
 
 const SLAUGHTER_YIELD_BPS: u64 = 6000;
 const WEIGHT_DECIMALS: u32 = 1;
@@ -25,6 +27,7 @@ pub fn instantiate(
 ) -> StdResult<Response> {
     OWNER.save(deps.storage, &info.sender)?;
     GOAT_NFT.save(deps.storage, &deps.api.addr_validate(&msg.nft_contract)?)?;
+    MEAT.save(deps.storage, &deps.api.addr_validate(&msg.meat_contract)?)?;
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     Ok(Response::default())
 }
@@ -57,7 +60,18 @@ fn execute_on_burn(
     let amount = weight as u128 * 1_000_000_000_000_000_000u128 * SLAUGHTER_YIELD_BPS as u128
         / 10u128.pow(WEIGHT_DECIMALS)
         / 10_000u128;
+    let meat = MEAT.load(deps.storage)?;
+    let mint = WasmMsg::Execute {
+        contract_addr: meat.to_string(),
+        msg: to_json_binary(&meat::msg::ExecuteMsg::MintSubtype {
+            to: to.clone(),
+            subtype: GOATMEAT_SUBTYPE.into(),
+            amount: Uint128::new(amount),
+        })?,
+        funds: vec![],
+    };
     Ok(Response::new()
+        .add_message(mint)
         .add_attribute("action", "GoatMeatMinted")
         .add_attribute("to", to)
         .add_attribute("amount", amount.to_string()))

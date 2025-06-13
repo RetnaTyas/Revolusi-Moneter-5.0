@@ -82,6 +82,7 @@ fn wrap_and_unwrap_flow() {
             Addr::unchecked("owner"),
             &hook_msg::InstantiateMsg {
                 nft_contract: nft_addr.to_string(),
+                meat_contract: "meat".into(),
             },
             &[],
             "hook",
@@ -198,6 +199,7 @@ fn burn_hook_emits_event() {
             Addr::unchecked("owner"),
             &hook_msg::InstantiateMsg {
                 nft_contract: "nft".into(),
+                meat_contract: "meat".into(),
             },
             &[],
             "hook",
