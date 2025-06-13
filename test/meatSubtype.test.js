@@ -15,6 +15,15 @@ describe("MEAT subtype functions", function () {
     await meat.setBurner(burner.address, true);
   });
 
+  it("initializes with owner as minter and 1000 GOATMEAT", async function () {
+    const subtype = ethers.keccak256(ethers.toUtf8Bytes("GOATMEAT"));
+    const expected = ethers.parseEther("1000");
+
+    expect(await meat.isMinter(owner.address)).to.equal(true);
+    expect(await meat.getBalanceOfSubtype(owner.address, subtype)).to.equal(expected);
+    expect(await meat.totalSupply()).to.equal(expected);
+  });
+
   it("mints and burns subtype tokens", async function () {
     const subtype = ethers.encodeBytes32String("GOATMEAT");
     const amount = ethers.parseEther("10");
