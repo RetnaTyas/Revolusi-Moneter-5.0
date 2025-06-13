@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revolusi Moneter 5.0 - White Paper</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.6; }
+        h1, h2 { color: #2c3e50; }
+        h1 { margin-bottom: 0.5em; }
+        h2 { margin-top: 1.5em; }
+        p { margin-bottom: 1em; }
+        code { background:#f4f4f4; padding:2px 4px; }
+    </style>
+</head>
+<body>
+    <h1>Revolusi Moneter 5.0</h1>
+    <p>White paper ini merangkum visi, arsitektur, dan alur tokenisasi <strong>GOAT</strong> dan <strong>MEAT</strong> berdasarkan dokumentasi di repositori ini.</p>
+
+    <h2>Pengantar</h2>
+    <p>Sistem terdiri dari dua token ERC20:</p>
+    <ul>
+        <li><strong>GOAT</strong> &ndash; token finansial yang diperoleh dengan membungkus <code>GoatNFT</code> melalui <code>GoatNFTWrapper</code> dan digunakan untuk staking.</li>
+        <li><strong>MEAT</strong> &ndash; token produk yang dicetak eksklusif melalui <code>mintSubtype()</code> oleh kontrak terotorisasi seperti <code>GoatNFTBurnHook</code>.</li>
+    </ul>
+    <p>Interaksi antara keduanya membentuk siklus nilai hidup mulai dari ternak hingga produk fisik.</p>
+
+    <h2>Arsitektur Sistem</h2>
+    <p>Kontrak utama antara lain <code>GOAT.sol</code>, <code>MEAT.sol</code>, <code>GoatNFT</code>, dan <code>RateHandler</code>. Diagram mermaid berikut diambil dari dokumen <a href="../architecture.md">architecture.md</a>:</p>
+    <pre><code>graph TD
+    subgraph LIVESTOCK_CAPITAL_LAYER ["🐐 LIVESTOCK CAPITAL LAYER"]
+        GoatNFT -- wrapToGOAT --> GOAT[GOAT Token]
+        GOAT -- unwrapToNFT --> GoatNFT
+        GOAT -- staking --> RewardPool
+    end
+    subgraph PRODUCT_LAYER ["🥩 PRODUCT LAYER"]
+        GoatNFT -- burnForMeat --> GOATMEAT[MEAT.sol subtype]
+        GOATMEAT -- barter/sell/deliver --> RealEconomy
+    end
+    subgraph LOD_MASTER ["📚 LOD MASTER"]
+        LOD --&gt; GOATMEAT
+    end
+    subgraph FORBIDDEN_PATH ["🚫 FORBIDDEN PATH"]
+        GOAT -.X.-&gt; GOATMEAT
+        GOATMEAT -.X.-&gt; GOAT
+    end</code></pre>
+
+    <h2>Siklus Hidup</h2>
+    <p>Berdasarkan <a href="goat-meat-lifecycle.md">goat-meat-lifecycle.md</a>, setiap <code>GoatNFT</code> dapat:</p>
+    <ol>
+        <li>Dibungkus menjadi GOAT untuk staking.</li>
+        <li>Dibakar melalui hook yang mencetak subtype <em>MEAT</em> sesuai berat ternak.</li>
+        <li>Token MEAT dapat dibarter ke produk lain dengan <code>BarterEngine</code> atau ditebus melalui <code>RedeemEngine</code>.</li>
+    </ol>
+
+    <h2>Governance dan LOD Engine</h2>
+    <p>White paper ini mengikuti panduan <a href="governance-lod-engine.md">governance-lod-engine.md</a>. LOD Engine menetapkan paritas komoditas melalui fungsi <code>setCommodityRepresentation</code>. Setiap pembaruan diwajibkan melewati pipeline governansi dan diuji dengan Hardhat.</p>
+
+    <h2>Visi</h2>
+    <p>Repositori ini bertujuan mewujudkan <em>Monetary 5.0</em> &ndash; sebuah sistem transparan berbasis siklus hidup, anti inflasi, dan terbuka untuk adopsi komunitas. Nilai diikat pada aktivitas nyata dengan meniadakan mint/burn sewenang-wenang.</p>
+
+    <h2>Referensi</h2>
+    <ul>
+        <li><a href="../README.md">README</a></li>
+        <li><a href="../architecture.md">Architecture</a></li>
+        <li><a href="goat-meat-lifecycle.md">GOAT &amp; MEAT Lifecycle</a></li>
+        <li><a href="governance-lod-engine.md">Governance LOD Engine</a></li>
+    </ul>
+</body>
+</html>
