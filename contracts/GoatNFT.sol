@@ -101,18 +101,18 @@ contract GoatNFT is ERC721Burnable {
 
         bytes32 hash = keccak256(bytes(goatMetadata[tokenId].nfcId));
 
+        super.burn(tokenId);
+        delete goatValue[tokenId];
+        delete goatMetadata[tokenId];
+        delete lastWeightUpdateAt[tokenId];
+        delete nfcIdToTokenId[hash];
+
         // Memicu burnHook untuk mint GOATMEAT
         if (address(burnHook) != address(0)) {
             burnHook.onBurn(tokenOwner, currentWeight);
         }
 
         emit GoatBurned(tokenId, tokenOwner, currentWeight);
-
-        super.burn(tokenId);
-        delete goatValue[tokenId];
-        delete goatMetadata[tokenId];
-        delete lastWeightUpdateAt[tokenId];
-        delete nfcIdToTokenId[hash];
     }
 
     function getGoatData(uint256 tokenId) external view returns (GoatData memory) {
