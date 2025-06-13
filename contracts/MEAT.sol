@@ -16,6 +16,8 @@ contract MEAT is ERC20 {
     mapping(address => bool) public isMinter;
     mapping(address => bool) public isBurner;
 
+    bytes32 public constant GOATMEAT_SUBTYPE = keccak256(abi.encodePacked("GOATMEAT"));
+
     struct SubtypeBalance {
         uint256 balance;
         uint256 lineageID;
@@ -40,7 +42,6 @@ contract MEAT is ERC20 {
     event DepositRateChanged(uint256 oldRate, uint256 newRate);
     event MintedWithNative(address indexed user, uint256 nativeReceived, uint256 meatMinted);
     event NativeWithdrawn(address indexed to, uint256 amount);
-    event InitialSupplyMinted(address indexed to, uint256 amount);
     event MeatRedeemed(address indexed user, uint256 amount);
     event RateHandlerUpdated(address indexed oldAddress, address indexed newAddress);
     event SubtypeMinted(address indexed to, bytes32 indexed subtype, uint256 amount);
@@ -91,12 +92,15 @@ contract MEAT is ERC20 {
         _;
     }
 
+    /// @notice Sets deployer as owner and default minter then mints
+    ///         an initial 1000 GOATMEAT to the owner.
     constructor() ERC20("Market-Enabled Agricultural Token", "MEAT") {
         _owner = msg.sender;
 
-        uint256 initialSupply = 1000 * 1e18;
-        _mint(_owner, initialSupply);
-        emit InitialSupplyMinted(_owner, initialSupply);
+        isMinter[_owner] = true;
+
+        // Mint initial GOATMEAT supply to the deployer
+        mintSubtype(_owner, GOATMEAT_SUBTYPE, 1000 * 1e18);
     }
 
     /// @notice Menerima token native dan mencetak MEAT sesuai rate
