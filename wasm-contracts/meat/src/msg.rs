@@ -47,6 +47,9 @@ pub enum ExecuteMsg {
         subtype: String,
         lineage_id: u64,
     },
+    SetRateHandler {
+        address: String,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -57,6 +60,9 @@ pub enum QueryMsg {
     TokenInfo {},
     Owner {},
     BalanceOfSubtypeWithLineage { user: String, subtype: String },
+    BalanceOfSubtype { user: String, subtype: String },
+    TotalSupplyOfSubtype { subtype: String },
+    RateHandler {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -81,4 +87,9 @@ pub struct TokenInfoResponse {
 pub struct BalanceSubtypeWithLineageResponse {
     pub balance: Uint128,
     pub lineage_id: u64,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct TotalSupplyResponse {
+    pub total: Uint128,
 }

@@ -18,6 +18,8 @@ pub const SUBTYPE_BALANCES: Map<(&Addr, &[u8]), Uint128> = Map::new("subtype_bal
 pub const SUBTYPE_TOTAL_SUPPLY: Map<&[u8], Uint128> = Map::new("subtype_total_supply");
 pub const SUBTYPE_LINEAGE: Map<(&Addr, &[u8]), u64> = Map::new("subtype_lineage");
 pub const USER_SUBTYPES: Map<&Addr, Vec<Vec<u8>>> = Map::new("user_subtypes");
+pub const TRANSFER_CURSOR: Map<&Addr, u64> = Map::new("transfer_cursor");
+pub const RATE_HANDLER: Item<Option<Addr>> = Item::new("rate_handler");
 
 pub const DECIMAL_FACTOR: u128 = 1_000_000_000_000_000_000u128;
 pub const INITIAL_SUPPLY: u128 = 1_000u128 * DECIMAL_FACTOR;
