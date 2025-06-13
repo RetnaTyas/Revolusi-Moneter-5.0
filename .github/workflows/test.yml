@@ -1,4 +1,4 @@
-name: CI
+name: CI Test Hybrid Hardhat + Wasm
 on:
   push:
     branches: [ "Revolusi-Moneter-5.0" ]
@@ -35,9 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-rust@v1
+      - name: Setup Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          rust-version: stable
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
 
       - name: Cache Cargo dependencies
         uses: actions/cache@v3
@@ -49,9 +52,6 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-
-      - name: Add wasm target
-        run: rustup target add wasm32-unknown-unknown
 
       - name: Run CosmWasm tests
         run: |
