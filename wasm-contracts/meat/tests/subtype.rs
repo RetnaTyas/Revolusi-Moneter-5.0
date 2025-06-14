@@ -76,6 +76,18 @@ fn mint_burn_and_lineage() {
     )
     .unwrap();
 
+    // user approves burner to burn tokens
+    app.execute_contract(
+        Addr::unchecked("user"),
+        meat_addr.clone(),
+        &ExecuteMsg::Approve {
+            spender: "burner".into(),
+            amount: Uint128::new(10),
+        },
+        &[],
+    )
+    .unwrap();
+
     app.execute_contract(
         Addr::unchecked("burner"),
         meat_addr.clone(),
