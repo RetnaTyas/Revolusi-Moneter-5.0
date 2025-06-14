@@ -371,6 +371,16 @@ fn execute_burn_subtype(
         return Err(StdError::generic_err("Invalid params"));
     }
     let from_addr = deps.api.addr_validate(&from)?;
+    if info.sender != from_addr {
+        let mut allowance = ALLOWANCES
+            .may_load(deps.storage, (&from_addr, &info.sender))?
+            .unwrap_or_default();
+        if allowance < amount {
+            return Err(StdError::generic_err("Allowance exceeded"));
+        }
+        allowance -= amount;
+        ALLOWANCES.save(deps.storage, (&from_addr, &info.sender), &allowance)?;
+    }
     burn_subtype_internal(deps.storage, &from_addr, subtype.as_bytes(), amount)?;
     Ok(Response::new()
         .add_attribute("action", "SubtypeBurned")
@@ -433,10 +443,15 @@ fn execute_set_rate_handler(
 ) -> StdResult<Response> {
     only_owner(deps.branch(), &info)?;
     let addr = deps.api.addr_validate(&address)?;
+    let old = RATE_HANDLER.load(deps.storage)?;
     RATE_HANDLER.save(deps.storage, &Some(addr.clone()))?;
     Ok(Response::new()
         .add_attribute("action", "RateHandlerUpdated")
-        .add_attribute("address", addr.into_string()))
+        .add_attribute(
+            "old_address",
+            old.map(|a| a.into_string()).unwrap_or_default(),
+        )
+        .add_attribute("new_address", addr.into_string()))
 }
 
 fn execute_redeem_for_meat(
