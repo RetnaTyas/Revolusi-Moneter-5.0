@@ -96,7 +96,7 @@ fn query_rate_forward() {
         Addr::unchecked("owner"),
         rate_addr.clone(),
         &RHExecute::SetCommodityRepresentation {
-            commodity_id: "A".into(),
+            commodity_id: "AMEAT".into(),
             data: data_a,
         },
         &[],
@@ -107,7 +107,7 @@ fn query_rate_forward() {
         Addr::unchecked("owner"),
         rate_addr.clone(),
         &RHExecute::SetCommodityRepresentation {
-            commodity_id: "B".into(),
+            commodity_id: "BMEAT".into(),
             data: data_b,
         },
         &[],
@@ -119,8 +119,8 @@ fn query_rate_forward() {
         .query_wasm_smart(
             eng_addr,
             &QueryMsg::GetRate {
-                from_subtype: "A".into(),
-                to_subtype: "B".into(),
+                from_subtype: "AMEAT".into(),
+                to_subtype: "BMEAT".into(),
             },
         )
         .unwrap();
@@ -229,7 +229,7 @@ fn barter_flow_and_admin() {
         Addr::unchecked("owner"),
         rate_addr.clone(),
         &RHExecute::SetCommodityRepresentation {
-            commodity_id: "A".into(),
+            commodity_id: "AMEAT".into(),
             data: rep_a.clone(),
         },
         &[],
@@ -239,7 +239,7 @@ fn barter_flow_and_admin() {
         Addr::unchecked("owner"),
         rate_addr.clone(),
         &RHExecute::SetCommodityRepresentation {
-            commodity_id: "B".into(),
+            commodity_id: "BMEAT".into(),
             data: rep_b.clone(),
         },
         &[],
@@ -274,9 +274,9 @@ fn barter_flow_and_admin() {
         .query_wasm_smart(
             rate_addr.clone(),
             &RHQuery::GetRate {
-                from_commodity: "A".into(),
+                from_commodity: "AMEAT".into(),
                 from_layer: "PRODUCT".into(),
-                to_commodity: "B".into(),
+                to_commodity: "BMEAT".into(),
                 to_layer: "PRODUCT".into(),
             },
         )
